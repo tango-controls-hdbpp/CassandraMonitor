@@ -1,16 +1,17 @@
 # Cassandra Monitor Tango Device Server
+[![TangoControls](https://img.shields.io/badge/-Tango--Controls-7ABB45.svg?style=flat&logo=%20data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAACAAAAAkCAYAAADo6zjiAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEwAACxMBAJqcGAAAAsFJREFUWIXtl01IFVEYht9zU%2FvTqOxShLowlOgHykWUGEjUKqiocB1FQURB0KJaRdGiaFM7gzZRLWpTq2olhNQyCtpYCP1gNyIoUTFNnxZzRs8dzvw4Q6564XLnfOf73vedc2a%2BmZEKALgHrC3CUUR8CxZFeEoFalsdM4uLmMgFoIlZLJp3A9ZE4S2oKehhlaR1BTnyg2ocnW%2FxsxEDhbYij4EPVncaeASMAavnS%2FwA8NMaqACNQCew3f4as3KZOYh2SuqTVJeQNiFpn6QGSRVjTH9W%2FiThvcCn6H6n4BvQDvQWFT%2BSIDIFDAKfE3KOAQeBfB0XGPeQvgE67P8ZoB44DvTHmFgJdOQRv%2BUjc%2BavA9siNTWemgfA3TwGquCZ3w8szFIL1ALngIZorndvgJOR0GlP2gtJkzH%2Bd0fGFxW07NqY%2FCrx5QRXcYjbCbmxF1dkBSbi8kpACah3Yi2Sys74cVyxMWY6bk5BTwgRe%2BYlSzLmxNpU3aBeJogk4XWWpJKUeiap3RJYCpQj4QWZDQCuyIAk19Auj%2BAFYGZZjTGjksaBESB8P9iaxUBIaJzjZcCQcwHdj%2BS2Al0xPOeBYYKHk4vfmQ3Y8YkIwRUb7wQGU7j2ePrA1URx93ayd8UpD8klyPbSQfCOMIO05MbI%2BDvwBbjsMdGTwlX21AAMZzEerkaI9zFkP4AeYCPBg6gNuEb6I%2FthFgN1KSQupqzoRELOSed4DGiJala1UmOMr2U%2Bl%2FTWEy9Japa%2Fy41IWi%2FJ3d4%2FkkaAw0Bz3AocArqApwTvet3O3GbgV8qqjAM7bf4N4KMztwTodcYVyelywKSCD5V3xphNXoezuTskNSl4bgxJ6jPGVJJqbN0aSV%2Bd0M0aO7FCs19Jo2lExphXaTkxdRVgQFK7DZVDZ8%2BcpdmQh3wuILh7ut3AEyt%2B51%2BL%2F0cUfwFOX0t0StltmQAAAABJRU5ErkJggg%3D%3D)](http://www.tango-controls.org) [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 The CassandraMonitor device server is a Tango device server (see [tango-controls website](http://www.tango-controls.org)), able to monitor what's happening on a given Apache Cassandra node.
 The goal is to benefit from the Tango Controls features to be able to identify the current state of Cassandra nodes and to allow interested Tango clients to react according to the current state (triggering alarms, notifying Tango clients) for instance.
 Another goal is to use the Tango archiving capabilities (like HDB++) to monitor interesting Cassandra metrics.
 The device server is written in JAVA and is using JMX internally to access Cassandra metrics.
-This project was orginally developped as part of the [Tango HDB++ project](http://www.tango-controls.org/community/projects/hdbplus) (Cassandra version) but could be used independently to monitor any Cassandra node from a TANGO Control System.
+This project was orginally developped as part of the [Tango HDB++ project](http://tango-controls.readthedocs.io/en/latest/tools-and-extensions/archiving/HDB++.html) (Cassandra version) but could be used independently to monitor any Cassandra node from a TANGO Control System.
 
 ## Getting Started
 
 To compile this device server, follow the following steps:
 ```
-git clone https://github.com/tango-controls/CassandraMonitor.git
+git clone https://github.com/tango-controls-hdbpp/CassandraMonitor.git
 cd CassandraMonitor
 pogo CassandraMonitor.xmi
 ```
@@ -39,7 +40,7 @@ Pogo, the Tango-Controls device server code generator must be installed to be ab
 Java must be installed on the machine this device server will be running on.
 The Cassandra nodes this device server will monitor must be configured to allow JMX access from the machine where CassandraMonitor device server will be running. Please refer to Apache Cassandra documentation to know how to configure JMX. This is configured in cassandra-env.sh configuration file.
 
-For the moment, CassandraMonitor has been developed and tested with Cassandra version 2.2.4 and 2.2.6.
+For the moment, CassandraMonitor has been developed and tested with Cassandra version 2.2.11.
 It might work with other versions but there is no warranty since there might be incompatible changes in the Cassandra JMX interface.
 
 ### Installing
@@ -79,12 +80,12 @@ See also the list of [contributors](https://github.com/tango-controls/CassandraM
 
 ## License
 
-This project is licensed under the GPL License - see the [LICENSE.md](LICENSE) file for details.
+This project is licensed under the GPL V3 License - see the [LICENSE.md](LICENSE) file for details.
 
 ## Related links
 
 * [Tango-Controls](http://www.tango-controls.org)
-* [Tango HDB++ project](http://www.tango-controls.org/community/projects/hdbplus)
+* [Tango HDB++ project](http://tango-controls.readthedocs.io/en/latest/tools-and-extensions/archiving/HDB++.html)
 
 ## Acknowledgments
 
