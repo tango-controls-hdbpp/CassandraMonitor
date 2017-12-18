@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ASCII"?>
 <pogoDsl:PogoSystem xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pogoDsl="http://www.esrf.fr/tango/pogo/PogoDsl">
   <classes name="CassandraMonitor" pogoRevision="9.6">
-    <description description="This class is used to monitor a Cassandra cluster" title="Cassandra monitor" sourcePath="/mntdirect/_segfs/tango/jserver/CassandraMonitor/src/main/java" language="Java" filestogenerate="XMI   file,Protected Regions,pom.xml" license="GPL" copyright="Copyright (C): 2016&#xA;               European Synchrotron Radiation Facility&#xA;               BP 220, Grenoble 38043&#xA;               France" hasMandatoryProperty="true" hasConcreteProperty="true" hasAbstractCommand="false" hasAbstractAttribute="false">
+    <description description="This class is used to monitor a Cassandra cluster" title="Cassandra monitor" sourcePath="/mntdirect/_segfs/tango/jserver/CassandraMonitor/src/main/java" language="Java" filestogenerate="XMI   file,Code files,Protected Regions" license="GPL" copyright="Copyright (C): 2016&#xA;               European Synchrotron Radiation Facility&#xA;               BP 220, Grenoble 38043&#xA;               France" hasMandatoryProperty="true" hasConcreteProperty="true" hasAbstractCommand="false" hasAbstractAttribute="false">
       <inheritances classname="Device_Impl" sourcePath=""/>
       <identification contact="at esrf.fr - accelerator-control" author="accelerator-control" emailDomain="esrf.fr" classFamily="SoftwareSystem" siteSpecific="" platform="All Platforms" bus="JMX" manufacturer="none" reference=""/>
     </description>
@@ -27,11 +27,6 @@
       <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
       <DefaultPropValue>3</DefaultPropValue>
     </deviceProperties>
-    <deviceProperties name="Simulate" description="Will simulate compation if true">
-      <type xsi:type="pogoDsl:BooleanType"/>
-      <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
-      <DefaultPropValue>false</DefaultPropValue>
-    </deviceProperties>
     <commands name="State" description="This command gets the device state (stored in its device_state data member) and returns it to the caller." execMethod="dev_state" displayLevel="OPERATOR" polledPeriod="1000" isDynamic="false">
       <argin description="none">
         <type xsi:type="pogoDsl:VoidType"/>
@@ -49,15 +44,6 @@
         <type xsi:type="pogoDsl:ConstStringType"/>
       </argout>
       <status abstract="true" inherited="true" concrete="true" concreteHere="false"/>
-    </commands>
-    <commands name="StartSimulation" description="Restart simulation if used" execMethod="start_simulation" displayLevel="OPERATOR" polledPeriod="0" isDynamic="false">
-      <argin description="">
-        <type xsi:type="pogoDsl:VoidType"/>
-      </argin>
-      <argout description="">
-        <type xsi:type="pogoDsl:VoidType"/>
-      </argout>
-      <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
     </commands>
     <attributes name="DataLoadStr" attType="Scalar" rwType="READ" displayLevel="OPERATOR" polledPeriod="60000" maxX="" maxY="" allocReadMember="true" isDynamic="false">
       <dataType xsi:type="pogoDsl:StringType"/>

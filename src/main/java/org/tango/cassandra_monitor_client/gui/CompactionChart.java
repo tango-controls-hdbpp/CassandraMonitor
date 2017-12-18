@@ -33,15 +33,15 @@
 //
 //-======================================================================
 
-package org.tango.cassandra_monitor_client;
+package org.tango.cassandra_monitor_client.gui;
 
 import fr.esrf.tangoatk.widget.util.chart.*;
 
 import java.awt.*;
 import java.util.List;
 
-import static org.tango.cassandra_monitor_client.CassandraNode.COMPACTION;
-import static org.tango.cassandra_monitor_client.CassandraNode.VALIDATION;
+import static org.tango.cassandra_monitor_client.gui.CassandraNode.COMPACTION;
+import static org.tango.cassandra_monitor_client.gui.CassandraNode.VALIDATION;
 
 
 //===============================================================

@@ -33,17 +33,20 @@
 //
 //-======================================================================
 
-package org.tango.cassandra_monitor_client;
+package org.tango.cassandra_monitor_client.gui;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.DbServer;
+import fr.esrf.TangoApi.DeviceAttribute;
+import fr.esrf.TangoApi.DeviceProxy;
 import fr.esrf.TangoDs.Except;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
+import org.tango.cassandra_monitor_client.tools.PopupHtml;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
 
 //=======================================================
@@ -55,7 +58,9 @@ import java.util.List;
 //=======================================================
 public class CassandraMonitoring extends JFrame {
     private CompactionChartDialog compactionChartDialog;
-    private List<CassandraNode> cassandraNodes = new ArrayList<>();
+    private List<CassandraNode> cassandraNodeList = new ArrayList<>();
+    private List<DataCenter> dataCenterList = new ArrayList<>();
+    private Map<String, DataCenter> dataCenterMap = new HashMap<>();
 	//=======================================================
     /**
 	 *	Creates new form CassandraMonitoring
@@ -64,31 +69,27 @@ public class CassandraMonitoring extends JFrame {
     public CassandraMonitoring() throws DevFailed {
         initComponents();
         buildDeviceList();
-        buildNodesPanel();
-        compactionChartDialog = new CompactionChartDialog(this, cassandraNodes);
+        buildDataCenterPanels();
+        compactionChartDialog = new CompactionChartDialog(this, cassandraNodeList);
         pack();
         ATKGraphicsUtils.centerFrameOnScreen(this);
 	}
 	//=======================================================
 	//=======================================================
-    private void buildNodesPanel() {
+    private void buildDataCenterPanels() {
+        JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints  gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.insets = new Insets(10, 5, 10, 5);
-        for (CassandraNode node : cassandraNodes) {
-            gbc.gridx = 0;
-            JLabel label = new JLabel(node.getName()+":  ");
-            nodesPanel.add(label, gbc);
+        gbc.anchor = GridBagConstraints.NORTH;
+        gbc.insets = new Insets(10, 20, 10, 20);
+        for(DataCenter dataCenter : dataCenterList) {
+            dataCenter.sort();
+            panel.add(dataCenter.getPanel(), gbc);
             gbc.gridx++;
-            nodesPanel.add(node.getStateViewer(), gbc);
-            gbc.gridx++;
-            nodesPanel.add(node.getCompactionButton(), gbc);
-            gbc.gridx++;
-            nodesPanel.add(node.getTestButton(), gbc);
-            gbc.gridy++;
-            gbc.insets = new Insets(5, 5, 5, 5);
         }
+        getContentPane().add(panel, BorderLayout.CENTER);
     }
 	//=======================================================
 	//=======================================================
@@ -106,8 +107,55 @@ public class CassandraMonitoring extends JFrame {
             Except.throw_exception("NoDeviceFound", "No device found for server " + serverName);
         for (String deviceName : deviceNames) {
             System.out.println(deviceName);
-            cassandraNodes.add(new CassandraNode(deviceName));
+            cassandraNodeList.add(new CassandraNode(deviceName));
         }
+        buildDistribution();
+    }
+	//=======================================================
+	//=======================================================
+    private void buildDistribution(String line) throws DevFailed {
+        int idx = line.indexOf(':');
+        if (idx>0) {
+            String nodeName = line.substring(0, idx);
+            StringTokenizer stk = new StringTokenizer(line.substring(idx+1), ",");
+            if (stk.countTokens()!=4)
+                Except.throw_exception("SyntaxError", "Syntax error in DistributionDevice attribute");
+            String dataCenterName = stk.nextToken();
+            String rackName  = stk.nextToken();
+            String owns = stk.nextToken();
+            String tokens = stk.nextToken();
+
+            DataCenter dataCenter = dataCenterMap.get(dataCenterName);
+            if (dataCenter==null) {
+                dataCenter = new DataCenter(dataCenterName);
+                dataCenterList.add(dataCenter);
+                dataCenterMap.put(dataCenterName, dataCenter);
+            }
+            CassandraNode cassandraNode = getCassandraNode(nodeName);
+            if (cassandraNode!=null) {
+                cassandraNode.setDistributionInfo(rackName, owns, tokens);
+                dataCenter.add(cassandraNode);
+            }
+        }
+    }
+	//=======================================================
+	//=======================================================
+    private void buildDistribution() throws DevFailed {
+        String deviceName = System.getenv("DistributionDevice");
+        if (deviceName==null)
+            Except.throw_exception("PropertyNotDefined", "DistributionDevice not defined");
+        DeviceAttribute attribute = new DeviceProxy(deviceName).read_attribute("NodeDistribution");
+        String[] hostDistribution = attribute.extractStringArray();
+        for (String line : hostDistribution)
+            buildDistribution(line);
+    }
+	//=======================================================
+	//=======================================================
+    private CassandraNode getCassandraNode(String name) {
+        for (CassandraNode cassandraNode : cassandraNodeList)
+            if (cassandraNode.getName().equals(name))
+                return cassandraNode;
+        return null;
     }
 	//=======================================================
 	//=======================================================
@@ -122,7 +170,6 @@ public class CassandraMonitoring extends JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        nodesPanel = new javax.swing.JPanel();
         javax.swing.JPanel topPanel = new javax.swing.JPanel();
         javax.swing.JLabel jLabel1 = new javax.swing.JLabel();
         javax.swing.JMenuBar menuBar = new javax.swing.JMenuBar();
@@ -141,10 +188,7 @@ public class CassandraMonitoring extends JFrame {
             }
         });
 
-        nodesPanel.setLayout(new java.awt.GridBagLayout());
-        getContentPane().add(nodesPanel, java.awt.BorderLayout.CENTER);
-
-        jLabel1.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jLabel1.setFont(new java.awt.Font("Dialog", Font.BOLD, 18));
         jLabel1.setText("Cassandra Monitoring Client");
         topPanel.add(jLabel1);
 
@@ -253,7 +297,7 @@ public class CassandraMonitoring extends JFrame {
     @SuppressWarnings("UnusedParameters")
     private void startSimulationItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startSimulationItemActionPerformed
         try {
-            for (CassandraNode cassandraNode : cassandraNodes) {
+            for (CassandraNode cassandraNode : cassandraNodeList) {
                 cassandraNode.startSimulation();
             }
         }
@@ -270,8 +314,8 @@ public class CassandraMonitoring extends JFrame {
         StringBuilder   sb = new StringBuilder(PopupHtml.htmlPageTitle("Cassandra Node Status"));
         sb.append("<center><table Border=2 CellSpacing=0>\n");
         sb.append(PopupHtml.htmlTableLine(
-                new String[] { "Node", "Status", "Version", "Load", "Unreachable" }, true));
-        for (CassandraNode node : cassandraNodes) {
+                new String[] { "Node", "Cluster", "Status", "Version", "Load", "Unreachable" }, true));
+        for (CassandraNode node : cassandraNodeList) {
             try {
                 sb.append(node.getHtmlStatus());
             }
@@ -305,7 +349,6 @@ public class CassandraMonitoring extends JFrame {
 
 	//=======================================================
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel nodesPanel;
     // End of variables declaration//GEN-END:variables
 	//=======================================================
 

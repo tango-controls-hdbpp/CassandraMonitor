@@ -31,7 +31,7 @@
 //
 //-======================================================================
 
-package org.tango.cassandra_monitor_client;
+package org.tango.cassandra_monitor_client.tools;
 
 import fr.esrf.Tango.DevEncoded;
 import fr.esrf.Tango.DevFailed;

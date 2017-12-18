@@ -31,7 +31,7 @@
 //
 //-======================================================================
 
-package org.tango.cassandra_monitor_client;
+package org.tango.cassandra_monitor_client.gui;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.*;
@@ -43,9 +43,12 @@ import fr.esrf.TangoDs.TangoConst;
 import fr.esrf.tangoatk.core.AttributeList;
 import fr.esrf.tangoatk.core.ConnectionException;
 import fr.esrf.tangoatk.core.IDevStateScalar;
+import fr.esrf.tangoatk.core.IStringScalar;
+import fr.esrf.tangoatk.widget.attribute.SimpleScalarViewer;
 import fr.esrf.tangoatk.widget.attribute.StateViewer;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
+import org.tango.cassandra_monitor_client.tools.IconUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -53,18 +56,25 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.tango.cassandra_monitor_client.tools.IConstants.BACKGROUND;
+
 
 /**
- * This class is able to
+ * This class is able to model a cassandra node
  *
  * @author verdier
  */
 
 public class CassandraNode extends DeviceProxy {
-
     private String name;
+    private String rackName;
+    private String tokens;
+    private String owns;
+    private String cluster;
+    private String version;
     private List<Compaction> compactionList = new ArrayList<>();
     private StateViewer stateViewer;
+    private SimpleScalarViewer dataLoadViewer;
     private AttributeList attributeList = new AttributeList();
     private JRadioButton compactionButton;
     private JButton testButton;
@@ -72,7 +82,6 @@ public class CassandraNode extends DeviceProxy {
     private boolean selected;
 
     private static final String pipeName = "Compactions";
-    private static final Font   font = new Font("Dialog", Font.BOLD, 12);
     public static final int COMPACTION = 0;
     public static final int VALIDATION = 1;
     //===============================================================
@@ -81,8 +90,13 @@ public class CassandraNode extends DeviceProxy {
         super(deviceName);
         name = deviceName.substring(deviceName.lastIndexOf('/')+1);
         buildStateViewer(deviceName);
+        buildDataLoadViewer(deviceName);
+        initialize();
         compactionChart = new CompactionChart(this);
-        compactionButton = new JRadioButton("Compacting");
+        compactionButton = new JRadioButton("");
+        compactionButton.setEnabled(false);
+        compactionButton.setSelectedIcon(IconUtils.getCompactionIcon());
+        compactionButton.setBackground(BACKGROUND);
         compactionButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 compactionActionPerformed(evt);
@@ -102,6 +116,13 @@ public class CassandraNode extends DeviceProxy {
         PipeEventListener pipeListener = new PipeEventListener();
         adapter.addTangoPipeListener(pipeListener, pipeName, TangoConst.NOT_STATELESS);
 
+    }
+    //===============================================================
+    //===============================================================
+    public void setDistributionInfo(String rackName, String owns, String tokens) {
+        this.rackName = rackName;
+        this.owns = owns;
+        this.tokens = tokens;
     }
     //===============================================================
     //===============================================================
@@ -157,6 +178,11 @@ public class CassandraNode extends DeviceProxy {
     }
     //===============================================================
     //===============================================================
+    public SimpleScalarViewer getDataLoadViewer() {
+        return dataLoadViewer;
+    }
+    //===============================================================
+    //===============================================================
     public CompactionChart getCompactionChart() {
         return compactionChart;
     }
@@ -167,20 +193,47 @@ public class CassandraNode extends DeviceProxy {
     }
     //===============================================================
     //===============================================================
+    public String getRackName() {
+        return rackName;
+    }
+    //===============================================================
+    //===============================================================
+    public String getTokens() {
+        return tokens;
+    }
+    //===============================================================
+    //===============================================================
+    public String getOwns() {
+        return owns;
+    }
+    //===============================================================
+    //===============================================================
     private void buildStateViewer(String deviceName) throws DevFailed {
         try {
             //  Add a state viewer
             stateViewer = new StateViewer();
-            stateViewer.setFont(font);
             stateViewer.setLabel("");
-            stateViewer.setStatePreferredSize(new Dimension(60, 15));
-            //errorHistory.add(stateViewer);
-
+            stateViewer.setBackground(BACKGROUND);
             IDevStateScalar attState =
                     (IDevStateScalar) attributeList.add(deviceName + "/state");
             stateViewer.setModel(attState);
             //attState.addDevStateScalarListener(this);
-            attState.refresh();
+            attributeList.refresh();
+        }
+        catch (ConnectionException e) {
+            Except.throw_exception("ConnectionFailed", e.getDescription());
+        }
+    }
+    //===========================================================
+    //===========================================================
+    public void buildDataLoadViewer(String deviceName) throws DevFailed {
+        try {
+            dataLoadViewer = new SimpleScalarViewer();
+            IStringScalar attLoadFile =
+                    (IStringScalar) attributeList.add(deviceName + "/DataLoadStr");
+            dataLoadViewer.setModel(attLoadFile);
+            dataLoadViewer.setBackgroundColor(Color.white);
+            //dataLoadViewer.setFont(new Font("Dialog", Font.BOLD, 12));
         }
         catch (ConnectionException e) {
             Except.throw_exception("ConnectionFailed", e.getDescription());
@@ -189,6 +242,7 @@ public class CassandraNode extends DeviceProxy {
     //===============================================================
     //===============================================================
     private void buildCompactions(PipeBlob pipeBlob) {
+        //  Compaction modified -> update display
         compactionList.clear();
         if (pipeBlob.getName().equals("Compactions")) {
             compactionButton.setSelected(true);
@@ -199,9 +253,6 @@ public class CassandraNode extends DeviceProxy {
         else {
             compactionButton.setSelected(false);
         }
-
-        //for (Compaction compaction : compactionList)
-        //    System.out.println(compaction);
 
         //  Update chart
         if (compactionChart!=null)
@@ -226,20 +277,52 @@ public class CassandraNode extends DeviceProxy {
     //===============================================================
     public String getHtmlStatus() throws DevFailed {
         DeviceAttribute[] deviceAttributes = read_attribute(
-                new String[]{"Status", "CassandraVersion", "DataLoadStr", "UnreachableNodes" });
-        String[] unreachableList = deviceAttributes[3].extractStringArray();
-        String unreachableStr = "";
+                new String[]{"ClusterName", "Status", "CassandraVersion", "DataLoadStr", "UnreachableNodes" });
+        String[] unreachableList = deviceAttributes[4].extractStringArray();
+
+        StringBuilder unreachableStr = new StringBuilder();
         for (String unreachable : unreachableList)
-            unreachableStr += unreachable + "<br>";
+            unreachableStr.append(unreachable).append("<br>");
 
         return "<tr>\n<td><b>" + name + "</b></td><td>" +
                 deviceAttributes[0].extractString()  + "</td><td>" +
                 deviceAttributes[1].extractString()  + "</td><td>" +
                 deviceAttributes[2].extractString()  + "</td><td>" +
+                deviceAttributes[3].extractString()  + "</td><td>" +
                 unreachableStr  + "</td>\n</tr>\n";
     }
     //===============================================================
     //===============================================================
+    public String getCluster() {
+        initialize();
+        if (cluster==null)
+            return "? ?";
+        return cluster;
+    }
+    //===============================================================
+    //===============================================================
+    public String getVersion() {
+        if (version==null)
+            return "? ?";
+        return version;
+    }
+    //===============================================================
+    //===============================================================
+    private void initialize() {
+        if (cluster==null || version==null) {
+            try {
+                DeviceAttribute[] attributes = read_attribute(
+                        new String[]{"ClusterName", "CassandraVersion"});
+                cluster = attributes[0].extractString();
+                version = attributes[1].extractString();
+            } catch (DevFailed e) {
+                System.err.println(e.errors[0]);
+            }
+        }
+    }
+    //===============================================================
+    //===============================================================
+
 
 
 
@@ -253,7 +336,7 @@ public class CassandraNode extends DeviceProxy {
     //=========================================================================
     class Compaction {
         String tableName;
-        String taskName = "?";
+        String taskName;
         int    taskType = COMPACTION;
         long   total = -1;
         long   completed = -1;

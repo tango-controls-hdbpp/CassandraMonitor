@@ -133,25 +133,16 @@ public class JmxUtilities {
     }
     //===============================================================
     //===============================================================
-    public Object getAttribute(ObjectName objectName, String jmx_attr_name) throws DevFailed {
+    public Object getAttribute(ObjectName objectName, String jmxAttributeName) throws DevFailed {
         if (connectionError!=null) {
             connect();
         }
         try {
-            return connection.getAttribute(objectName, jmx_attr_name);
-        } catch (AttributeNotFoundException ex) {
-            throw DevFailedUtils.newDevFailed("AttributeNotFoundException", ex.getMessage());
-        } catch (InstanceNotFoundException ex) {
-            connectionError = ex.toString();
-            throw DevFailedUtils.newDevFailed("InstanceNotFoundException", ex.getMessage());
-        } catch (ReflectionException ex) {
-            throw DevFailedUtils.newDevFailed("ReflectionException", ex.getMessage());
-        } catch (MBeanException ex) {
-            connectionError = ex.toString();
-            throw DevFailedUtils.newDevFailed("MBeanException", ex.getMessage());
-        } catch (IOException e) {
+            return connection.getAttribute(objectName, jmxAttributeName);
+        } catch (AttributeNotFoundException | InstanceNotFoundException |
+                ReflectionException | MBeanException | IOException e) {
             connectionError = e.toString();
-            throw DevFailedUtils.newDevFailed("IOException", e.getMessage());
+            throw DevFailedUtils.newDevFailed(e.toString(), e.getMessage());
         }
     }
     //===============================================================

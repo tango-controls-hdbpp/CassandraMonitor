@@ -33,7 +33,7 @@
 //
 //-======================================================================
 
-package org.tango.cassandra_monitor_client;
+package org.tango.cassandra_monitor_client.gui;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
@@ -46,7 +46,7 @@ import java.awt.*;
 import java.util.Enumeration;
 import java.util.List;
 
-import static org.tango.cassandra_monitor_client.CassandraNode.VALIDATION;
+import static org.tango.cassandra_monitor_client.gui.CassandraNode.VALIDATION;
 
 
 //===============================================================

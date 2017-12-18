@@ -34,7 +34,7 @@
 //
 //-======================================================================
 
-package org.tango.cassandra_monitor_client;
+package org.tango.cassandra_monitor_client.tools;
 
 import fr.esrf.TangoDs.TangoConst;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
