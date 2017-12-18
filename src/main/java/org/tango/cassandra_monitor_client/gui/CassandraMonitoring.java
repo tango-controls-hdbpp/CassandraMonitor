@@ -70,7 +70,7 @@ public class CassandraMonitoring extends JFrame {
         initComponents();
         buildDeviceList();
         buildDataCenterPanels();
-        compactionChartDialog = new CompactionChartDialog(this, cassandraNodeList);
+        compactionChartDialog = new CompactionChartDialog(this, dataCenterList);
         pack();
         ATKGraphicsUtils.centerFrameOnScreen(this);
 	}

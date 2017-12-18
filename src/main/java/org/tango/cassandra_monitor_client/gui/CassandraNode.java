@@ -48,7 +48,6 @@ import fr.esrf.tangoatk.widget.attribute.SimpleScalarViewer;
 import fr.esrf.tangoatk.widget.attribute.StateViewer;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
-import org.tango.cassandra_monitor_client.tools.IconUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -95,7 +94,6 @@ public class CassandraNode extends DeviceProxy {
         compactionChart = new CompactionChart(this);
         compactionButton = new JRadioButton("");
         compactionButton.setEnabled(false);
-        compactionButton.setSelectedIcon(IconUtils.getCompactionIcon());
         compactionButton.setBackground(BACKGROUND);
         compactionButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent evt) {

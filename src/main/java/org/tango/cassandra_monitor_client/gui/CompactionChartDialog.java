@@ -62,36 +62,43 @@ public class CompactionChartDialog extends JDialog {
 
 	private JFrame	parent;
     private static CassandraNode cassandraNode = null;
-	private static List<CassandraNode> cassandraNodes;
+    private static List<DataCenter> dataCenterList;
+    private static final int LINE_SIZE = 6;
 	//===============================================================
 	/**
 	 *	Creates new form CompactionChartDialog
 	 */
 	//===============================================================
-	public CompactionChartDialog(JFrame parent, List<CassandraNode> cassandraNodes) throws DevFailed {
+	public CompactionChartDialog(JFrame parent, List<DataCenter> dataCenterList) throws DevFailed {
 		super(parent, false);
 		this.parent = parent;
-		CompactionChartDialog.cassandraNodes = cassandraNodes;
+		CompactionChartDialog.dataCenterList = dataCenterList;
 		initComponents();
         buildTable();
 
-		//	Create and add chart for each node
-        int LINE_SIZE=(int) Math.sqrt(cassandraNodes.size())+2;
-		GridBagConstraints  gbc = new GridBagConstraints();
-		gbc.fill = GridBagConstraints.BOTH;
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
         gbc.gridx = 0;
-        gbc.gridy=0;
-        int i=0;
-		for (CassandraNode node : cassandraNodes) {
-			centerTopPanel.add(node.getCompactionChart(), gbc);
-            if (i++>0 && (i%LINE_SIZE)==0) {
-                gbc.gridx = 0;
-                gbc.gridy++;
+        gbc.gridy = 0;
+        for (DataCenter dataCenter : dataCenterList) {
+            //	Create and add chart for each node
+            int i = 0;
+            int lineSize = (int) Math.sqrt(dataCenter.size()+1) + 1;
+            for (CassandraNode node : dataCenter) {
+                centerTopPanel.add(node.getCompactionChart(), gbc);
+                if (i++>0 && (i % lineSize) == 0) {
+                    gbc.gridx = 0;
+                    gbc.gridy++;
+                } else
+                    gbc.gridx++;
             }
-            else
-                gbc.gridx++;
-		}
 
+            //  Add a DataCenter separator
+            gbc.gridx = 0;
+            gbc.gridy++;
+            centerTopPanel.add(new JLabel("   "), gbc);
+            gbc.gridy++;
+        }
 		pack();
  		ATKGraphicsUtils.centerDialog(this);
 	}
@@ -140,14 +147,15 @@ public class CompactionChartDialog extends JDialog {
         CompactionChartDialog.cassandraNode = cassandraNode;
         tableModel.fireTableDataChanged();
         //  Set selection in light gray
-        for (CassandraNode node : cassandraNodes) {
-            if (node.getCompactionChart()==cassandraNode.getCompactionChart()) {
-                node.getCompactionChart().setBackground(new Color(0xffffdd));
-                node.setSelected(true);
-            }
-            else {
-                node.getCompactionChart().setBackground(Color.white);
-                node.setSelected(true);
+        for (DataCenter dataCenter : dataCenterList) {
+            for (CassandraNode node : dataCenter) {
+                if (node.getCompactionChart() == cassandraNode.getCompactionChart()) {
+                    node.getCompactionChart().setBackground(new Color(0xffffdd));
+                    node.setSelected(true);
+                } else {
+                    node.getCompactionChart().setBackground(Color.white);
+                    node.setSelected(true);
+                }
             }
         }
     }
