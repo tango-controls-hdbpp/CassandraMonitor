@@ -35,7 +35,6 @@
 
 package org.tango.cassandra_monitor_client.gui;
 
-import fr.esrf.Tango.DevFailed;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 
 import javax.swing.*;
@@ -58,18 +57,19 @@ import static org.tango.cassandra_monitor_client.gui.CassandraNode.VALIDATION;
 //===============================================================
 
 
+@SuppressWarnings("MagicConstant")
 public class CompactionChartDialog extends JDialog {
 
 	private JFrame	parent;
     private static CassandraNode cassandraNode = null;
     private static List<DataCenter> dataCenterList;
-    private static final int LINE_SIZE = 6;
+    private static final int LINE_SIZE_MAX = 6;
 	//===============================================================
 	/**
 	 *	Creates new form CompactionChartDialog
 	 */
 	//===============================================================
-	public CompactionChartDialog(JFrame parent, List<DataCenter> dataCenterList) throws DevFailed {
+	public CompactionChartDialog(JFrame parent, List<DataCenter> dataCenterList) {
 		super(parent, false);
 		this.parent = parent;
 		CompactionChartDialog.dataCenterList = dataCenterList;
@@ -81,16 +81,18 @@ public class CompactionChartDialog extends JDialog {
         gbc.gridx = 0;
         gbc.gridy = 0;
         for (DataCenter dataCenter : dataCenterList) {
+            JLabel label = new JLabel(dataCenter.getName());
+            label.setFont(new Font("Dialog", Font.BOLD, 18));
+            centerTopPanel.add(label, gbc);
+            gbc.gridy++;
+
             //	Create and add chart for each node
-            int i = 0;
-            int lineSize = (int) Math.sqrt(dataCenter.size()+1) + 1;
             for (CassandraNode node : dataCenter) {
                 centerTopPanel.add(node.getCompactionChart(), gbc);
-                if (i++>0 && (i % lineSize) == 0) {
+                if (++gbc.gridx==LINE_SIZE_MAX) {
                     gbc.gridx = 0;
                     gbc.gridy++;
-                } else
-                    gbc.gridx++;
+                }
             }
 
             //  Add a DataCenter separator
@@ -102,6 +104,7 @@ public class CompactionChartDialog extends JDialog {
 		pack();
  		ATKGraphicsUtils.centerDialog(this);
 	}
+	//===============================================================
 	//===============================================================
     private static DataTableModel tableModel;
     private static final String[] columnNames = {

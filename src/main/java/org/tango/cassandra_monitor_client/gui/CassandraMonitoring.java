@@ -37,8 +37,6 @@ package org.tango.cassandra_monitor_client.gui;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.DbServer;
-import fr.esrf.TangoApi.DeviceAttribute;
-import fr.esrf.TangoApi.DeviceProxy;
 import fr.esrf.TangoDs.Except;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
@@ -60,7 +58,6 @@ public class CassandraMonitoring extends JFrame {
     private CompactionChartDialog compactionChartDialog;
     private List<CassandraNode> cassandraNodeList = new ArrayList<>();
     private List<DataCenter> dataCenterList = new ArrayList<>();
-    private Map<String, DataCenter> dataCenterMap = new HashMap<>();
 	//=======================================================
     /**
 	 *	Creates new form CassandraMonitoring
@@ -113,49 +110,19 @@ public class CassandraMonitoring extends JFrame {
     }
 	//=======================================================
 	//=======================================================
-    private void buildDistribution(String line) throws DevFailed {
-        int idx = line.indexOf(':');
-        if (idx>0) {
-            String nodeName = line.substring(0, idx);
-            StringTokenizer stk = new StringTokenizer(line.substring(idx+1), ",");
-            if (stk.countTokens()!=4)
-                Except.throw_exception("SyntaxError", "Syntax error in DistributionDevice attribute");
-            String dataCenterName = stk.nextToken();
-            String rackName  = stk.nextToken();
-            String owns = stk.nextToken();
-            String tokens = stk.nextToken();
-
-            DataCenter dataCenter = dataCenterMap.get(dataCenterName);
+    private void buildDistribution() {
+        Map<String, DataCenter> dataCenterMap = new HashMap<>();
+        for (CassandraNode node : cassandraNodeList) {
+            DataCenter dataCenter = dataCenterMap.get(node.getDataCenter());
             if (dataCenter==null) {
-                dataCenter = new DataCenter(dataCenterName);
-                dataCenterList.add(dataCenter);
-                dataCenterMap.put(dataCenterName, dataCenter);
+                dataCenter = new DataCenter(node.getDataCenter());
+                dataCenterMap.put(node.getDataCenter(), dataCenter);
             }
-            CassandraNode cassandraNode = getCassandraNode(nodeName);
-            if (cassandraNode!=null) {
-                cassandraNode.setDistributionInfo(rackName, owns, tokens);
-                dataCenter.add(cassandraNode);
-            }
+            dataCenter.add(node);
         }
-    }
-	//=======================================================
-	//=======================================================
-    private void buildDistribution() throws DevFailed {
-        String deviceName = System.getenv("DistributionDevice");
-        if (deviceName==null)
-            Except.throw_exception("PropertyNotDefined", "DistributionDevice not defined");
-        DeviceAttribute attribute = new DeviceProxy(deviceName).read_attribute("NodeDistribution");
-        String[] hostDistribution = attribute.extractStringArray();
-        for (String line : hostDistribution)
-            buildDistribution(line);
-    }
-	//=======================================================
-	//=======================================================
-    private CassandraNode getCassandraNode(String name) {
-        for (CassandraNode cassandraNode : cassandraNodeList)
-            if (cassandraNode.getName().equals(name))
-                return cassandraNode;
-        return null;
+        Set<String> keys = dataCenterMap.keySet();
+        for (String key : keys)
+            dataCenterList.add(dataCenterMap.get(key));
     }
 	//=======================================================
 	//=======================================================

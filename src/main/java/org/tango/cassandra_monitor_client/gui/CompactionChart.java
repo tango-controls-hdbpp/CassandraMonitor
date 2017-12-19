@@ -57,7 +57,7 @@ public class CompactionChart extends JLChart implements IJLChartListener {
 	private CassandraNode cassandraNode;
     private JLDataView compactionDataView;
     private JLDataView validationDataView;
-    private static final Dimension chartDimension = new Dimension(300, 250);
+    private static final Dimension chartDimension = new Dimension(250, 250);
 	//===============================================================
 	//===============================================================
 	public CompactionChart(CassandraNode cassandraNode) {

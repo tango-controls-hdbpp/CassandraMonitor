@@ -51,6 +51,9 @@ package org.tango.cassandramonitor;
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.Tango.DevState;
 import fr.esrf.Tango.DispLevel;
+import fr.esrf.TangoApi.DeviceAttribute;
+import fr.esrf.TangoApi.DeviceProxy;
+import fr.esrf.TangoDs.Except;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.ext.XLogger;
@@ -68,6 +71,7 @@ import javax.management.ObjectName;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import static org.tango.cassandramonitor.IConstants.*;
 
@@ -105,6 +109,24 @@ public class CassandraMonitor {
 	//========================================================
 	//	Property data members and related methods
 	//========================================================
+	/**
+	 * Class Property DistributionDeviceName
+	 * Device name for CassandraDistribution class.
+	 */
+	@ClassProperty(name="DistributionDeviceName", description="Device name for CassandraDistribution class." )
+	private String distributionDeviceName;
+	/**
+	 * set property DistributionDeviceName
+	 * @param  distributionDeviceName  see description above.
+	 */
+	public void setDistributionDeviceName(String distributionDeviceName) {
+		this.distributionDeviceName = distributionDeviceName;
+		/*----- PROTECTED REGION ID(CassandraMonitor.setDistributionDeviceName) ENABLED START -----*/
+		
+
+		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.setDistributionDeviceName
+	}
+	
 	/**
 	 * Device Property JMXPort
 	 * JMX port
@@ -218,8 +240,16 @@ public class CassandraMonitor {
 		logger.debug("init device " + deviceManager.getName());
 		/*----- PROTECTED REGION ID(CassandraMonitor.initDevice) ENABLED START -----*/
 
+		//  Check if class property is OK
+        if (distributionDeviceName==null || distributionDeviceName.isEmpty()) {
+            System.err.println("*** Class property DistributionDeviceName is not defined ! ***");
+            System.exit(0);
+        }
+        //  Property has been set -> read it to initialize
+        InitializeFromDistribution();
+
+        //  Initialize the JMX utility
 		jmxUtilities = new JmxUtilities(node, jMXPort, jMXUser, jMXPassword, jMXConnectionTimeout);
-        //	Put your device initialization code here
         try {
             storageServiceObjName = new ObjectName("org.apache.cassandra.db:type=StorageService");
         } catch (MalformedObjectNameException ex) {
@@ -311,6 +341,90 @@ public class CassandraMonitor {
 	//========================================================
 	//	Attribute data members and related methods
 	//========================================================
+	/**
+	 * Attribute DataCenter, String, Scalar, READ
+	 * description:
+	 *     Data center where node is located
+	 */
+	@Attribute(name="DataCenter", isPolled=true, pollingPeriod=3000)
+	@AttributeProperties(description="Data center where node is located", label="Data center")
+	private String dataCenter = "";
+	/**
+	 * Read attribute DataCenter
+	 * 
+	 * @return attribute value
+	 * @throws DevFailed if read attribute failed.
+	 */
+	public org.tango.server.attribute.AttributeValue getDataCenter() throws DevFailed {
+		xlogger.entry();
+		org.tango.server.attribute.AttributeValue
+			attributeValue = new org.tango.server.attribute.AttributeValue();
+		/*----- PROTECTED REGION ID(CassandraMonitor.getDataCenter) ENABLED START -----*/
+		
+		//	Put read attribute code here
+		
+		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getDataCenter
+		attributeValue.setValue(dataCenter);
+		xlogger.exit();
+		return attributeValue;
+	}
+	
+	/**
+	 * Attribute Rack, String, Scalar, READ
+	 * description:
+	 *     Rack where node is located
+	 */
+	@Attribute(name="Rack", isPolled=true, pollingPeriod=3000)
+	@AttributeProperties(description="Rack where node is located", label="Rack")
+	private String rack = "";
+	/**
+	 * Read attribute Rack
+	 * 
+	 * @return attribute value
+	 * @throws DevFailed if read attribute failed.
+	 */
+	public org.tango.server.attribute.AttributeValue getRack() throws DevFailed {
+		xlogger.entry();
+		org.tango.server.attribute.AttributeValue
+			attributeValue = new org.tango.server.attribute.AttributeValue();
+		/*----- PROTECTED REGION ID(CassandraMonitor.getRack) ENABLED START -----*/
+		
+		//	Put read attribute code here
+		
+		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getRack
+		attributeValue.setValue(rack);
+		xlogger.exit();
+		return attributeValue;
+	}
+	
+	/**
+	 * Attribute ClusterName, String, Scalar, READ
+	 * description:
+	 *     Cassandra cluster name
+	 */
+	@Attribute(name="ClusterName")
+	@AttributeProperties(description="Cassandra cluster name", label="Cluster name")
+	private String clusterName = "";
+	/**
+	 * Read attribute ClusterName
+	 * 
+	 * @return attribute value
+	 * @throws DevFailed if read attribute failed.
+	 */
+	public org.tango.server.attribute.AttributeValue getClusterName() throws DevFailed {
+		xlogger.entry();
+		org.tango.server.attribute.AttributeValue
+			attributeValue = new org.tango.server.attribute.AttributeValue();
+		/*----- PROTECTED REGION ID(CassandraMonitor.getClusterName) ENABLED START -----*/
+
+        //	Put read attribute code here
+        clusterName = jmxUtilities.getAttribute(storageServiceObjName, ATTR_CLUSTER).toString();
+		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getClusterName
+		attributeValue.setValue(clusterName);
+		xlogger.exit();
+		return attributeValue;
+	}
+	
 	/**
 	 * Attribute DataLoadStr, String, Scalar, READ
 	 * description:
@@ -453,29 +567,57 @@ public class CassandraMonitor {
 	}
 	
 	/**
-	 * Attribute ClusterName, String, Scalar, READ
+	 * Attribute Owns, String, Scalar, READ
 	 * description:
-	 *     Cassandra cluster name
+	 *     Node's owns
 	 */
-	@Attribute(name="ClusterName")
-	@AttributeProperties(description="Cassandra cluster name", label="Cluster name")
-	private String clusterName = "";
+	@Attribute(name="Owns", isPolled=true, pollingPeriod=3000)
+	@AttributeProperties(description="Node's owns", label="Owns")
+	private String owns = "";
 	/**
-	 * Read attribute ClusterName
+	 * Read attribute Owns
 	 * 
 	 * @return attribute value
 	 * @throws DevFailed if read attribute failed.
 	 */
-	public org.tango.server.attribute.AttributeValue getClusterName() throws DevFailed {
+	public org.tango.server.attribute.AttributeValue getOwns() throws DevFailed {
 		xlogger.entry();
 		org.tango.server.attribute.AttributeValue
 			attributeValue = new org.tango.server.attribute.AttributeValue();
-		/*----- PROTECTED REGION ID(CassandraMonitor.getClusterName) ENABLED START -----*/
-
-        //	Put read attribute code here
-        clusterName = jmxUtilities.getAttribute(storageServiceObjName, ATTR_CLUSTER).toString();
-		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getClusterName
-		attributeValue.setValue(clusterName);
+		/*----- PROTECTED REGION ID(CassandraMonitor.getOwns) ENABLED START -----*/
+		
+		//	Put read attribute code here
+		
+		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getOwns
+		attributeValue.setValue(owns);
+		xlogger.exit();
+		return attributeValue;
+	}
+	
+	/**
+	 * Attribute Tokens, String, Scalar, READ
+	 * description:
+	 *     Node`s tokens
+	 */
+	@Attribute(name="Tokens", isPolled=true, pollingPeriod=3000)
+	@AttributeProperties(description="Node`s tokens", label="Tokens")
+	private String tokens = "";
+	/**
+	 * Read attribute Tokens
+	 * 
+	 * @return attribute value
+	 * @throws DevFailed if read attribute failed.
+	 */
+	public org.tango.server.attribute.AttributeValue getTokens() throws DevFailed {
+		xlogger.entry();
+		org.tango.server.attribute.AttributeValue
+			attributeValue = new org.tango.server.attribute.AttributeValue();
+		/*----- PROTECTED REGION ID(CassandraMonitor.getTokens) ENABLED START -----*/
+		
+		//	Put read attribute code here
+		
+		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getTokens
+		attributeValue.setValue(tokens);
 		xlogger.exit();
 		return attributeValue;
 	}
@@ -657,10 +799,42 @@ public class CassandraMonitor {
 	//========================================================
 	/*----- PROTECTED REGION ID(CassandraMonitor.methods) ENABLED START -----*/
 
-	/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.methods
+    //========================================================
+    //========================================================
+    private void InitializeFromDistribution() {
+        try {
+            DeviceAttribute attribute =
+                    new DeviceProxy(distributionDeviceName).read_attribute("NodeDistribution");
+            String[] lines = attribute.extractStringArray();
+            for (String line : lines) {
+                if (line.startsWith(node)) {
+                    StringTokenizer stk = new StringTokenizer(line);
+                    if (stk.countTokens()!=5)
+                        Except.throw_exception("SyntaxError",
+                                "Syntax error in DistributionDevice attribute");
+                    stk.nextToken(); // node name
+                    dataCenter = stk.nextToken();
+                    rack = stk.nextToken();
+                    owns = stk.nextToken();
+                    tokens = stk.nextToken();
+                }
+            }
+        }
+        catch (DevFailed e) {
+            System.err.println(e.errors[0].desc);
+        }
+    }
+    //========================================================
+    //========================================================
 
 
+    /*----- PROTECTED REGION END -----*/	//	CassandraMonitor.methods
 
+
+	
+	
+	
+	
 	/**
 	 * Starts the server.
 	 * @param args program arguments (instance_name [-v[trace level]]  [-nodb [-dlist <device name list>] [-file=fileName]])

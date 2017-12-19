@@ -66,6 +66,7 @@ import static org.tango.cassandra_monitor_client.tools.IConstants.BACKGROUND;
 
 public class CassandraNode extends DeviceProxy {
     private String name;
+    private String dataCenter;
     private String rackName;
     private String tokens;
     private String owns;
@@ -87,7 +88,12 @@ public class CassandraNode extends DeviceProxy {
     //===============================================================
     public CassandraNode(String deviceName) throws DevFailed {
         super(deviceName);
-        name = deviceName.substring(deviceName.lastIndexOf('/')+1);
+        DbDatum datum = get_property("node");
+        if (datum.is_empty())
+            name = "? ?";
+        else
+            name = datum.extractString();
+        initializeFromDevice();
         buildStateViewer(deviceName);
         buildDataLoadViewer(deviceName);
         initialize();
@@ -117,10 +123,14 @@ public class CassandraNode extends DeviceProxy {
     }
     //===============================================================
     //===============================================================
-    public void setDistributionInfo(String rackName, String owns, String tokens) {
-        this.rackName = rackName;
-        this.owns = owns;
-        this.tokens = tokens;
+    private void initializeFromDevice() throws DevFailed {
+        DeviceAttribute[] attributes = read_attribute(new String[] {
+                "DataCenter", "Rack", "Owns", "Tokens" });
+        int i=0;
+        dataCenter = attributes[i++].extractString();
+        rackName   = attributes[i++].extractString();
+        owns       = attributes[i++].extractString();
+        tokens     = attributes[i].extractString();
     }
     //===============================================================
     //===============================================================
@@ -158,6 +168,11 @@ public class CassandraNode extends DeviceProxy {
     //===============================================================
     public JButton getTestButton() {
         return testButton;
+    }
+    //===============================================================
+    //===============================================================
+    public String getDataCenter() {
+        return dataCenter;
     }
     //===============================================================
     //===============================================================
@@ -231,7 +246,7 @@ public class CassandraNode extends DeviceProxy {
                     (IStringScalar) attributeList.add(deviceName + "/DataLoadStr");
             dataLoadViewer.setModel(attLoadFile);
             dataLoadViewer.setBackgroundColor(Color.white);
-            //dataLoadViewer.setFont(new Font("Dialog", Font.BOLD, 12));
+            dataLoadViewer.setBackground(Color.white);
         }
         catch (ConnectionException e) {
             Except.throw_exception("ConnectionFailed", e.getDescription());

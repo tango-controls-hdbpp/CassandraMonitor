@@ -43,5 +43,6 @@ import java.awt.*;
  */
 
 public interface IConstants {
-    Color BACKGROUND = Color.lightGray;
+    Color BACKGROUND = new Color(0xdddddd);
+    //Color BACKGROUND = Color.lightGray;
 }
