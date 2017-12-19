@@ -45,6 +45,7 @@ import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
 import org.tango.cassandra_monitor_client.commons.ReleaseNote;
 import org.tango.cassandra_monitor_client.tools.IConstants;
+import org.tango.cassandra_monitor_client.tools.IconUtils;
 import org.tango.cassandra_monitor_client.tools.PopupHtml;
 import org.tango.cassandra_monitor_client.tools.SplashUtils;
 
@@ -79,6 +80,10 @@ public class CassandraMonitoring extends JFrame {
         SplashUtils.getInstance().setSplashProgress(30, "Building GUI");
         buildDataCenterPanels();
         compactionChartDialog = new CompactionChartDialog(this, dataCenterList);
+
+        setTitle("CassandraMonitoring - " + IConstants.revNumber);
+        ImageIcon icon = IconUtils.getInstance().getIcon("cassandra.jpeg", 0.10);
+        setIconImage(icon.getImage());
         pack();
         ATKGraphicsUtils.centerFrameOnScreen(this);
         SplashUtils.getInstance().stopSplash();
@@ -165,7 +170,7 @@ public class CassandraMonitoring extends JFrame {
     private void initComponents() {
 
         javax.swing.JPanel topPanel = new javax.swing.JPanel();
-        javax.swing.JLabel jLabel1 = new javax.swing.JLabel();
+        javax.swing.JLabel titleLabel = new javax.swing.JLabel();
         javax.swing.JMenuBar menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem exitItem = new javax.swing.JMenuItem();
@@ -181,9 +186,9 @@ public class CassandraMonitoring extends JFrame {
             }
         });
 
-        jLabel1.setFont(new java.awt.Font("Dialog", Font.BOLD, 18));
-        jLabel1.setText("Cassandra Monitoring Client");
-        topPanel.add(jLabel1);
+        titleLabel.setFont(new java.awt.Font("Dialog", Font.BOLD, 18));
+        titleLabel.setText("Cassandra Monitoring Client");
+        topPanel.add(titleLabel);
 
         getContentPane().add(topPanel, java.awt.BorderLayout.NORTH);
 
@@ -265,10 +270,19 @@ public class CassandraMonitoring extends JFrame {
     //=======================================================
     @SuppressWarnings("UnusedParameters")
     private void aboutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutMenuItemActionPerformed
-        String  message = "This application is able monitor Cassandra data centers\n" +
-                "Release: "+ IConstants.revNumber +
+        String message = "This application is able monitor Cassandra data centers\n" +
+                "Release: " + IConstants.revNumber +
                 "\n\nPascal Verdier - ESRF - Accelerator Control Unit";
-        JOptionPane.showMessageDialog(this, message, "Help Window", JOptionPane.INFORMATION_MESSAGE);
+        try {
+            JOptionPane.showMessageDialog(this,
+                    message, "Help Window", JOptionPane.INFORMATION_MESSAGE,
+                    IconUtils.getInstance().getIcon("cassandra.jpeg", 0.33));
+        }
+        catch (DevFailed e) {
+            System.err.println(e.errors[0].desc);
+            //  Display without icon
+            JOptionPane.showMessageDialog(this, message, "Help Window", JOptionPane.INFORMATION_MESSAGE);
+        }
     }//GEN-LAST:event_aboutMenuItemActionPerformed
     //=======================================================
     //=======================================================

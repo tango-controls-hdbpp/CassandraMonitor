@@ -73,11 +73,10 @@ public class SplashUtils {
         }
         //  Create a new one
         String title = packageName;
-        /*
-        int end = revNumber.indexOf("-");
+        int end = IConstants.revNumber.indexOf("-");
         if (end > 0)
-            title += " - " + revNumber.substring(0, end).trim();
-        */
+            title += " - " + IConstants.revNumber.substring(0, end).trim();
+
         //	Create a splash window.
         JSmoothProgressBar myBar = new JSmoothProgressBar();
         myBar.setStringPainted(true);
