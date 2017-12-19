@@ -43,6 +43,8 @@ import java.awt.*;
  */
 
 public interface IConstants {
+
+    String revNumber = "1.0  -  19-12-2017  09:54:54";
+
     Color BACKGROUND = new Color(0xdddddd);
-    //Color BACKGROUND = Color.lightGray;
 }

@@ -40,6 +40,8 @@ import fr.esrf.TangoApi.DbServer;
 import fr.esrf.TangoDs.Except;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
+import org.tango.cassandra_monitor_client.commons.ReleaseNote;
+import org.tango.cassandra_monitor_client.tools.IConstants;
 import org.tango.cassandra_monitor_client.tools.PopupHtml;
 
 import javax.swing.*;
@@ -141,13 +143,12 @@ public class CassandraMonitoring extends JFrame {
         javax.swing.JLabel jLabel1 = new javax.swing.JLabel();
         javax.swing.JMenuBar menuBar = new javax.swing.JMenuBar();
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
-        javax.swing.JMenuItem startSimulationItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem exitItem = new javax.swing.JMenuItem();
         javax.swing.JMenu viewMenu = new javax.swing.JMenu();
-        javax.swing.JMenuItem viewStatusItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem compactionsItem = new javax.swing.JMenuItem();
         javax.swing.JMenu helpMenu = new javax.swing.JMenu();
-        javax.swing.JMenuItem jMenuItem1 = new javax.swing.JMenuItem();
+        javax.swing.JMenuItem releaseMenuItem = new javax.swing.JMenuItem();
+        javax.swing.JMenuItem aboutMenuItem = new javax.swing.JMenuItem();
 
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
@@ -164,16 +165,6 @@ public class CassandraMonitoring extends JFrame {
         fileMenu.setMnemonic('F');
         fileMenu.setText("File");
 
-        startSimulationItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
-        startSimulationItem.setMnemonic('S');
-        startSimulationItem.setText("Start Simulation");
-        startSimulationItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                startSimulationItemActionPerformed(evt);
-            }
-        });
-        fileMenu.add(startSimulationItem);
-
         exitItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.event.InputEvent.CTRL_MASK));
         exitItem.setMnemonic('E');
         exitItem.setText("Exit");
@@ -188,16 +179,6 @@ public class CassandraMonitoring extends JFrame {
 
         viewMenu.setMnemonic('V');
         viewMenu.setText("View");
-
-        viewStatusItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.ALT_MASK));
-        viewStatusItem.setMnemonic('S');
-        viewStatusItem.setText("Status");
-        viewStatusItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                viewStatusItemActionPerformed(evt);
-            }
-        });
-        viewMenu.add(viewStatusItem);
 
         compactionsItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_C, java.awt.event.InputEvent.ALT_MASK));
         compactionsItem.setMnemonic('C');
@@ -214,15 +195,25 @@ public class CassandraMonitoring extends JFrame {
         helpMenu.setMnemonic('H');
         helpMenu.setText("help");
 
-        jMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F1, 0));
-        jMenuItem1.setMnemonic('A');
-        jMenuItem1.setText("About");
-        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+        releaseMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F2, 0));
+        releaseMenuItem.setMnemonic('R');
+        releaseMenuItem.setText("Release Notes");
+        releaseMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem1ActionPerformed(evt);
+                releaseMenuItemActionPerformed(evt);
             }
         });
-        helpMenu.add(jMenuItem1);
+        helpMenu.add(releaseMenuItem);
+
+        aboutMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F1, 0));
+        aboutMenuItem.setMnemonic('A');
+        aboutMenuItem.setText("About");
+        aboutMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                aboutMenuItemActionPerformed(evt);
+            }
+        });
+        helpMenu.add(aboutMenuItem);
 
         menuBar.add(helpMenu);
 
@@ -248,51 +239,25 @@ public class CassandraMonitoring extends JFrame {
     //=======================================================
     //=======================================================
     @SuppressWarnings("UnusedParameters")
-    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-        String  message = "This application is able to bla bla\n" +
-                "\nPascal Verdier - Accelerator Control Unit";
+    private void aboutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutMenuItemActionPerformed
+        String  message = "This application is able monitor Cassandra data centers\n" +
+                "Release: "+ IConstants.revNumber +
+                "\n\nPascal Verdier - ESRF - Accelerator Control Unit";
         JOptionPane.showMessageDialog(this, message, "Help Window", JOptionPane.INFORMATION_MESSAGE);
-    }//GEN-LAST:event_jMenuItem1ActionPerformed
+    }//GEN-LAST:event_aboutMenuItemActionPerformed
     //=======================================================
     //=======================================================
     @SuppressWarnings("UnusedParameters")
     private void compactionsItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_compactionsItemActionPerformed
         compactionChartDialog.setVisible(true);
     }//GEN-LAST:event_compactionsItemActionPerformed
-    //=======================================================
-    //=======================================================
-    @SuppressWarnings("UnusedParameters")
-    private void startSimulationItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startSimulationItemActionPerformed
-        try {
-            for (CassandraNode cassandraNode : cassandraNodeList) {
-                cassandraNode.startSimulation();
-            }
-        }
-        catch (DevFailed e) {
-            ErrorPane.showErrorMessage(this, e.getMessage(), e);
-        }
-    }//GEN-LAST:event_startSimulationItemActionPerformed
 
     //=======================================================
     //=======================================================
     @SuppressWarnings("UnusedParameters")
-    private void viewStatusItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewStatusItemActionPerformed
-        // TODO add your handling code here:
-        StringBuilder   sb = new StringBuilder(PopupHtml.htmlPageTitle("Cassandra Node Status"));
-        sb.append("<center><table Border=2 CellSpacing=0>\n");
-        sb.append(PopupHtml.htmlTableLine(
-                new String[] { "Node", "Cluster", "Status", "Version", "Load", "Unreachable" }, true));
-        for (CassandraNode node : cassandraNodeList) {
-            try {
-                sb.append(node.getHtmlStatus());
-            }
-            catch (DevFailed e) {
-                ErrorPane.showErrorMessage(this, node.getName(), e);
-            }
-        }
-        sb.append("</table>");
-        new PopupHtml(this).show(sb.toString(), 640, 480);
-    }//GEN-LAST:event_viewStatusItemActionPerformed
+    private void releaseMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_releaseMenuItemActionPerformed
+        new PopupHtml(this).show(ReleaseNote.str);
+    }//GEN-LAST:event_releaseMenuItemActionPerformed
 	//=======================================================
 	//=======================================================
     private void doClose() {

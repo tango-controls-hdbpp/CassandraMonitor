@@ -77,7 +77,6 @@ public class CassandraNode extends DeviceProxy {
     private SimpleScalarViewer dataLoadViewer;
     private AttributeList attributeList = new AttributeList();
     private JRadioButton compactionButton;
-    private JButton testButton;
     private CompactionChart compactionChart;
     private boolean selected;
 
@@ -104,14 +103,6 @@ public class CassandraNode extends DeviceProxy {
         compactionButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 compactionActionPerformed(evt);
-            }
-        });
-        testButton = new JButton("...");
-        testButton.setToolTipText("Test device");
-        testButton.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        testButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                testActionPerformed();
             }
         });
 
@@ -144,7 +135,7 @@ public class CassandraNode extends DeviceProxy {
     }
     //===============================================================
     //===============================================================
-    private void testActionPerformed() {
+    public void testDevice() {
         try {
             //	Start Test Device panel  on selected device
             JDialog d = new JDialog(new JFrame(), false);
@@ -163,11 +154,6 @@ public class CassandraNode extends DeviceProxy {
         //  Cancel action
         JRadioButton btn = (JRadioButton) event.getSource();
         btn.setSelected(!btn.isSelected());
-    }
-    //===============================================================
-    //===============================================================
-    public JButton getTestButton() {
-        return testButton;
     }
     //===============================================================
     //===============================================================
@@ -270,39 +256,6 @@ public class CassandraNode extends DeviceProxy {
         //  Update chart
         if (compactionChart!=null)
             compactionChart.updateCurves();
-    }
-    //===============================================================
-    //===============================================================
-    public void startSimulation() throws DevFailed {
-        command_inout("StartSimulation");
-    }
-    //===============================================================
-    //===============================================================
-    public String getStatus() {
-        try {
-            return status();
-        }
-        catch (DevFailed e) {
-            return e.errors[0].desc;
-        }
-    }
-    //===============================================================
-    //===============================================================
-    public String getHtmlStatus() throws DevFailed {
-        DeviceAttribute[] deviceAttributes = read_attribute(
-                new String[]{"ClusterName", "Status", "CassandraVersion", "DataLoadStr", "UnreachableNodes" });
-        String[] unreachableList = deviceAttributes[4].extractStringArray();
-
-        StringBuilder unreachableStr = new StringBuilder();
-        for (String unreachable : unreachableList)
-            unreachableStr.append(unreachable).append("<br>");
-
-        return "<tr>\n<td><b>" + name + "</b></td><td>" +
-                deviceAttributes[0].extractString()  + "</td><td>" +
-                deviceAttributes[1].extractString()  + "</td><td>" +
-                deviceAttributes[2].extractString()  + "</td><td>" +
-                deviceAttributes[3].extractString()  + "</td><td>" +
-                unreachableStr  + "</td>\n</tr>\n";
     }
     //===============================================================
     //===============================================================

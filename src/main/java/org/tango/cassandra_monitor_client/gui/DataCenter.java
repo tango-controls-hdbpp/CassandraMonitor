@@ -35,6 +35,9 @@ package org.tango.cassandra_monitor_client.gui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -51,10 +54,15 @@ import static org.tango.cassandra_monitor_client.tools.IConstants.BACKGROUND;
 public class DataCenter extends ArrayList<CassandraNode> {
     private String name;
     private JPanel panel;
+    private CassandraNode selectedNode = null;
+    private PanelPopupMenu popupMenu = new PanelPopupMenu();
+
     private static final String[] columnHeaders = {
             "Rack", "Node",  "Cluster", "Vers.",
             "Tokens", "Owns", "State", " Data  Load ", "Comp.",
     };
+    private static final Font labelFont = new Font("Dialog", Font.PLAIN, 12);
+    private static final Font headerFont = new Font("Dialog", Font.BOLD, 12);
     //===============================================================
     //===============================================================
     public DataCenter(String name) {
@@ -83,39 +91,26 @@ public class DataCenter extends ArrayList<CassandraNode> {
         gbc.gridy++;
         for (String header : columnHeaders) {
             label = new JLabel(header);
-            label.setFont(new Font("Dialog", Font.BOLD, 12));
+            label.setFont(headerFont);
             panel.add(label, gbc);
             gbc.gridx++;
         }
 
         //  Build line for each node
-        gbc.gridy++;
-        Font font = new Font("Dialog", Font.PLAIN, 12);
         for (CassandraNode node : this) {
+            gbc.gridy++;
             gbc.gridx = 0;
-            label = new JLabel(node.getRackName());
-            label.setFont(font);
-            panel.add(label, gbc);
+            panel.add(buildLabel(node.getRackName(), node), gbc);
             gbc.gridx++;
-            label = new JLabel(node.getName());
-            label.setFont(font);
-            panel.add(label, gbc);
+            panel.add(buildLabel(node.getName(), node), gbc);
             gbc.gridx++;
-            label = new JLabel(node.getCluster());
-            label.setFont(font);
-            panel.add(label, gbc);
+            panel.add(buildLabel(node.getCluster(), node), gbc);
             gbc.gridx++;
-            label = new JLabel(node.getVersion());
-            label.setFont(font);
-            panel.add(label, gbc);
+            panel.add(buildLabel(node.getVersion(), node), gbc);
             gbc.gridx++;
-            label = new JLabel(node.getTokens());
-            label.setFont(font);
-            panel.add(label, gbc);
+            panel.add(buildLabel(node.getTokens(), node), gbc);
             gbc.gridx++;
-            label = new JLabel(node.getOwns());
-            label.setFont(font);
-            panel.add(label, gbc);
+            panel.add(buildLabel(node.getOwns(), node), gbc);
             gbc.gridx++;
             panel.add(node.getStateViewer(), gbc);
             gbc.gridx++;
@@ -123,8 +118,26 @@ public class DataCenter extends ArrayList<CassandraNode> {
             gbc.gridx++;
             panel.add(node.getCompactionButton(), gbc);
             gbc.gridx++;
-            panel.add(node.getTestButton(), gbc);
-            gbc.gridy++;
+        }
+    }
+    //===============================================================
+    //===============================================================
+    private JLabel buildLabel(String text, final CassandraNode node) {
+        JLabel label = new JLabel(text);
+        label.setFont(labelFont);
+        label.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                nodeActionPerformed(evt, node);
+            }
+        });
+        return label;
+    }
+    //===============================================================
+    //===============================================================
+    private void nodeActionPerformed(MouseEvent event, CassandraNode node) {
+        selectedNode = node;
+        if ((event.getModifiers() & MouseEvent.BUTTON3_MASK) != 0) {
+            popupMenu.showMenu(event);
         }
     }
     //===============================================================
@@ -143,6 +156,11 @@ public class DataCenter extends ArrayList<CassandraNode> {
     }
     //===============================================================
     //===============================================================
+    private void testDevice() {
+        selectedNode.testDevice();
+    }
+    //===============================================================
+    //===============================================================
 
 
 
@@ -157,4 +175,60 @@ public class DataCenter extends ArrayList<CassandraNode> {
     }
     //===============================================================
     //===============================================================
+
+
+
+    //=======================================================
+    //=======================================================
+    private static final int TEST_DEVICE = 0;
+    private static final int OFFSET = 2;    //	Label And separator
+
+    private static String[] menuLabels = {
+            "Test Device",
+    };
+    //=======================================================
+    //=======================================================
+    private class PanelPopupMenu extends JPopupMenu {
+        //===================================================
+        private PanelPopupMenu() {
+            add(new JLabel());  //  title
+            add(new JPopupMenu.Separator());
+
+            for (String menuLabel : menuLabels) {
+                if (menuLabel == null)
+                    add(new Separator());
+                else {
+                    JMenuItem btn = new JMenuItem(menuLabel);
+                    btn.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent evt) {
+                            menuActionPerformed(evt);
+                        }
+                    });
+                    add(btn);
+                }
+            }
+        }
+        //===================================================
+        private void showMenu(MouseEvent event) {
+            ((JLabel) getComponent(0)).setText(selectedNode.getName());
+            show(event.getComponent(), event.getX(), event.getY());
+        }
+        //===================================================
+        private void menuActionPerformed(ActionEvent evt) {
+            //	Check component source
+            Object obj = evt.getSource();
+            int itemIndex = -1;
+            for (int i = 0 ; i<menuLabels.length ; i++)
+                if (getComponent(OFFSET + i) == obj)
+                    itemIndex = i;
+            switch (itemIndex) {
+                case TEST_DEVICE:
+                    testDevice();
+                    break;
+            }
+        }
+        //===================================================
+    }
+    //=======================================================
+    //=======================================================
 }
