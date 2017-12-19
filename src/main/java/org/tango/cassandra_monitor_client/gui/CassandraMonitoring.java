@@ -46,6 +46,7 @@ import fr.esrf.tangoatk.widget.util.ErrorPane;
 import org.tango.cassandra_monitor_client.commons.ReleaseNote;
 import org.tango.cassandra_monitor_client.tools.IConstants;
 import org.tango.cassandra_monitor_client.tools.PopupHtml;
+import org.tango.cassandra_monitor_client.tools.SplashUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -69,13 +70,18 @@ public class CassandraMonitoring extends JFrame {
 	 */
 	//=======================================================
     public CassandraMonitoring() throws DevFailed {
-        initComponents();
         checkDistributionDevice();
+        SplashUtils.getInstance().startSplash();
+        SplashUtils.getInstance().setSplashProgress(10, "Building GUI");
+        initComponents();
+        SplashUtils.getInstance().setSplashProgress(20, "Building GUI");
         buildDeviceList();
+        SplashUtils.getInstance().setSplashProgress(30, "Building GUI");
         buildDataCenterPanels();
         compactionChartDialog = new CompactionChartDialog(this, dataCenterList);
         pack();
         ATKGraphicsUtils.centerFrameOnScreen(this);
+        SplashUtils.getInstance().stopSplash();
 	}
 	//=======================================================
 	//=======================================================
@@ -292,6 +298,7 @@ public class CassandraMonitoring extends JFrame {
       		new CassandraMonitoring().setVisible(true);
 		}
 		catch(DevFailed e) {
+            SplashUtils.getInstance().stopSplash();
             ErrorPane.showErrorMessage(new Frame(), null, e);
 			System.exit(0);
 		}
