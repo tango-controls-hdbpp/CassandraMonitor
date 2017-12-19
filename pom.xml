@@ -28,9 +28,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git@github.com:tango-controls/${project.artifactId}.git</connection>
-        <developerConnection>scm:git:git@github.com:tango-controls/${project.artifactId}.git</developerConnection>
-        <url>https://github.com/tango-controls/${project.artifactId}</url>
+        <connection>scm:git:git@github.com:tango-controls-hdbpp/${project.artifactId}.git</connection>
+        <developerConnection>scm:git:git@github.com:tango-controls-hdbpp/${project.artifactId}.git</developerConnection>
+        <url>https://github.com/tango-controls-hdbpp/${project.artifactId}</url>
         <tag>HEAD</tag>
     </scm>
 
