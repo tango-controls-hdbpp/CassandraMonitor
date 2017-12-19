@@ -36,7 +36,10 @@
 package org.tango.cassandra_monitor_client.gui;
 
 import fr.esrf.Tango.DevFailed;
+import fr.esrf.TangoApi.DbClass;
+import fr.esrf.TangoApi.DbDatum;
 import fr.esrf.TangoApi.DbServer;
+import fr.esrf.TangoApi.DeviceProxy;
 import fr.esrf.TangoDs.Except;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
@@ -67,6 +70,7 @@ public class CassandraMonitoring extends JFrame {
 	//=======================================================
     public CassandraMonitoring() throws DevFailed {
         initComponents();
+        checkDistributionDevice();
         buildDeviceList();
         buildDataCenterPanels();
         compactionChartDialog = new CompactionChartDialog(this, dataCenterList);
@@ -125,6 +129,21 @@ public class CassandraMonitoring extends JFrame {
         Set<String> keys = dataCenterMap.keySet();
         for (String key : keys)
             dataCenterList.add(dataCenterMap.get(key));
+    }
+	//=======================================================
+	//=======================================================
+    private void checkDistributionDevice() throws DevFailed {
+        DbClass clazz = new DbClass("CassandraMonitor");
+        DbDatum datum = clazz.get_property("DistributionDeviceName");
+        if (datum.is_empty())
+            Except.throw_exception("PropertyNotDefined",
+                    "CassandraMonitor.DistributionDeviceName class property not defined !");
+        try {
+            new DeviceProxy(datum.extractString()).ping();
+        } catch (DevFailed e) {
+            String message = "Device   "+datum.extractString()+"   is not alive";
+            ErrorPane.showErrorMessage(this, null, new Exception(message));
+        }
     }
 	//=======================================================
 	//=======================================================

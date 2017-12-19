@@ -58,6 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
+import org.tango.cassandradistribution.CassandraDistribution;
 import org.tango.server.InvocationContext;
 import org.tango.server.ServerManager;
 import org.tango.server.annotation.*;
@@ -246,7 +247,8 @@ public class CassandraMonitor {
             System.exit(0);
         }
         //  Property has been set -> read it to initialize
-        InitializeFromDistribution();
+		//	Now done at DataCenter read
+        // initializeFromDistribution();
 
         //  Initialize the JMX utility
 		jmxUtilities = new JmxUtilities(node, jMXPort, jMXUser, jMXPassword, jMXConnectionTimeout);
@@ -360,8 +362,9 @@ public class CassandraMonitor {
 		org.tango.server.attribute.AttributeValue
 			attributeValue = new org.tango.server.attribute.AttributeValue();
 		/*----- PROTECTED REGION ID(CassandraMonitor.getDataCenter) ENABLED START -----*/
-		
-		//	Put read attribute code here
+		//	If empty (not initialized) try again
+		if (dataCenter.isEmpty())
+			initializeFromDistribution();
 		
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getDataCenter
 		attributeValue.setValue(dataCenter);
@@ -800,28 +803,36 @@ public class CassandraMonitor {
 	/*----- PROTECTED REGION ID(CassandraMonitor.methods) ENABLED START -----*/
 
     //========================================================
+	private static DeviceProxy distributionProxy = null;
     //========================================================
-    private void InitializeFromDistribution() {
+    private void initializeFromDistribution() {
         try {
-            DeviceAttribute attribute =
-                    new DeviceProxy(distributionDeviceName).read_attribute("NodeDistribution");
+        	if (distributionProxy==null)
+        		distributionProxy = new DeviceProxy(distributionDeviceName);
+            DeviceAttribute attribute = distributionProxy.read_attribute("NodeDistribution");
             String[] lines = attribute.extractStringArray();
             for (String line : lines) {
+            	//	Get line for specified node
                 if (line.startsWith(node)) {
-                    StringTokenizer stk = new StringTokenizer(line);
-                    if (stk.countTokens()!=5)
+                	int index = line.indexOf(':');
+                	if (index<0)
+						Except.throw_exception("SyntaxError",
+								"Syntax error in DistributionDevice attribute");
+
+					// split after removing node name
+                    StringTokenizer stk = new StringTokenizer(line.substring(++index), ",");
+                    if (stk.countTokens()!=4)
                         Except.throw_exception("SyntaxError",
                                 "Syntax error in DistributionDevice attribute");
-                    stk.nextToken(); // node name
-                    dataCenter = stk.nextToken();
-                    rack = stk.nextToken();
-                    owns = stk.nextToken();
-                    tokens = stk.nextToken();
+                    dataCenter = stk.nextToken().trim();
+                    rack = stk.nextToken().trim();
+                    owns = stk.nextToken().trim();
+                    tokens = stk.nextToken().trim();
                 }
             }
         }
         catch (DevFailed e) {
-            System.err.println(e.errors[0].desc);
+            //System.err.println(e.errors[0].desc + "  (" + deviceManager.getName() + ")");
         }
     }
     //========================================================
@@ -841,7 +852,6 @@ public class CassandraMonitor {
 	 */
 	public static void main(final String[] args) {
 		/*----- PROTECTED REGION ID(CassandraMonitor.main) ENABLED START -----*/
-
 
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.main
 		ServerManager.getInstance().start(args, CassandraMonitor.class);
