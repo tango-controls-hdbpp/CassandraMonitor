@@ -40,10 +40,7 @@ import fr.esrf.TangoApi.events.TangoEventsAdapter;
 import fr.esrf.TangoApi.events.TangoPipeEvent;
 import fr.esrf.TangoDs.Except;
 import fr.esrf.TangoDs.TangoConst;
-import fr.esrf.tangoatk.core.AttributeList;
-import fr.esrf.tangoatk.core.ConnectionException;
-import fr.esrf.tangoatk.core.IDevStateScalar;
-import fr.esrf.tangoatk.core.IStringScalar;
+import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.widget.attribute.SimpleScalarViewer;
 import fr.esrf.tangoatk.widget.attribute.StateViewer;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
@@ -66,6 +63,7 @@ import static org.tango.cassandra_monitor_client.tools.IConstants.BACKGROUND;
 
 public class CassandraNode extends DeviceProxy {
     private String name;
+    private String deviceName;
     private String dataCenter;
     private String rackName;
     private String tokens;
@@ -75,6 +73,7 @@ public class CassandraNode extends DeviceProxy {
     private List<Compaction> compactionList = new ArrayList<>();
     private StateViewer stateViewer;
     private SimpleScalarViewer dataLoadViewer;
+    private SimpleScalarViewer[] requestViewers;
     private AttributeList attributeList = new AttributeList();
     private JRadioButton compactionButton;
     private CompactionChart compactionChart;
@@ -87,6 +86,7 @@ public class CassandraNode extends DeviceProxy {
     //===============================================================
     public CassandraNode(String deviceName) throws DevFailed {
         super(deviceName);
+        this.deviceName = deviceName;
         DbDatum datum = get_property("node");
         if (datum.is_empty())
             name = "? ?";
@@ -95,6 +95,7 @@ public class CassandraNode extends DeviceProxy {
         initializeFromDevice();
         buildStateViewer(deviceName);
         buildDataLoadViewer(deviceName);
+        buildRequestViewers(deviceName);
         initialize();
         compactionChart = new CompactionChart(this);
         compactionButton = new JRadioButton("");
@@ -162,6 +163,11 @@ public class CassandraNode extends DeviceProxy {
     }
     //===============================================================
     //===============================================================
+    public String getDeviceName() {
+        return deviceName;
+    }
+    //===============================================================
+    //===============================================================
     public String getName() {
         return name;
     }
@@ -179,6 +185,11 @@ public class CassandraNode extends DeviceProxy {
     //===============================================================
     public SimpleScalarViewer getDataLoadViewer() {
         return dataLoadViewer;
+    }
+    //===============================================================
+    //===============================================================
+    public SimpleScalarViewer[] getRequestViewers() {
+        return requestViewers;
     }
     //===============================================================
     //===============================================================
@@ -213,9 +224,9 @@ public class CassandraNode extends DeviceProxy {
             stateViewer = new StateViewer();
             stateViewer.setLabel("");
             stateViewer.setBackground(BACKGROUND);
-            IDevStateScalar attState =
+            IDevStateScalar stateScalar =
                     (IDevStateScalar) attributeList.add(deviceName + "/state");
-            stateViewer.setModel(attState);
+            stateViewer.setModel(stateScalar);
             //attState.addDevStateScalarListener(this);
             attributeList.refresh();
         }
@@ -228,11 +239,34 @@ public class CassandraNode extends DeviceProxy {
     public void buildDataLoadViewer(String deviceName) throws DevFailed {
         try {
             dataLoadViewer = new SimpleScalarViewer();
-            IStringScalar attLoadFile =
+            IStringScalar stringScalar =
                     (IStringScalar) attributeList.add(deviceName + "/DataLoadStr");
-            dataLoadViewer.setModel(attLoadFile);
+            dataLoadViewer.setModel(stringScalar);
             dataLoadViewer.setBackgroundColor(Color.white);
             dataLoadViewer.setBackground(Color.white);
+        }
+        catch (ConnectionException e) {
+            Except.throw_exception("ConnectionFailed", e.getDescription());
+        }
+    }
+    //===========================================================
+    //===========================================================
+    public void buildRequestViewers(String deviceName) throws DevFailed {
+        try {
+            requestViewers = new SimpleScalarViewer[2];
+            requestViewers[0] = new SimpleScalarViewer();
+            INumberScalar readScalar =
+                    (INumberScalar) attributeList.add(deviceName + "/ReadRequests");
+            requestViewers[0].setModel(readScalar);
+            requestViewers[0].setBackgroundColor(Color.white);
+            requestViewers[0].setBackground(Color.white);
+
+            requestViewers[1] = new SimpleScalarViewer();
+            INumberScalar writeScalar =
+                    (INumberScalar) attributeList.add(deviceName + "/WriteRequests");
+            requestViewers[1].setModel(writeScalar);
+            requestViewers[1].setBackgroundColor(Color.white);
+            requestViewers[1].setBackground(Color.white);
         }
         catch (ConnectionException e) {
             Except.throw_exception("ConnectionFailed", e.getDescription());

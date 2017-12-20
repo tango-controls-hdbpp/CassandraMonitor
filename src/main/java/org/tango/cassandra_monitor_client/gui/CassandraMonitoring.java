@@ -176,6 +176,7 @@ public class CassandraMonitoring extends JFrame {
         javax.swing.JMenuItem exitItem = new javax.swing.JMenuItem();
         javax.swing.JMenu viewMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem compactionsItem = new javax.swing.JMenuItem();
+        javax.swing.JMenuItem requestTrendItem = new javax.swing.JMenuItem();
         javax.swing.JMenu helpMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem releaseMenuItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem aboutMenuItem = new javax.swing.JMenuItem();
@@ -219,6 +220,16 @@ public class CassandraMonitoring extends JFrame {
             }
         });
         viewMenu.add(compactionsItem);
+
+        requestTrendItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_R, java.awt.event.InputEvent.ALT_MASK));
+        requestTrendItem.setMnemonic('R');
+        requestTrendItem.setText("Client Requests");
+        requestTrendItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                requestTrendItemActionPerformed(evt);
+            }
+        });
+        viewMenu.add(requestTrendItem);
 
         menuBar.add(viewMenu);
 
@@ -290,13 +301,19 @@ public class CassandraMonitoring extends JFrame {
     private void compactionsItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_compactionsItemActionPerformed
         compactionChartDialog.setVisible(true);
     }//GEN-LAST:event_compactionsItemActionPerformed
-
     //=======================================================
     //=======================================================
     @SuppressWarnings("UnusedParameters")
     private void releaseMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_releaseMenuItemActionPerformed
         new PopupHtml(this).show(ReleaseNote.str);
     }//GEN-LAST:event_releaseMenuItemActionPerformed
+    //=======================================================
+    //=======================================================
+    @SuppressWarnings("UnusedParameters")
+    private void requestTrendItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_requestTrendItemActionPerformed
+        // TODO add your handling code here:
+        new RequestTrendDialog(this, dataCenterList).setVisible(true);
+    }//GEN-LAST:event_requestTrendItemActionPerformed
 	//=======================================================
 	//=======================================================
     private void doClose() {

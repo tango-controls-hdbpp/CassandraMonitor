@@ -58,19 +58,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
-import org.tango.cassandradistribution.CassandraDistribution;
 import org.tango.server.InvocationContext;
 import org.tango.server.ServerManager;
 import org.tango.server.annotation.*;
 import org.tango.server.device.DeviceManager;
 import org.tango.server.dynamic.DynamicManager;
 import org.tango.server.pipe.PipeValue;
-import org.tango.utils.DevFailedUtils;
 
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -94,14 +92,14 @@ public class CassandraMonitor {
     /*----- PROTECTED REGION ID(CassandraMonitor.variables) ENABLED START -----*/
 
     //	Put static variables here
-    private static boolean runThreads = true;
+    private static boolean runThread = true;
+    private static final long READ_JMX_PERIOD = 10; // seconds
 
     /*----- PROTECTED REGION END -----*/	//	CassandraMonitor.variables
 	/*----- PROTECTED REGION ID(CassandraMonitor.private) ENABLED START -----*/
 
     //	Put private variables here
-    private ObjectName storageServiceObjName;
-    private ObjectName storageMetricsLoadObjName;
+    private List<ObjectName> objectNameList = new ArrayList<>();
     private CompactionsThread compactionsThread;
 	private JmxUtilities jmxUtilities;
 
@@ -250,28 +248,16 @@ public class CassandraMonitor {
 		//	Now done at DataCenter read
         // initializeFromDistribution();
 
+
         //  Initialize the JMX utility
 		jmxUtilities = new JmxUtilities(node, jMXPort, jMXUser, jMXPassword, jMXConnectionTimeout);
-        try {
-            storageServiceObjName = new ObjectName("org.apache.cassandra.db:type=StorageService");
-        } catch (MalformedObjectNameException ex) {
-            xlogger.error(ex.getMessage());
-            throw DevFailedUtils.newDevFailed("MalformedObjectNameException",
-                    "MalformedObjectNameException for object \"org.apache.cassandra.db:type=StorageService\"");
-        }
-        try {
-            storageMetricsLoadObjName = new ObjectName("org.apache.cassandra.metrics:type=Storage,name=Load");
-        } catch (MalformedObjectNameException ex) {
-            xlogger.error(ex.getMessage());
-            throw DevFailedUtils.newDevFailed("MalformedObjectNameException",
-                    "MalformedObjectNameException for object \"org.apache.cassandra.metrics:type=Storage,name=Load\"");
-        }
-
+        objectNameList = jmxUtilities.getObjectNameList();
         try {
             jmxUtilities.connect();
         } catch (DevFailed ex) {
             xlogger.error(ex.getMessage());
         }
+
 		compactionsThread = new CompactionsThread(deviceManager, jmxUtilities, node);
         compactionsThread.start();
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.initDevice
@@ -290,6 +276,7 @@ public class CassandraMonitor {
 
 		jmxUtilities.close();
 		compactionsThread.stopThread();
+		runThread = false;
 
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.deleteDevice
 		xlogger.exit();
@@ -348,7 +335,7 @@ public class CassandraMonitor {
 	 * description:
 	 *     Data center where node is located
 	 */
-	@Attribute(name="DataCenter", isPolled=true, pollingPeriod=3000)
+	@Attribute(name="DataCenter", isPolled=true, pollingPeriod=60000)
 	@AttributeProperties(description="Data center where node is located", label="Data center")
 	private String dataCenter = "";
 	/**
@@ -377,7 +364,7 @@ public class CassandraMonitor {
 	 * description:
 	 *     Rack where node is located
 	 */
-	@Attribute(name="Rack", isPolled=true, pollingPeriod=3000)
+	@Attribute(name="Rack", isPolled=true, pollingPeriod=60000)
 	@AttributeProperties(description="Rack where node is located", label="Rack")
 	private String rack = "";
 	/**
@@ -405,7 +392,7 @@ public class CassandraMonitor {
 	 * description:
 	 *     Cassandra cluster name
 	 */
-	@Attribute(name="ClusterName")
+	@Attribute(name="ClusterName", isPolled=true, pollingPeriod=60000)
 	@AttributeProperties(description="Cassandra cluster name", label="Cluster name")
 	private String clusterName = "";
 	/**
@@ -421,7 +408,7 @@ public class CassandraMonitor {
 		/*----- PROTECTED REGION ID(CassandraMonitor.getClusterName) ENABLED START -----*/
 
         //	Put read attribute code here
-        clusterName = jmxUtilities.getAttribute(storageServiceObjName, ATTR_CLUSTER).toString();
+        clusterName = jmxUtilities.getAttribute(objectNameList.get(STORAGE_SERVICE), ATTR_CLUSTER).toString();
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getClusterName
 		attributeValue.setValue(clusterName);
 		xlogger.exit();
@@ -450,7 +437,7 @@ public class CassandraMonitor {
 		/*----- PROTECTED REGION ID(CassandraMonitor.getDataLoadStr) ENABLED START -----*/
 
         //	Put read attribute code here
-        dataLoadStr = jmxUtilities.getAttribute(storageServiceObjName, ATTR_LOAD).toString();
+        dataLoadStr = jmxUtilities.getAttribute(objectNameList.get(STORAGE_SERVICE), ATTR_LOAD).toString();
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getDataLoadStr
 		attributeValue.setValue(dataLoadStr);
 		xlogger.exit();
@@ -462,7 +449,7 @@ public class CassandraMonitor {
 	 * description:
 	 *     Cassandra node current operation mode (NORMAL,JOINING,LEAVING...)
 	 */
-	@Attribute(name="OperationMode", isPolled=true, pollingPeriod=1000)
+	@Attribute(name="OperationMode", isPolled=true, pollingPeriod=60000)
 	@AttributeProperties(description="Cassandra node current operation mode (NORMAL,JOINING,LEAVING...)",
 	                     label="Operation Mode", archiveEventPeriod="3600000")
 	private String operationMode = "";
@@ -479,7 +466,7 @@ public class CassandraMonitor {
 		/*----- PROTECTED REGION ID(CassandraMonitor.getOperationMode) ENABLED START -----*/
 
         //	Put read attribute code here
-        operationMode = jmxUtilities.getAttribute(storageServiceObjName, ATTR_OPERATION_MODE).toString();
+        operationMode = jmxUtilities.getAttribute(objectNameList.get(STORAGE_SERVICE), ATTR_OPERATION_MODE).toString();
         switch (operationMode) {
             case "STARTING":
                 setState(DevState.INIT);
@@ -534,7 +521,7 @@ public class CassandraMonitor {
 		/*----- PROTECTED REGION ID(CassandraMonitor.getDataLoad) ENABLED START -----*/
 
         //	Put read attribute code here
-        dataLoad = (Long) jmxUtilities.getAttribute(storageMetricsLoadObjName, ATTR_COUNT);
+        dataLoad = (Long) jmxUtilities.getAttribute(objectNameList.get(STORAGE_LOAD), ATTR_COUNT);
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getDataLoad
 		attributeValue.setValue(dataLoad);
 		xlogger.exit();
@@ -562,7 +549,7 @@ public class CassandraMonitor {
 		/*----- PROTECTED REGION ID(CassandraMonitor.getCassandraVersion) ENABLED START -----*/
 
         //	Put read attribute code here
-        cassandraVersion = jmxUtilities.getAttribute(storageServiceObjName, ATTR_RELEASE).toString();
+        cassandraVersion = jmxUtilities.getAttribute(objectNameList.get(STORAGE_SERVICE), ATTR_RELEASE).toString();
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getCassandraVersion
 		attributeValue.setValue(cassandraVersion);
 		xlogger.exit();
@@ -572,10 +559,10 @@ public class CassandraMonitor {
 	/**
 	 * Attribute Owns, String, Scalar, READ
 	 * description:
-	 *     Node's owns
+	 *     Node`s owns
 	 */
-	@Attribute(name="Owns", isPolled=true, pollingPeriod=3000)
-	@AttributeProperties(description="Node's owns", label="Owns")
+	@Attribute(name="Owns", isPolled=true, pollingPeriod=60000)
+	@AttributeProperties(description="Node`s owns", label="Owns")
 	private String owns = "";
 	/**
 	 * Read attribute Owns
@@ -602,7 +589,7 @@ public class CassandraMonitor {
 	 * description:
 	 *     Node`s tokens
 	 */
-	@Attribute(name="Tokens", isPolled=true, pollingPeriod=3000)
+	@Attribute(name="Tokens", isPolled=true, pollingPeriod=60000)
 	@AttributeProperties(description="Node`s tokens", label="Tokens")
 	private String tokens = "";
 	/**
@@ -621,6 +608,66 @@ public class CassandraMonitor {
 		
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getTokens
 		attributeValue.setValue(tokens);
+		xlogger.exit();
+		return attributeValue;
+	}
+	
+	/**
+	 * Attribute WriteRequests, double, Scalar, READ
+	 * description:
+	 *     Write request (events/second)
+	 */
+	@Attribute(name="WriteRequests", isPolled=true, pollingPeriod=10000)
+	@AttributeProperties(description="Write request (events/second)", label="Write requests",
+	                     unit="ev/s", format="%.1f", changeEventAbsolute="0.1", archiveEventRelative="0.1")
+	private double writeRequests;
+	/**
+	 * Read attribute WriteRequests
+	 * 
+	 * @return attribute value
+	 * @throws DevFailed if read attribute failed.
+	 */
+	public org.tango.server.attribute.AttributeValue getWriteRequests() throws DevFailed {
+		xlogger.entry();
+		org.tango.server.attribute.AttributeValue
+			attributeValue = new org.tango.server.attribute.AttributeValue();
+		/*----- PROTECTED REGION ID(CassandraMonitor.getWriteRequests) ENABLED START -----*/
+		
+		//	ToDo Put read attribute code here
+        writeRequests = (double)jmxUtilities.getAttribute(objectNameList.get(WRITE_REQUESTS), ATTR_RATE);
+
+        /*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getWriteRequests
+		attributeValue.setValue(writeRequests);
+		xlogger.exit();
+		return attributeValue;
+	}
+	
+	/**
+	 * Attribute ReadRequests, double, Scalar, READ
+	 * description:
+	 *     Read request (events/second)
+	 */
+	@Attribute(name="ReadRequests", isPolled=true, pollingPeriod=10000)
+	@AttributeProperties(description="Read request (events/second)", label="Read requests",
+	                     unit="ev/s", standardUnit="%.1f", changeEventAbsolute="0.1")
+	private double readRequests;
+	/**
+	 * Read attribute ReadRequests
+	 * 
+	 * @return attribute value
+	 * @throws DevFailed if read attribute failed.
+	 */
+	public org.tango.server.attribute.AttributeValue getReadRequests() throws DevFailed {
+		xlogger.entry();
+		org.tango.server.attribute.AttributeValue
+			attributeValue = new org.tango.server.attribute.AttributeValue();
+		/*----- PROTECTED REGION ID(CassandraMonitor.getReadRequests) ENABLED START -----*/
+
+        //  Read done by JmsThread
+        readRequests = (double)jmxUtilities.getAttribute(objectNameList.get(READ_REQUESTS), ATTR_RATE);
+
+		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getReadRequests
+		attributeValue.setValue(readRequests);
 		xlogger.exit();
 		return attributeValue;
 	}
@@ -647,7 +694,7 @@ public class CassandraMonitor {
 		/*----- PROTECTED REGION ID(CassandraMonitor.getUnreachableNodes) ENABLED START -----*/
 
         //	Put read attribute code here
-        java.util.List list = (List) jmxUtilities.getAttribute(storageServiceObjName, ATTR_UNREACHABLE);
+        java.util.List list = (List) jmxUtilities.getAttribute(objectNameList.get(STORAGE_SERVICE), ATTR_UNREACHABLE);
         unreachableNodes = new String[list.size()];
         int i = 0;
         for (Object n : list) {
@@ -687,7 +734,7 @@ public class CassandraMonitor {
 		/*----- PROTECTED REGION ID(CassandraMonitor.getLiveNodes) ENABLED START -----*/
 
         //	Put read attribute code here
-        java.util.List list = (List) jmxUtilities.getAttribute(storageServiceObjName, ATTR_LIVE_MODE);
+        List list = (List) jmxUtilities.getAttribute(objectNameList.get(STORAGE_SERVICE), ATTR_LIVE_MODE);
         liveNodes = new String[list.size()];
         int i = 0;
         for (Object n : list) {

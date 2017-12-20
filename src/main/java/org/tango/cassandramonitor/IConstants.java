@@ -42,8 +42,24 @@ package org.tango.cassandramonitor;
 
 public interface IConstants {
 
+    int READ = 0;
+    int WRITE = 1;
+
+    //  JMX services
+    int STORAGE_SERVICE = 0;
+    int STORAGE_LOAD = 1;
+    int WRITE_REQUESTS = 2;
+    int READ_REQUESTS = 3;
+    String[] JMX_SERVICES = {
+            "org.apache.cassandra.db:type=StorageService",
+            "org.apache.cassandra.metrics:type=Storage,name=Load",
+            "org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Latency",
+            "org.apache.cassandra.metrics:type=ClientRequest,scope=Read,name=Latency",
+    };
+
+
+
     //  JMX attribute names (org.apache.cassandra.db:type=StorageService)
-    String ATTR_DATA_CENTER = "DataCenter";
     String ATTR_LOAD = "LoadString";
     String ATTR_OPERATION_MODE = "OperationMode";
     String ATTR_RELEASE = "ReleaseVersion";
@@ -55,4 +71,5 @@ public interface IConstants {
 
     //  JMX attribute names (org.apache.cassandra.metrics)
     String ATTR_COUNT = "Count";
+    String ATTR_RATE = "OneMinuteRate";
 }

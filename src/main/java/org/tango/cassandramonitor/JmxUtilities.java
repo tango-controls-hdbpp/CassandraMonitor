@@ -41,8 +41,12 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import static org.tango.cassandramonitor.IConstants.JMX_SERVICES;
 
 
 /**
@@ -69,6 +73,19 @@ public class JmxUtilities {
         this.user = user;
         this.password = password;
         this.timeout = timeout;
+    }
+    //===============================================================
+    //===============================================================
+    List<ObjectName> getObjectNameList() throws  DevFailed {
+        List<ObjectName> objectNameList = new ArrayList<>();
+        for (String jmxService : JMX_SERVICES) {
+            try {
+                objectNameList.add(new ObjectName(jmxService));
+            } catch (MalformedObjectNameException e) {
+                throw DevFailedUtils.newDevFailed("MalformedObjectNameException", e.toString());
+            }
+        }
+        return objectNameList;
     }
     //===============================================================
     //===============================================================

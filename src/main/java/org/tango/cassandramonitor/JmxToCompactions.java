@@ -53,6 +53,7 @@ public class JmxToCompactions {
     private List<Compaction> compactionList = new ArrayList<>();
     private String nodeName;
     private boolean changed;
+    private boolean trace = System.getenv("TRACE_COMPACTIONS")!=null;
     //===============================================================
     //===============================================================
     JmxToCompactions(String nodeName) {
@@ -65,7 +66,8 @@ public class JmxToCompactions {
         for (HashMap<String, String> map : list) {
             Compaction compaction = new Compaction(map);
             compactionList.add(compaction);
-            System.out.println(compaction);
+            if (trace)
+                System.out.println(compaction);
         }
         checkIfChanged();
     }

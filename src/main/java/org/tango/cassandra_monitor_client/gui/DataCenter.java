@@ -59,8 +59,15 @@ public class DataCenter extends ArrayList<CassandraNode> {
 
     private static final String[] columnHeaders = {
             "Rack", "Node",  "Cluster", "Vers.",
-            "Tokens", "Owns", "State", " Data  Load ", "Comp.",
+            "Tokens", "Owns", "State", " Data  Load ",
+            "R Requests ", "W Requests ", "Comp.",
     };
+    private static final String[] columnTooltips = {
+            "Rack name", "Node name",  "Cluster name", "Cassandra Version",
+            "Tokens", "Owns", "Node State", " Data  Load ",
+            "Read Client Requests ", "Write Client Requests ", "Compactions",
+    };
+
     private static final Font labelFont = new Font("Dialog", Font.PLAIN, 12);
     private static final Font headerFont = new Font("Dialog", Font.BOLD, 12);
     //===============================================================
@@ -100,31 +107,41 @@ public class DataCenter extends ArrayList<CassandraNode> {
         for (CassandraNode node : this) {
             gbc.gridy++;
             gbc.gridx = 0;
-            panel.add(buildLabel(node.getRackName(), node), gbc);
+            panel.add(buildLabel(node.getRackName(), node, gbc.gridx), gbc);
             gbc.gridx++;
-            panel.add(buildLabel(node.getName(), node), gbc);
+            panel.add(buildLabel(node.getName(), node, gbc.gridx), gbc);
             gbc.gridx++;
-            panel.add(buildLabel(node.getCluster(), node), gbc);
+            panel.add(buildLabel(node.getCluster(), node, gbc.gridx), gbc);
             gbc.gridx++;
-            panel.add(buildLabel(node.getVersion(), node), gbc);
+            panel.add(buildLabel(node.getVersion(), node, gbc.gridx), gbc);
             gbc.gridx++;
-            panel.add(buildLabel(node.getTokens(), node), gbc);
+            panel.add(buildLabel(node.getTokens(), node, gbc.gridx), gbc);
             gbc.gridx++;
-            panel.add(buildLabel(node.getOwns(), node), gbc);
+            panel.add(buildLabel(node.getOwns(), node, gbc.gridx), gbc);
             gbc.gridx++;
             panel.add(node.getStateViewer(), gbc);
+            node.getStateViewer().setToolTipText(columnTooltips[gbc.gridx]);
             gbc.gridx++;
             panel.add(node.getDataLoadViewer(), gbc);
+            node.getDataLoadViewer().setToolTipText(columnTooltips[gbc.gridx]);
+            gbc.gridx++;
+            panel.add(node.getRequestViewers()[0], gbc);
+            node.getRequestViewers()[0].setToolTipText(columnTooltips[gbc.gridx]);
+            gbc.gridx++;
+            panel.add(node.getRequestViewers()[1], gbc);
+            node.getRequestViewers()[1].setToolTipText(columnTooltips[gbc.gridx]);
             gbc.gridx++;
             panel.add(node.getCompactionButton(), gbc);
+            node.getCompactionButton().setToolTipText(columnTooltips[gbc.gridx]);
             gbc.gridx++;
         }
     }
     //===============================================================
     //===============================================================
-    private JLabel buildLabel(String text, final CassandraNode node) {
+    private JLabel buildLabel(String text, final CassandraNode node, int idx) {
         JLabel label = new JLabel(text);
         label.setFont(labelFont);
+        label.setToolTipText(columnTooltips[idx]);
         label.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
                 nodeActionPerformed(evt, node);
