@@ -58,6 +58,7 @@ public class SplashUtils {
     private static boolean splashActive = false;
     private static final String packageName = "EbsVacuum";
 
+    private static final String revNumber = "1.1  -  20-12-2017  13:41:01";
     private static SplashUtils instance = new SplashUtils();
     private static final String imageFile = "TangoLogo.gif";
     //=======================================================
@@ -73,9 +74,9 @@ public class SplashUtils {
         }
         //  Create a new one
         String title = packageName;
-        int end = IConstants.revNumber.indexOf("-");
+        int end = revNumber.indexOf("-");
         if (end > 0)
-            title += " - " + IConstants.revNumber.substring(0, end).trim();
+            title += " - " + revNumber.substring(0, end).trim();
 
         //	Create a splash window.
         JSmoothProgressBar myBar = new JSmoothProgressBar();
@@ -93,6 +94,11 @@ public class SplashUtils {
         } catch (DevFailed e) {
             System.err.println(e.errors[0].desc);
         }
+    }
+    //=======================================================
+    //=======================================================
+    public static String getRevisionNumber() {
+        return revNumber;
     }
     //=======================================================
     //=======================================================

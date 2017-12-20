@@ -34,6 +34,7 @@
 package org.tango.cassandra_monitor_client.gui;
 
 import javax.swing.*;
+import javax.swing.table.AbstractTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -42,7 +43,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import static org.tango.cassandra_monitor_client.tools.IConstants.BACKGROUND;
+import static org.tango.cassandramonitor.IConstants.READ;
+import static org.tango.cassandramonitor.IConstants.WRITE;
 
 
 /**
@@ -58,18 +60,13 @@ public class DataCenter extends ArrayList<CassandraNode> {
     private PanelPopupMenu popupMenu = new PanelPopupMenu();
 
     private static final String[] columnHeaders = {
-            "Rack", "Node",  "Cluster", "Vers.",
-            "Tokens", "Owns", "State", " Data  Load ",
+            "Node",  "State", " Data  Load ",
             "R Requests ", "W Requests ", "Comp.",
-    };
-    private static final String[] columnTooltips = {
-            "Rack name", "Node name",  "Cluster name", "Cassandra Version",
-            "Tokens", "Owns", "Node State", " Data  Load ",
-            "Read Client Requests ", "Write Client Requests ", "Compactions",
     };
 
     private static final Font labelFont = new Font("Dialog", Font.PLAIN, 12);
     private static final Font headerFont = new Font("Dialog", Font.BOLD, 12);
+    static final Color BACKGROUND = new Color(0xdddddd);
     //===============================================================
     //===============================================================
     public DataCenter(String name) {
@@ -87,7 +84,7 @@ public class DataCenter extends ArrayList<CassandraNode> {
         gbc.insets = new Insets(5, 5, 5, 5);
 
         //  Label for data center name
-        JLabel label = new JLabel(name);
+        JLabel label = new JLabel("Data Center:  " + name);
         label.setFont(new Font("Dialog", Font.BOLD, 18));
         gbc.gridwidth = 5;
         panel.add(label, gbc);
@@ -107,41 +104,25 @@ public class DataCenter extends ArrayList<CassandraNode> {
         for (CassandraNode node : this) {
             gbc.gridy++;
             gbc.gridx = 0;
-            panel.add(buildLabel(node.getRackName(), node, gbc.gridx), gbc);
-            gbc.gridx++;
-            panel.add(buildLabel(node.getName(), node, gbc.gridx), gbc);
-            gbc.gridx++;
-            panel.add(buildLabel(node.getCluster(), node, gbc.gridx), gbc);
-            gbc.gridx++;
-            panel.add(buildLabel(node.getVersion(), node, gbc.gridx), gbc);
-            gbc.gridx++;
-            panel.add(buildLabel(node.getTokens(), node, gbc.gridx), gbc);
-            gbc.gridx++;
-            panel.add(buildLabel(node.getOwns(), node, gbc.gridx), gbc);
+            panel.add(buildLabel(node.getName(), node), gbc);
             gbc.gridx++;
             panel.add(node.getStateViewer(), gbc);
-            node.getStateViewer().setToolTipText(columnTooltips[gbc.gridx]);
             gbc.gridx++;
             panel.add(node.getDataLoadViewer(), gbc);
-            node.getDataLoadViewer().setToolTipText(columnTooltips[gbc.gridx]);
             gbc.gridx++;
-            panel.add(node.getRequestViewers()[0], gbc);
-            node.getRequestViewers()[0].setToolTipText(columnTooltips[gbc.gridx]);
+            panel.add(node.getRequestViewers()[READ], gbc);
             gbc.gridx++;
-            panel.add(node.getRequestViewers()[1], gbc);
-            node.getRequestViewers()[1].setToolTipText(columnTooltips[gbc.gridx]);
+            panel.add(node.getRequestViewers()[WRITE], gbc);
             gbc.gridx++;
             panel.add(node.getCompactionButton(), gbc);
-            node.getCompactionButton().setToolTipText(columnTooltips[gbc.gridx]);
             gbc.gridx++;
         }
     }
     //===============================================================
     //===============================================================
-    private JLabel buildLabel(String text, final CassandraNode node, int idx) {
+    private JLabel buildLabel(String text, final CassandraNode node) {
         JLabel label = new JLabel(text);
         label.setFont(labelFont);
-        label.setToolTipText(columnTooltips[idx]);
         label.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
                 nodeActionPerformed(evt, node);
@@ -177,8 +158,74 @@ public class DataCenter extends ArrayList<CassandraNode> {
         selectedNode.testDevice();
     }
     //===============================================================
+    private static final String[] TABLE_COLUMNS = {
+            "Rack", "Node", "Cluster", "Version", "Tokens", "Owns"
+    };
+    //===============================================================
+    public JScrollPane getTableScrollPane() {
+        DataTableModel dataTableModel = new DataTableModel();
+
+        // Create the table
+        JTable table;
+        table = new JTable(dataTableModel);
+        table.setRowSelectionAllowed(true);
+        table.setColumnSelectionAllowed(true);
+        table.setDragEnabled(false);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.getTableHeader().setFont(new Font("Dialog", Font.BOLD, 12));
+
+        //	Put it in scrolled pane
+        return new JScrollPane(table);
+    }
+    //===============================================================
     //===============================================================
 
+    //=========================================================================
+    /**
+     * "Rack", "Node", "Cluster", "Cassandra Version", "Tokens", "Owns"
+     * The Table dataTableModel
+     */
+    //=========================================================================
+    public class DataTableModel extends AbstractTableModel {
+        //==========================================================
+        public int getColumnCount() {
+            return TABLE_COLUMNS.length;
+        }
+        //==========================================================
+        public int getRowCount() {
+            return size();
+        }
+        //==========================================================
+        public String getColumnName(int columnIndex) {
+            String title;
+            if (columnIndex >= getColumnCount())
+                title = TABLE_COLUMNS[getColumnCount()-1];
+            else
+                title = TABLE_COLUMNS[columnIndex];
+            return title;
+        }
+        //==========================================================
+        public Object getValueAt(int row, int column) {
+            switch (column) {
+                case 0:
+                    return get(row).getRackName();
+                case 1:
+                    return get(row).getName();
+                case 2:
+                    return get(row).getCluster();
+                case 3:
+                    return get(row).getVersion();
+                case 4:
+                    return get(row).getTokens();
+                case 5:
+                    return get(row).getOwns();
+            }
+            return "";
+        }
+        //==========================================================
+    }
+    //======================================================
+    //======================================================
 
 
 

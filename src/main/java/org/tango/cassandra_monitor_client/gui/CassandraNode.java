@@ -52,7 +52,9 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.tango.cassandra_monitor_client.tools.IConstants.BACKGROUND;
+import static org.tango.cassandra_monitor_client.gui.DataCenter.BACKGROUND;
+import static org.tango.cassandramonitor.IConstants.READ;
+import static org.tango.cassandramonitor.IConstants.WRITE;
 
 
 /**
@@ -101,6 +103,7 @@ public class CassandraNode extends DeviceProxy {
         compactionButton = new JRadioButton("");
         compactionButton.setEnabled(false);
         compactionButton.setBackground(BACKGROUND);
+        compactionButton.setToolTipText("Compactions");
         compactionButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 compactionActionPerformed(evt);
@@ -244,6 +247,7 @@ public class CassandraNode extends DeviceProxy {
             dataLoadViewer.setModel(stringScalar);
             dataLoadViewer.setBackgroundColor(Color.white);
             dataLoadViewer.setBackground(Color.white);
+            dataLoadViewer.setToolTipText(" Data  Load ");
         }
         catch (ConnectionException e) {
             Except.throw_exception("ConnectionFailed", e.getDescription());
@@ -254,19 +258,21 @@ public class CassandraNode extends DeviceProxy {
     public void buildRequestViewers(String deviceName) throws DevFailed {
         try {
             requestViewers = new SimpleScalarViewer[2];
-            requestViewers[0] = new SimpleScalarViewer();
+            requestViewers[READ] = new SimpleScalarViewer();
             INumberScalar readScalar =
                     (INumberScalar) attributeList.add(deviceName + "/ReadRequests");
-            requestViewers[0].setModel(readScalar);
-            requestViewers[0].setBackgroundColor(Color.white);
-            requestViewers[0].setBackground(Color.white);
+            requestViewers[READ].setModel(readScalar);
+            requestViewers[READ].setBackgroundColor(Color.white);
+            requestViewers[READ].setBackground(Color.white);
+            requestViewers[READ].setToolTipText("Read Client Requests ");
 
-            requestViewers[1] = new SimpleScalarViewer();
+            requestViewers[WRITE] = new SimpleScalarViewer();
             INumberScalar writeScalar =
                     (INumberScalar) attributeList.add(deviceName + "/WriteRequests");
-            requestViewers[1].setModel(writeScalar);
-            requestViewers[1].setBackgroundColor(Color.white);
-            requestViewers[1].setBackground(Color.white);
+            requestViewers[WRITE].setModel(writeScalar);
+            requestViewers[WRITE].setBackgroundColor(Color.white);
+            requestViewers[WRITE].setBackground(Color.white);
+            requestViewers[WRITE].setToolTipText("Write Client Requests ");
         }
         catch (ConnectionException e) {
             Except.throw_exception("ConnectionFailed", e.getDescription());

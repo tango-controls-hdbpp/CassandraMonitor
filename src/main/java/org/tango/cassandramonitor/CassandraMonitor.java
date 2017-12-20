@@ -74,6 +74,7 @@ import java.util.StringTokenizer;
 
 import static org.tango.cassandramonitor.IConstants.*;
 
+@SuppressWarnings({"FieldCanBeLocal", "unused","RedundantThrows","DefaultAnnotationParam"})
 /*----- PROTECTED REGION END -----*/	//	CassandraMonitor.imports
 
 /**
@@ -92,7 +93,6 @@ public class CassandraMonitor {
     /*----- PROTECTED REGION ID(CassandraMonitor.variables) ENABLED START -----*/
 
     //	Put static variables here
-    private static boolean runThread = true;
     private static final long READ_JMX_PERIOD = 10; // seconds
 
     /*----- PROTECTED REGION END -----*/	//	CassandraMonitor.variables
@@ -233,7 +233,7 @@ public class CassandraMonitor {
 	 * 
 	 * @throws DevFailed if something fails during the device initialization.
 	 */
-	@Init(lazyLoading = false)
+    @Init(lazyLoading = false)
 	public void initDevice() throws DevFailed {
 		xlogger.entry();
 		logger.debug("init device " + deviceManager.getName());
@@ -269,14 +269,13 @@ public class CassandraMonitor {
 	 * 
 	 * @throws DevFailed if something fails during the device object deletion.
 	 */
-	@Delete
+    @Delete
 	public void deleteDevice() throws DevFailed {
 		xlogger.entry();
 		/*----- PROTECTED REGION ID(CassandraMonitor.deleteDevice) ENABLED START -----*/
 
 		jmxUtilities.close();
 		compactionsThread.stopThread();
-		runThread = false;
 
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.deleteDevice
 		xlogger.exit();
@@ -414,7 +413,7 @@ public class CassandraMonitor {
 		xlogger.exit();
 		return attributeValue;
 	}
-	
+
 	/**
 	 * Attribute DataLoadStr, String, Scalar, READ
 	 * description:

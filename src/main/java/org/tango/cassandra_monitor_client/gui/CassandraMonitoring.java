@@ -44,13 +44,14 @@ import fr.esrf.TangoDs.Except;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
 import org.tango.cassandra_monitor_client.commons.ReleaseNote;
-import org.tango.cassandra_monitor_client.tools.IConstants;
 import org.tango.cassandra_monitor_client.tools.IconUtils;
 import org.tango.cassandra_monitor_client.tools.PopupHtml;
 import org.tango.cassandra_monitor_client.tools.SplashUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
 
@@ -65,6 +66,7 @@ public class CassandraMonitoring extends JFrame {
     private CompactionChartDialog compactionChartDialog;
     private List<CassandraNode> cassandraNodeList = new ArrayList<>();
     private List<DataCenter> dataCenterList = new ArrayList<>();
+    private RequestTrendDialog requestTrendDialog;
 	//=======================================================
     /**
 	 *	Creates new form CassandraMonitoring
@@ -80,8 +82,9 @@ public class CassandraMonitoring extends JFrame {
         SplashUtils.getInstance().setSplashProgress(30, "Building GUI");
         buildDataCenterPanels();
         compactionChartDialog = new CompactionChartDialog(this, dataCenterList);
+        requestTrendDialog = new RequestTrendDialog(this, dataCenterList);
 
-        setTitle("CassandraMonitoring - " + IConstants.revNumber);
+        setTitle("CassandraMonitoring - " + SplashUtils.getRevisionNumber());
         ImageIcon icon = IconUtils.getInstance().getIcon("cassandra.jpeg", 0.10);
         setIconImage(icon.getImage());
         pack();
@@ -175,6 +178,7 @@ public class CassandraMonitoring extends JFrame {
         javax.swing.JMenu fileMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem exitItem = new javax.swing.JMenuItem();
         javax.swing.JMenu viewMenu = new javax.swing.JMenu();
+        javax.swing.JMenuItem overviewItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem compactionsItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem requestTrendItem = new javax.swing.JMenuItem();
         javax.swing.JMenu helpMenu = new javax.swing.JMenu();
@@ -210,6 +214,16 @@ public class CassandraMonitoring extends JFrame {
 
         viewMenu.setMnemonic('V');
         viewMenu.setText("View");
+
+        overviewItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.ALT_MASK));
+        overviewItem.setMnemonic('O');
+        overviewItem.setText("Overview");
+        overviewItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                overviewItemActionPerformed(evt);
+            }
+        });
+        viewMenu.add(overviewItem);
 
         compactionsItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_C, java.awt.event.InputEvent.ALT_MASK));
         compactionsItem.setMnemonic('C');
@@ -282,7 +296,7 @@ public class CassandraMonitoring extends JFrame {
     @SuppressWarnings("UnusedParameters")
     private void aboutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutMenuItemActionPerformed
         String message = "This application is able monitor Cassandra data centers\n" +
-                "Release: " + IConstants.revNumber +
+                "Release: " + SplashUtils.getRevisionNumber() +
                 "\n\nPascal Verdier - ESRF - Accelerator Control Unit";
         try {
             JOptionPane.showMessageDialog(this,
@@ -311,15 +325,41 @@ public class CassandraMonitoring extends JFrame {
     //=======================================================
     @SuppressWarnings("UnusedParameters")
     private void requestTrendItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_requestTrendItemActionPerformed
-        // TODO add your handling code here:
-        new RequestTrendDialog(this, dataCenterList).setVisible(true);
+        requestTrendDialog.setVisible(true);
     }//GEN-LAST:event_requestTrendItemActionPerformed
+    //=======================================================
+    //=======================================================
+    @SuppressWarnings("UnusedParameters")
+    private void overviewItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_overviewItemActionPerformed
+        // TODO add your handling code here:
+        JTabbedPane tabbedPane = new JTabbedPane();
+        int i=0;
+        for (DataCenter dataCenter : dataCenterList) {
+            tabbedPane.add(dataCenter.getTableScrollPane());
+            tabbedPane.setTitleAt(i, dataCenter.getName());
+            i++;
+        }
+        JDialog dialog = buildDialog(this, true, null, tabbedPane);
+        ATKGraphicsUtils.centerDialog(dialog);
+        dialog.setVisible(true);
+    }//GEN-LAST:event_overviewItemActionPerformed
 	//=======================================================
 	//=======================================================
     private void doClose() {
         System.exit(0);
     }
-	//=======================================================
+    //=======================================================
+    //=======================================================
+
+
+
+    //=======================================================
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    // End of variables declaration//GEN-END:variables
+    //=======================================================
+
+
+    //=======================================================
     /**
      * @param args the command line arguments
      */
@@ -334,11 +374,40 @@ public class CassandraMonitoring extends JFrame {
 			System.exit(0);
 		}
     }
+    //===============================================================
+    /**
+     *  Build a simple dialog with component at center position
+     * @param parent dialog parent
+     * @param modal  true if dialog must be modal
+     * @param title  dialog title
+     * @param component component to be added at center
+     * @return the dialog
+     */
+    //===============================================================
+    public static JDialog buildDialog(JFrame parent, boolean modal, String title, Component component) {
+        final JDialog dialog = new JDialog(parent, modal);
+        JPanel dialogPanel = new JPanel(new BorderLayout());
+        dialogPanel.add(component, BorderLayout.CENTER);
+        JButton button = new JButton("Dismiss");
+        button.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                dialog.setVisible(false);
+                dialog.dispose();
+            }
+        });
+        JPanel panel = new JPanel();
+        panel.add(button);
+        dialogPanel.add(panel, BorderLayout.SOUTH);
+        if (title!=null) {
+            panel = new JPanel();
+            panel.add(new JLabel(title));
+            dialogPanel.add(panel, BorderLayout.NORTH);
+        }
+        dialog.setContentPane(dialogPanel);
+        dialog.pack();
+        return dialog;
+    }
 
-
-	//=======================================================
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    // End of variables declaration//GEN-END:variables
-	//=======================================================
-
+    //===============================================================
+    //===============================================================
 }

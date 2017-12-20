@@ -36,6 +36,7 @@
 
 package org.tango.cassandra_monitor_client.tools;
 
+import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoDs.TangoConst;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
 
@@ -93,7 +94,12 @@ public class PopupHtml extends JDialog implements TangoConst {
     public PopupHtml(JFrame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-
+        try {
+            JLabel label = new JLabel(IconUtils.getInstance().getIcon("cassandra.jpeg", 0.5));
+            getContentPane().add(label, BorderLayout.WEST);
+        } catch (DevFailed e) {
+            System.err.println(e.errors[0].desc);
+        }
         this.parent = parent;
         pack();
     }
@@ -221,7 +227,7 @@ public class PopupHtml extends JDialog implements TangoConst {
      */
     //======================================================
     public void show(String code) {
-        show(code, 700, 750);
+        show(code, 500, 600);
     }
     //======================================================
     /**

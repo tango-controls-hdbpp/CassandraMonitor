@@ -16,8 +16,10 @@ public interface ReleaseNote {
 		"<body text=\"#000000\" bgColor=\"#FFFFFF\" link=\"#0000FF\" vLink=\"#7F00FF\" aLink=\"#FF0000\">\n" + 
 		"<p><!-------TITLE------></p>\n" + 
 		"<center>	<h2>CassandraMonitoring Release Notes </h2>\n" + 
-		"	(Generated 19-12-2017  09:54:54)</center><br>\n" + 
-		"<li><b>SettingManager-1.0 - 19/12/17:</b><br>" + 
+		"	(Generated 20-12-2017  13:41:01)</center><br>\n" + 
+		"<li><b>CassandraMonitor-1.1 - 20/12/17:</b><br>" + 
+		"&nbsp; &nbsp; &nbsp; Client requests monitoring added<br>" + 
+		"<li><b>CassandraMonitor-1.0 - 19/12/17:</b><br>" + 
 		"&nbsp; &nbsp; &nbsp; Initial revision<br>" + 
 		"</body>\n" + 
 		"</html>\n"

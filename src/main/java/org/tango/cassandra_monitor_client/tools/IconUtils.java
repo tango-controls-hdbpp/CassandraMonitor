@@ -45,7 +45,7 @@ import java.net.URL;
  * @author verdier
  */
 
-public class IconUtils implements IConstants {
+public class IconUtils {
 
     private static ImageIcon tangoLogo = null;
 
