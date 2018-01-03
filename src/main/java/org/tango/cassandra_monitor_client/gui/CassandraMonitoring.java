@@ -43,7 +43,7 @@ import fr.esrf.TangoApi.DeviceProxy;
 import fr.esrf.TangoDs.Except;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
-import org.tango.cassandra_monitor_client.commons.ReleaseNote;
+import org.tango.cassandra_monitor_client.tools.ReleaseNote;
 import org.tango.cassandra_monitor_client.tools.IconUtils;
 import org.tango.cassandra_monitor_client.tools.PopupHtml;
 import org.tango.cassandra_monitor_client.tools.SplashUtils;

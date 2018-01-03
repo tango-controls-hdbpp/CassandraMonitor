@@ -1,5 +1,5 @@
 
-package org.tango.cassandra_monitor_client.commons;
+package org.tango.cassandra_monitor_client.tools;
 
 /**
  * HTML code to display Release Notes for this package.
