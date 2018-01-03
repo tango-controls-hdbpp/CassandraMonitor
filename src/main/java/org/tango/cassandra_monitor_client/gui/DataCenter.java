@@ -84,6 +84,7 @@ public class DataCenter extends ArrayList<CassandraNode> {
         gbc.fill = GridBagConstraints.BOTH;
         gbc.gridy = 0;
         gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.CENTER;
 
         //  Label for data center name
         JLabel label = new JLabel("Data Center:  " + name);
@@ -116,7 +117,7 @@ public class DataCenter extends ArrayList<CassandraNode> {
             gbc.gridx++;
             panel.add(node.getRequestViewers()[WRITE], gbc);
             gbc.gridx++;
-            panel.add(node.getCompactionButton(), gbc);
+            panel.add(node.getCompactionLabel(), gbc);
             gbc.gridx++;
         }
     }

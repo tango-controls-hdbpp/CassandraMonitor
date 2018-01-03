@@ -45,10 +45,10 @@ import fr.esrf.tangoatk.widget.attribute.SimpleScalarViewer;
 import fr.esrf.tangoatk.widget.attribute.StateViewer;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
+import org.tango.cassandra_monitor_client.tools.IconUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -80,7 +80,7 @@ public class CassandraNode extends DeviceProxy {
     private SimpleScalarViewer dataLoadViewer;
     private SimpleScalarViewer[] requestViewers;
     private AttributeList attributeList = new AttributeList();
-    private JRadioButton compactionButton;
+    private JLabel compactionLabel;
     private CompactionChart compactionChart;
     private boolean selected;
 
@@ -104,15 +104,11 @@ public class CassandraNode extends DeviceProxy {
         buildRequestViewers(deviceName);
         initialize();
         compactionChart = new CompactionChart(this);
-        compactionButton = new JRadioButton("");
-        compactionButton.setEnabled(false);
-        compactionButton.setBackground(BACKGROUND);
-        compactionButton.setToolTipText("Compactions");
-        compactionButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                compactionActionPerformed(evt);
-            }
-        });
+
+        compactionLabel = new JLabel("");
+        compactionLabel.setBackground(BACKGROUND);
+        compactionLabel.setToolTipText("Compactions/validations/cleanup/...");
+        compactionLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
         try {
             InetAddress inetAddress = InetAddress.getByName(name);
@@ -164,13 +160,6 @@ public class CassandraNode extends DeviceProxy {
     }
     //===============================================================
     //===============================================================
-    private void compactionActionPerformed(ActionEvent event) {
-        //  Cancel action
-        JRadioButton btn = (JRadioButton) event.getSource();
-        btn.setSelected(!btn.isSelected());
-    }
-    //===============================================================
-    //===============================================================
     public String getDataCenter() {
         return dataCenter;
     }
@@ -186,8 +175,8 @@ public class CassandraNode extends DeviceProxy {
     }
     //===============================================================
     //===============================================================
-    public JRadioButton getCompactionButton() {
-        return compactionButton;
+    public JLabel getCompactionLabel() {
+        return compactionLabel;
     }
     //===============================================================
     //===============================================================
@@ -245,7 +234,6 @@ public class CassandraNode extends DeviceProxy {
             IDevStateScalar stateScalar =
                     (IDevStateScalar) attributeList.add(deviceName + "/state");
             stateViewer.setModel(stateScalar);
-            //attState.addDevStateScalarListener(this);
             attributeList.refresh();
         }
         catch (ConnectionException e) {
@@ -298,15 +286,14 @@ public class CassandraNode extends DeviceProxy {
     private void buildCompactions(PipeBlob pipeBlob) {
         //  Compaction modified -> update display
         compactionList.clear();
+        ImageIcon icon = null;
         if (pipeBlob.getName().equals("Compactions")) {
-            compactionButton.setSelected(true);
+            icon = IconUtils.getGreenBall();
             for (PipeDataElement dataElement : pipeBlob) {
                 compactionList.add(new Compaction(dataElement));
             }
         }
-        else {
-            compactionButton.setSelected(false);
-        }
+        compactionLabel.setIcon(icon);
 
         //  Update chart
         if (compactionChart!=null)

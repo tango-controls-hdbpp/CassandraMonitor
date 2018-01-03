@@ -51,6 +51,7 @@ public class IconUtils {
 
     private static final IconUtils instance = new IconUtils();
     private static final String ImagePath = "/cassandra_monitor_client/images/";
+    private static ImageIcon greenBall = null;
     //===============================================================
     //===============================================================
     public static IconUtils getInstance() {
@@ -97,6 +98,17 @@ public class IconUtils {
                             width, height, Image.SCALE_SMOOTH));
         }
         return icon;
+    }
+    //===============================================================
+    //===============================================================
+    public static ImageIcon getGreenBall() {
+        if (greenBall == null)
+            try {
+                greenBall = getInstance().getIcon("greenBall.gif");
+            } catch (DevFailed e) {
+                System.err.println(e.errors[0].desc);
+            }
+        return greenBall;
     }
     //===============================================================
     //===============================================================
