@@ -43,6 +43,8 @@ import java.util.List;
 import static org.tango.cassandra_monitor_client.gui.CassandraNode.CLEANUP;
 import static org.tango.cassandra_monitor_client.gui.CassandraNode.COMPACTION;
 import static org.tango.cassandra_monitor_client.gui.CassandraNode.VALIDATION;
+import static org.tango.cassandra_monitor_client.gui.CompactionChartDialog.CLEANUP_COLOR;
+import static org.tango.cassandra_monitor_client.gui.CompactionChartDialog.VALIDATION_COLOR;
 
 
 //===============================================================
@@ -88,8 +90,8 @@ public class CompactionChart extends JLChart implements IJLChartListener {
         xAxis.setAutoScale(false);
 
         compactionDataView = buildDataView("Compactions", Color.red, getY1Axis());
-        validationDataView = buildDataView("Validations", new Color(0x009900), getY1Axis());
-        cleanupDataView    = buildDataView("Cleanup", Color.blue, getY1Axis());
+        validationDataView = buildDataView("Validations", VALIDATION_COLOR, getY1Axis());
+        cleanupDataView    = buildDataView("Cleanup",     CLEANUP_COLOR, getY1Axis());
         setPreferredSize(chartDimension);
 	}
 	//===============================================================
@@ -135,7 +137,7 @@ public class CompactionChart extends JLChart implements IJLChartListener {
         }
         repaint();
         if (cassandraNode.isSelected())
-            CompactionChartDialog.firDataChanged();
+            CompactionChartDialog.fireDataChanged();
     }
     //===============================================================
     //===============================================================

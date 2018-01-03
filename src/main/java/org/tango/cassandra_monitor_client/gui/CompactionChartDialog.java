@@ -45,6 +45,7 @@ import java.awt.*;
 import java.util.Enumeration;
 import java.util.List;
 
+import static org.tango.cassandra_monitor_client.gui.CassandraNode.CLEANUP;
 import static org.tango.cassandra_monitor_client.gui.CassandraNode.VALIDATION;
 
 
@@ -61,7 +62,7 @@ import static org.tango.cassandra_monitor_client.gui.CassandraNode.VALIDATION;
 public class CompactionChartDialog extends JDialog {
 
 	private JFrame	parent;
-    private static CassandraNode cassandraNode = null;
+    private static CassandraNode selectedNode = null;
     private static List<DataCenter> dataCenterList;
     private static final int LINE_SIZE_MAX = 6;
 	//===============================================================
@@ -116,7 +117,9 @@ public class CompactionChartDialog extends JDialog {
     private static final int TASK  = 2;
     private static final int SIZE  = 3;
     private static final int RATIO = 4;
-    private static final Color validationColor = new Color(0x66ff66);
+    static final Color VALIDATION_COLOR = new Color(0x66ff66);
+    static final Color CLEANUP_COLOR    = new Color(0x6666ff);
+    private static final Color SELECTION_COLOR  = new Color(0xffffdd);
     //===============================================================
     private void buildTable() {
         tableModel = new DataTableModel();
@@ -147,13 +150,13 @@ public class CompactionChartDialog extends JDialog {
 	//===============================================================
 	//===============================================================
     public static void setSelection(CassandraNode cassandraNode) {
-        CompactionChartDialog.cassandraNode = cassandraNode;
+        CompactionChartDialog.selectedNode = cassandraNode;
         tableModel.fireTableDataChanged();
         //  Set selection in light gray
         for (DataCenter dataCenter : dataCenterList) {
             for (CassandraNode node : dataCenter) {
                 if (node.getCompactionChart() == cassandraNode.getCompactionChart()) {
-                    node.getCompactionChart().setBackground(new Color(0xffffdd));
+                    node.getCompactionChart().setBackground(SELECTION_COLOR);
                     node.setSelected(true);
                 } else {
                     node.getCompactionChart().setBackground(Color.white);
@@ -164,7 +167,7 @@ public class CompactionChartDialog extends JDialog {
     }
 	//===============================================================
 	//===============================================================
-    public static void firDataChanged() {
+    public static void fireDataChanged() {
         tableModel.fireTableDataChanged();
     }
 	//===============================================================
@@ -277,9 +280,9 @@ public class CompactionChartDialog extends JDialog {
         }
         //==========================================================
         public int getRowCount() {
-            if (cassandraNode==null)
+            if (selectedNode ==null)
                 return 0;
-            return cassandraNode.getCompactionList().size();
+            return selectedNode.getCompactionList().size();
         }
         //==========================================================
         public String getColumnName(int columnIndex) {
@@ -349,29 +352,32 @@ public class CompactionChartDialog extends JDialog {
             setBackground(getBackground(row));
             switch (column) {
                 case NODE:
-                    setText(cassandraNode.getName());
+                    setText(selectedNode.getName());
                     break;
                 case TABLE:
-                    setText(cassandraNode.getCompactionList().get(row).tableName);
+                    setText(selectedNode.getCompactionList().get(row).tableName);
                     break;
                 case TASK:
-                    setText(cassandraNode.getCompactionList().get(row).taskName);
+                    setText(selectedNode.getCompactionList().get(row).taskName);
                     break;
                 case SIZE:
-                    setText(cassandraNode.getCompactionList().get(row).totalStr);
+                    setText(selectedNode.getCompactionList().get(row).totalStr);
                     break;
                 case RATIO:
-                    setText(cassandraNode.getCompactionList().get(row).ratioStr);
+                    setText(selectedNode.getCompactionList().get(row).ratioStr);
                     break;
             }
             return this;
         }
         //==========================================================
         private Color getBackground(int row) {
-            if (cassandraNode.getCompactionList().get(row).taskType==VALIDATION)
-                return validationColor;
-            else
-                return Color.white;
+            switch (selectedNode.getCompactionList().get(row).taskType) {
+                case VALIDATION:
+                    return VALIDATION_COLOR;
+                case CLEANUP:
+                    return CLEANUP_COLOR;
+            }
+            return Color.white;
         }
         //==========================================================
     }
