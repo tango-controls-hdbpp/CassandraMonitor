@@ -35,6 +35,7 @@ package org.tango.cassandra_monitor_client.gui;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -42,6 +43,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Enumeration;
 
 import static org.tango.cassandramonitor.IConstants.READ;
 import static org.tango.cassandramonitor.IConstants.WRITE;
@@ -158,31 +160,51 @@ public class DataCenter extends ArrayList<CassandraNode> {
         selectedNode.testDevice();
     }
     //===============================================================
+    //===============================================================
+
+    //===============================================================
+    /*
+     *  Overview table management
+     */
+    //===============================================================
     private static final String[] TABLE_COLUMNS = {
-            "Rack", "Node", "Cluster", "Version", "Tokens", "Owns"
+            "Node", "Address",  "Rack", "Cluster", "Version", "Tokens", "Owns"
     };
     //===============================================================
     public JScrollPane getTableScrollPane() {
-        DataTableModel dataTableModel = new DataTableModel();
-
         // Create the table
         JTable table;
-        table = new JTable(dataTableModel);
+        table = new JTable(new DataTableModel());
         table.setRowSelectionAllowed(true);
         table.setColumnSelectionAllowed(true);
         table.setDragEnabled(false);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.getTableHeader().setFont(new Font("Dialog", Font.BOLD, 12));
 
+        //  Set column width
+        final Enumeration columnEnum = table.getColumnModel().getColumns();
+        int i = 0;
+        //tableWidth = 0;
+        TableColumn tableColumn;
+        int tableWidth = 0;
+        while (columnEnum.hasMoreElements()) {
+            int columnWidth = (i==0 || i==1)? 110 : 60;
+            tableWidth += columnWidth;
+            tableColumn = (TableColumn) columnEnum.nextElement();
+            tableColumn.setPreferredWidth(columnWidth);
+            i++;
+        }
+
         //	Put it in scrolled pane
-        return new JScrollPane(table);
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setPreferredSize(new Dimension(tableWidth, 18*size()+24));
+        return scrollPane;
     }
     //===============================================================
     //===============================================================
 
     //=========================================================================
     /**
-     * "Rack", "Node", "Cluster", "Cassandra Version", "Tokens", "Owns"
      * The Table dataTableModel
      */
     //=========================================================================
@@ -208,16 +230,18 @@ public class DataCenter extends ArrayList<CassandraNode> {
         public Object getValueAt(int row, int column) {
             switch (column) {
                 case 0:
-                    return get(row).getRackName();
-                case 1:
                     return get(row).getName();
+                case 1:
+                    return get(row).getTpAddress();
                 case 2:
-                    return get(row).getCluster();
+                    return get(row).getRackName();
                 case 3:
-                    return get(row).getVersion();
+                    return get(row).getCluster();
                 case 4:
-                    return get(row).getTokens();
+                    return get(row).getVersion();
                 case 5:
+                    return get(row).getTokens();
+                case 6:
                     return get(row).getOwns();
             }
             return "";
@@ -230,6 +254,9 @@ public class DataCenter extends ArrayList<CassandraNode> {
 
 
     //===============================================================
+    /**
+     * To sort nodes by alphabetic order
+     */
     //===============================================================
     private class NodeComparator implements Comparator<CassandraNode> {
         @Override

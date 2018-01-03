@@ -37,7 +37,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 /**
  *	JDialog Class to display a pressure trend
@@ -47,16 +46,13 @@ import java.util.StringTokenizer;
 
 @SuppressWarnings("MagicConstant")
 public class RequestTrendDialog extends JDialog {
-	private JFrame parent;
-	private AtkMoniTrend atkMoniTrend;
-	//===============================================================
+    //===============================================================
 	/**
 	 *	Creates new form PressureTrend
 	 */
 	//===============================================================
 	public RequestTrendDialog(JFrame parent, List<DataCenter> dataCenterList) {
 		super(parent, false);
-		this.parent = parent;
 		initComponents();
 		List<String> attributeList = new ArrayList<>();
 		for (DataCenter dataCenter : dataCenterList) {
@@ -65,7 +61,7 @@ public class RequestTrendDialog extends JDialog {
                 attributeList.add(node.getDeviceName()+"/WriteRequests");
             }
         }
-        atkMoniTrend = new AtkMoniTrend(null, attributeList);
+        AtkMoniTrend atkMoniTrend = new AtkMoniTrend(null, attributeList);
 		getContentPane().add(atkMoniTrend, BorderLayout.CENTER);
 
 		pack();
@@ -116,14 +112,6 @@ public class RequestTrendDialog extends JDialog {
 
 	//===============================================================
 	//===============================================================
-    private String getPressureAttributeName(String str) {
-        StringTokenizer stk = new StringTokenizer(str, "/");
-        if (stk.countTokens()==3)
-            return str + "/Pressure";
-        return str; // is an attribute name
-    }
-//===============================================================
-	//===============================================================
 	@SuppressWarnings("UnusedParameters")
     private void cancelBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelBtnActionPerformed
 		doClose();
@@ -138,14 +126,7 @@ public class RequestTrendDialog extends JDialog {
 //===============================================================
 	//===============================================================
 	private void doClose() {
-        if (atkMoniTrend!=null)
-            atkMoniTrend.stopRefresher();
-		if (parent==null)
-			System.exit(0);
-		else {
-			setVisible(false);
-			dispose();
-		}
+		setVisible(false);
 	}
 	//===============================================================
 	//===============================================================

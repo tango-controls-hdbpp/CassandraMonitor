@@ -49,6 +49,8 @@ import fr.esrf.tangoatk.widget.util.ErrorPane;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,6 +74,7 @@ public class CassandraNode extends DeviceProxy {
     private String owns;
     private String cluster;
     private String version;
+    private String ipAddress;
     private List<Compaction> compactionList = new ArrayList<>();
     private StateViewer stateViewer;
     private SimpleScalarViewer dataLoadViewer;
@@ -84,6 +87,7 @@ public class CassandraNode extends DeviceProxy {
     private static final String pipeName = "Compactions";
     public static final int COMPACTION = 0;
     public static final int VALIDATION = 1;
+    public static final int CLEANUP = 2;
     //===============================================================
     //===============================================================
     public CassandraNode(String deviceName) throws DevFailed {
@@ -110,11 +114,17 @@ public class CassandraNode extends DeviceProxy {
             }
         });
 
+        try {
+            InetAddress inetAddress = InetAddress.getByName(name);
+            ipAddress = inetAddress.getHostAddress();
+        } catch (UnknownHostException ex) {
+            ex.printStackTrace();
+        }
+
         //  Subscribe to pipe event
         TangoEventsAdapter adapter = new TangoEventsAdapter(this);
         PipeEventListener pipeListener = new PipeEventListener();
         adapter.addTangoPipeListener(pipeListener, pipeName, TangoConst.NOT_STATELESS);
-
     }
     //===============================================================
     //===============================================================
@@ -208,6 +218,11 @@ public class CassandraNode extends DeviceProxy {
     //===============================================================
     public String getRackName() {
         return rackName;
+    }
+    //===============================================================
+    //===============================================================
+    public String getTpAddress() {
+        return ipAddress;
     }
     //===============================================================
     //===============================================================
@@ -353,10 +368,14 @@ public class CassandraNode extends DeviceProxy {
         private Compaction(PipeDataElement pipeDataElement) {
             tableName = pipeDataElement.getName();
 
+            //  Decode info from pipe
             PipeBlob pipeBlob = pipeDataElement.extractPipeBlob();
             taskName = pipeBlob.getName();
             if (taskName.equalsIgnoreCase("validation"))
                 taskType = VALIDATION;
+            else
+            if (taskName.equalsIgnoreCase("cleanup"))
+                taskType = CLEANUP;
 
             for (PipeDataElement dataElement : pipeBlob) {
                 String str = dataElement.getName();

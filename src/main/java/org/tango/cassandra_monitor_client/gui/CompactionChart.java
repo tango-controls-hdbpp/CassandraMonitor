@@ -40,6 +40,7 @@ import fr.esrf.tangoatk.widget.util.chart.*;
 import java.awt.*;
 import java.util.List;
 
+import static org.tango.cassandra_monitor_client.gui.CassandraNode.CLEANUP;
 import static org.tango.cassandra_monitor_client.gui.CassandraNode.COMPACTION;
 import static org.tango.cassandra_monitor_client.gui.CassandraNode.VALIDATION;
 
@@ -57,16 +58,16 @@ public class CompactionChart extends JLChart implements IJLChartListener {
 	private CassandraNode cassandraNode;
     private JLDataView compactionDataView;
     private JLDataView validationDataView;
-    private static final Dimension chartDimension = new Dimension(250, 250);
+    private JLDataView cleanupDataView;
+    private static final Dimension chartDimension = new Dimension(200, 200);
 	//===============================================================
 	//===============================================================
 	public CompactionChart(CassandraNode cassandraNode) {
 		super();
 		this.cassandraNode = cassandraNode;
-		setHeaderFont(new Font("Dialog", Font.BOLD, 14));
+		setHeaderFont(new Font("Dialog", Font.BOLD, 12));
 		setHeader(cassandraNode.getName());
 		setLabelVisible(false);
-		//setLabelPlacement(JLChart.LABEL_ROW);
 		setLabelFont(new Font("Dialog", Font.BOLD, 12));
 		setJLChartListener(this);
 
@@ -88,6 +89,7 @@ public class CompactionChart extends JLChart implements IJLChartListener {
 
         compactionDataView = buildDataView("Compactions", Color.red, getY1Axis());
         validationDataView = buildDataView("Validations", new Color(0x009900), getY1Axis());
+        cleanupDataView    = buildDataView("Cleanup", Color.blue, getY1Axis());
         setPreferredSize(chartDimension);
 	}
 	//===============================================================
@@ -99,6 +101,7 @@ public class CompactionChart extends JLChart implements IJLChartListener {
         dataView.setFill(true);
         dataView.setFillColor(color);
         dataView.setViewType(JLDataView.TYPE_BAR);
+        dataView.setBarWidth(2);
 
         axis.addDataView(dataView);
         return dataView;
@@ -108,6 +111,7 @@ public class CompactionChart extends JLChart implements IJLChartListener {
     public void updateCurves() {
         compactionDataView.reset();
         validationDataView.reset();
+        cleanupDataView.reset();
         List<CassandraNode.Compaction> compactionList = cassandraNode.getCompactionList();
         if (compactionList.isEmpty()) {
             setHeader(cassandraNode.getName() + " (No Compaction)");
@@ -116,10 +120,16 @@ public class CompactionChart extends JLChart implements IJLChartListener {
             setHeader(cassandraNode.getName());
             int x = 1;
             for (CassandraNode.Compaction compaction : compactionList) {
-                if (compaction.taskType == COMPACTION)
-                    compactionDataView.add(x++, 100.0 * compaction.ratio);
-                else
-                    validationDataView.add(x++, 100.0 * compaction.ratio);
+                switch (compaction.taskType) {
+                    case COMPACTION:
+                        compactionDataView.add(x++, 100.0 * compaction.ratio);
+                        break;
+                    case CLEANUP:
+                        cleanupDataView.add(x++, 100.0 * compaction.ratio);
+                        break;
+                    default:
+                        validationDataView.add(x++, 100.0 * compaction.ratio);
+                }
             }
             getXAxis().setMaximum(compactionList.size() + 1);
         }
