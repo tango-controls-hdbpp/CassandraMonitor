@@ -160,6 +160,11 @@ public class CassandraNode extends DeviceProxy {
     }
     //===============================================================
     //===============================================================
+    public String[] displayCompactionHistory() throws DevFailed {
+        return this.command_inout("ReadCompactionHistory").extractStringArray();
+    }
+    //===============================================================
+    //===============================================================
     public String getDataCenter() {
         return dataCenter;
     }

@@ -23,6 +23,15 @@
       </argout>
       <status abstract="true" inherited="true" concrete="true"/>
     </commands>
+    <commands name="ReadCompactionHistory" description="Read the compaction history for specified host." execMethod="read_compaction_history" displayLevel="OPERATOR" polledPeriod="0" isDynamic="false">
+      <argin description="Host name">
+        <type xsi:type="pogoDsl:StringType"/>
+      </argin>
+      <argout description="compation history as:&#xA;compacted_at, keyspace_name, columnfamily_name, bytes_in, bytes_out">
+        <type xsi:type="pogoDsl:StringArrayType"/>
+      </argout>
+      <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
+    </commands>
     <attributes name="NodeDistribution" attType="Spectrum" rwType="READ" displayLevel="OPERATOR" polledPeriod="3000" maxX="1024" maxY="" allocReadMember="true" isDynamic="false">
       <dataType xsi:type="pogoDsl:StringType"/>
       <changeEvent fire="false" libCheckCriteria="false"/>

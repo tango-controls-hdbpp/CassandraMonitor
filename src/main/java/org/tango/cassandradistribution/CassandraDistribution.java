@@ -78,6 +78,8 @@ import fr.esrf.TangoDs.Except;
 import fr.esrf.TangoApi.PipeBlob;
 import fr.esrf.TangoApi.PipeDataElement;
 
+import java.util.List;
+
 /*----- PROTECTED REGION END -----*/	//	CassandraDistribution.imports
 
 /**
@@ -284,6 +286,28 @@ public class CassandraDistribution {
 	 */
 	public void setStatus(final String status) {
 		this.status = status;
+	}
+	
+	/**
+	 * Execute command "ReadCompactionHistory".
+	 * description: Read the compaction history for specified host.
+	 * @param readCompactionHistoryIn Host name
+	 * @return compation history as:
+	 *         compacted_at, keyspace_name, columnfamily_name, bytes_in, bytes_out
+	 * @throws DevFailed if command execution failed.
+	 */
+	@Command(name="ReadCompactionHistory", inTypeDesc="Host name", outTypeDesc="compation history as:\ncompacted_at, keyspace_name, columnfamily_name, bytes_in, bytes_out")
+	public String[] ReadCompactionHistory(String readCompactionHistoryIn) throws DevFailed {
+		xlogger.entry();
+		String[] readCompactionHistoryOut;
+		/*----- PROTECTED REGION ID(CassandraDistribution.readCompactionHistory) ENABLED START -----*/
+
+		List<String> history = Utils.readCompactionHistory(readCompactionHistoryIn);
+		readCompactionHistoryOut = history.toArray(new String[history.size()]);
+		
+		/*----- PROTECTED REGION END -----*/	//	CassandraDistribution.readCompactionHistory
+		xlogger.exit();
+		return readCompactionHistoryOut;
 	}
 	
 

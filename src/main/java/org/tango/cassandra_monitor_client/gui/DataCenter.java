@@ -33,6 +33,9 @@
 
 package org.tango.cassandra_monitor_client.gui;
 
+import fr.esrf.Tango.DevFailed;
+import fr.esrf.tangoatk.widget.util.ErrorPane;
+
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
@@ -56,6 +59,7 @@ import static org.tango.cassandramonitor.IConstants.WRITE;
  */
 
 public class DataCenter extends ArrayList<CassandraNode> {
+    private JFrame parentFrame;
     private String name;
     private JPanel panel;
     private CassandraNode selectedNode = null;
@@ -71,8 +75,9 @@ public class DataCenter extends ArrayList<CassandraNode> {
     static final Color BACKGROUND = new Color(0xdddddd);
     //===============================================================
     //===============================================================
-    public DataCenter(String name) {
+    public DataCenter(JFrame parentFrame, String name) {
         this.name = name;
+        this.parentFrame = parentFrame;
     }
     //===============================================================
     //===============================================================
@@ -159,6 +164,16 @@ public class DataCenter extends ArrayList<CassandraNode> {
     //===============================================================
     private void testDevice() {
         selectedNode.testDevice();
+    }
+    //===============================================================
+    //===============================================================
+    private void displayCompactionHistory() {
+        try {
+            new CompactionHistoryDialog(parentFrame, selectedNode).setVisible(true);
+        }
+        catch (DevFailed e) {
+            ErrorPane.showErrorMessage(parentFrame, null , e);
+        }
     }
     //===============================================================
     //===============================================================
@@ -273,10 +288,11 @@ public class DataCenter extends ArrayList<CassandraNode> {
     //=======================================================
     //=======================================================
     private static final int TEST_DEVICE = 0;
+    private static final int COMPACTION_HISTORY = 1;
     private static final int OFFSET = 2;    //	Label And separator
 
     private static String[] menuLabels = {
-            "Test Device",
+            "Test Device", "Compaction History"
     };
     //=======================================================
     //=======================================================
@@ -316,6 +332,9 @@ public class DataCenter extends ArrayList<CassandraNode> {
             switch (itemIndex) {
                 case TEST_DEVICE:
                     testDevice();
+                    break;
+                case COMPACTION_HISTORY:
+                    displayCompactionHistory();
                     break;
             }
         }

@@ -135,7 +135,7 @@ public class CassandraMonitoring extends JFrame {
         for (CassandraNode node : cassandraNodeList) {
             DataCenter dataCenter = dataCenterMap.get(node.getDataCenter());
             if (dataCenter==null) {
-                dataCenter = new DataCenter(node.getDataCenter());
+                dataCenter = new DataCenter(this, node.getDataCenter());
                 dataCenterMap.put(node.getDataCenter(), dataCenter);
             }
             dataCenter.add(node);

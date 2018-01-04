@@ -52,6 +52,7 @@ import fr.esrf.Tango.DevFailed;
 import fr.esrf.Tango.DevState;
 import fr.esrf.Tango.DispLevel;
 import fr.esrf.TangoApi.DeviceAttribute;
+import fr.esrf.TangoApi.DeviceData;
 import fr.esrf.TangoApi.DeviceProxy;
 import fr.esrf.TangoDs.Except;
 import org.slf4j.Logger;
@@ -233,7 +234,7 @@ public class CassandraMonitor {
 	 * 
 	 * @throws DevFailed if something fails during the device initialization.
 	 */
-    @Init(lazyLoading = false)
+	@Init(lazyLoading = false)
 	public void initDevice() throws DevFailed {
 		xlogger.entry();
 		logger.debug("init device " + deviceManager.getName());
@@ -269,7 +270,7 @@ public class CassandraMonitor {
 	 * 
 	 * @throws DevFailed if something fails during the device object deletion.
 	 */
-    @Delete
+	@Delete
 	public void deleteDevice() throws DevFailed {
 		xlogger.entry();
 		/*----- PROTECTED REGION ID(CassandraMonitor.deleteDevice) ENABLED START -----*/
@@ -413,7 +414,7 @@ public class CassandraMonitor {
 		xlogger.exit();
 		return attributeValue;
 	}
-
+	
 	/**
 	 * Attribute DataLoadStr, String, Scalar, READ
 	 * description:
@@ -842,6 +843,30 @@ public class CassandraMonitor {
 		this.status = status;
 	}
 	
+	/**
+	 * Execute command "ReadCompactionHistory".
+	 * description: Read the compaction history for this host.
+	 * @return compation history as:
+	 *         compacted_at, keyspace_name, columnfamily_name, bytes_in, bytes_out
+	 * @throws DevFailed if command execution failed.
+	 */
+	@Command(name="ReadCompactionHistory", inTypeDesc="", outTypeDesc="compation history as:\ncompacted_at, keyspace_name, columnfamily_name, bytes_in, bytes_out")
+	public String[] ReadCompactionHistory() throws DevFailed {
+		xlogger.entry();
+		String[] readCompactionHistoryOut;
+		/*----- PROTECTED REGION ID(CassandraMonitor.readCompactionHistory) ENABLED START -----*/
+
+		if (distributionProxy==null)
+			distributionProxy = new DeviceProxy(distributionDeviceName);
+		DeviceData argIn = new DeviceData();
+		argIn.insert(node);
+		DeviceData argOut = distributionProxy.command_inout("ReadCompactionHistory", argIn);
+		readCompactionHistoryOut = argOut.extractStringArray();
+		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.readCompactionHistory
+		xlogger.exit();
+		return readCompactionHistoryOut;
+	}
+	
 
 	//========================================================
 	//	Programmer's methods
@@ -898,6 +923,25 @@ public class CassandraMonitor {
 	 */
 	public static void main(final String[] args) {
 		/*----- PROTECTED REGION ID(CassandraMonitor.main) ENABLED START -----*/
+// /**
+// 	 * Execute command "ReadCompactionHistory".
+// 	 * description: Read the compaction history for specified host.
+// 	 *              Each record containns:keyspace_name, columnfamily_name, compacted_at, bytes_in, bytes_out
+// 	 * @param readCompactionHistoryIn Host name
+// 	 * @return 
+// 	 * @throws DevFailed if command execution failed.
+// 	 */
+// 	@Command(name="ReadCompactionHistory", inTypeDesc="Host name", outTypeDesc="")
+// 	public String[] ReadCompactionHistory(String readCompactionHistoryIn) throws DevFailed {
+// 		xlogger.entry();
+// 		String[] readCompactionHistoryOut;
+// 		
+// 		//	Put command code here
+// 		
+// 		xlogger.exit();
+// 		return readCompactionHistoryOut;
+// 	}
+
 
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.main
 		ServerManager.getInstance().start(args, CassandraMonitor.class);

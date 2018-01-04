@@ -34,12 +34,7 @@
 package org.tango.cassandradistribution;
 
 import fr.esrf.Tango.DevFailed;
-import fr.esrf.TangoDs.Except;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -56,7 +51,7 @@ public class ReadDistribution {
     //===============================================================
     //===============================================================
     public ReadDistribution() throws DevFailed {
-        String result = executeShellCmd("nodetool status -r hdb");
+        String result = Utils.executeShellCmd("nodetool status -r hdb");
         System.out.println(result);
         splitLines(result);
         System.out.println("================================================");
@@ -74,10 +69,9 @@ public class ReadDistribution {
     //===============================================================
     //===============================================================
     private void splitLines(String code) {
-        StringTokenizer stk = new StringTokenizer(code, "\n");
+        List<String> lines = Utils.splitLines(code);
         String dataCenter = "";
-        while (stk.hasMoreTokens()) {
-            String line = stk.nextToken();
+        for (String line : lines) {
             if (line.startsWith("Datacenter")) {
                 dataCenter = line.substring(line.indexOf(":")+1).trim();
             }
@@ -86,52 +80,6 @@ public class ReadDistribution {
                 hostList.add(new Host(line, dataCenter));
             }
         }
-    }
-    //===============================================================
-    /**
-     *	Execute a shell command and throw exception if command failed.
-     *
-     *	@param command	shell command to be executed.
-     */
-    //===============================================================
-    public static String executeShellCmd(String command) throws DevFailed {
-        StringBuilder sb = new StringBuilder();
-        try {
-            Process process = Runtime.getRuntime().exec(command);
-
-            // get command's output stream and
-            // put a buffered reader input stream on it.
-            InputStream inputStream = process.getInputStream();
-            BufferedReader br =
-                    new BufferedReader(new InputStreamReader(inputStream));
-
-            // read output lines from command
-            String str;
-            while ((str = br.readLine()) != null) {
-                sb.append(str).append("\n");
-            }
-
-            // wait for end of command
-            process.waitFor();
-
-            // check its exit value
-            int retVal;
-            if ((retVal = process.exitValue()) != 0) {
-                //	An error occured try to read it
-                InputStream errorStream = process.getErrorStream();
-                br = new BufferedReader(new InputStreamReader(errorStream));
-                while ((str = br.readLine()) != null) {
-                    System.out.println(str);
-                    sb.append(str).append("\n");
-                }
-                Except.throw_exception("ShellCommandFailed",
-                        "the shell command\n" + command + "\nreturns : " + retVal + " !\n\n" + sb);
-            }
-        }
-        catch (InterruptedException|IOException e) {
-            Except.throw_exception("ShellCommandFailed", e.toString());
-        }
-        return sb.toString();
     }
     //===============================================================
     //===============================================================
