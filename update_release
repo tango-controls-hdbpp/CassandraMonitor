@@ -20,4 +20,4 @@ java -cp $CLP $UPDATE_CLASS \
 	-release $RELEASE \
 	-title   "$CLASS Release Notes" \
 	-note_path $HOME_SRC/$SOURCE_FILES \
-	-package $PACKAGE.commons
+	-package $PACKAGE.tools
