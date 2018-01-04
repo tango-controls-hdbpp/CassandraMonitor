@@ -41,7 +41,7 @@ import java.util.StringTokenizer;
 
 
 /**
- * This class is able to
+ * This class is able to read node distribution (data centers, racks, ..) using nodetool
  *
  * @author verdier
  */

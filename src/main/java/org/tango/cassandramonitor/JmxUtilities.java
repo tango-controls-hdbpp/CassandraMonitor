@@ -41,11 +41,9 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import static org.tango.cassandramonitor.IConstants.COLUMN_FAMILIES;
 import static org.tango.cassandramonitor.IConstants.JMX_SERVICES;
 
 
@@ -65,19 +63,23 @@ public class JmxUtilities {
     private String password;
     private int timeout;
     private ConnectionThread connectionThread = null;
+    private List<ObjectName> objectNameList = new ArrayList<>();
+    private List<String> hdbTableList = new ArrayList<>();
     //===============================================================
     //===============================================================
-    public JmxUtilities(String node, short port, String user, String password, int timeout) {
+    public JmxUtilities(String node, short port, String user, String password, int timeout) throws DevFailed {
         this.node = node;
         this.port = port;
         this.user = user;
         this.password = password;
         this.timeout = timeout;
+        connect();
+        initObjectNameList();
+        initHdbTableList();
     }
     //===============================================================
     //===============================================================
-    List<ObjectName> getObjectNameList() throws  DevFailed {
-        List<ObjectName> objectNameList = new ArrayList<>();
+    private void initObjectNameList() throws DevFailed {
         for (String jmxService : JMX_SERVICES) {
             try {
                 objectNameList.add(new ObjectName(jmxService));
@@ -85,7 +87,6 @@ public class JmxUtilities {
                 throw DevFailedUtils.newDevFailed("MalformedObjectNameException", e.toString());
             }
         }
-        return objectNameList;
     }
     //===============================================================
     //===============================================================
@@ -107,12 +108,10 @@ public class JmxUtilities {
                 System.err.println(ex.toString());
             }
         }
-
     }
     //===============================================================
     //===============================================================
-    public void connect() throws DevFailed {
-
+    private void connect() throws DevFailed {
         //  Check if a ConnectionThread already running
         if (connectionThread!=null) {
             if (connectionThread.running) {
@@ -150,12 +149,31 @@ public class JmxUtilities {
     }
     //===============================================================
     //===============================================================
-    public Object getAttribute(ObjectName objectName, String jmxAttributeName) throws DevFailed {
+    private void initHdbTableList() throws DevFailed {
         if (connectionError!=null) {
             connect();
         }
         try {
-            return connection.getAttribute(objectName, jmxAttributeName);
+            Set<ObjectName> objectNames = connection.queryNames(objectNameList.get(COLUMN_FAMILIES), null);
+            for (ObjectName objectName : objectNames) {
+                String name = objectName.toString();
+                int idx = name.lastIndexOf("=");
+                if (idx>0)
+                    hdbTableList.add(name.substring(++idx));
+            }
+        } catch (IOException e) {
+            connectionError = e.toString();
+            throw DevFailedUtils.newDevFailed(e.toString(), e.getMessage());
+        }
+    }
+    //===============================================================
+    //===============================================================
+    public Object getAttribute(int objectIndex, String jmxAttributeName) throws DevFailed {
+        if (connectionError!=null) {
+            connect();
+        }
+        try {
+            return connection.getAttribute(objectNameList.get(objectIndex), jmxAttributeName);
         } catch (AttributeNotFoundException | InstanceNotFoundException |
                 ReflectionException | MBeanException | IOException e) {
             connectionError = e.toString();

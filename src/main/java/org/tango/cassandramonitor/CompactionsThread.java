@@ -39,18 +39,17 @@ import fr.esrf.TangoDs.Except;
 import org.tango.server.device.DeviceManager;
 import org.tango.server.events.EventManager;
 import org.tango.server.pipe.PipeValue;
-import org.tango.utils.DevFailedUtils;
 
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
 import java.util.HashMap;
 import java.util.List;
 
 import static org.tango.cassandramonitor.IConstants.ATTR_COMPACTIONS;
+import static org.tango.cassandramonitor.IConstants.COMPACTION_SERVICE;
 
 
 /**
- * This class is able to
+ * This class is able to check if compaction is active
+ * and fill a PipeValue with compaction info.
  *
  * @author verdier
  */
@@ -60,22 +59,12 @@ class CompactionsThread extends Thread {
     private DeviceManager deviceManager;
     private JmxToCompactions jmxToCompactions;
     private JmxUtilities jmxUtilities;
-    private ObjectName compactionObjectName;
     private boolean runThreads = true;
-    private static final String COMPACTION_NAME = "org.apache.cassandra.db:type=CompactionManager";
     //===============================================================
     //===============================================================
-    CompactionsThread(DeviceManager deviceManager,
-                          JmxUtilities jmxUtilities,
-                          String cassandraNode) throws DevFailed {
+    CompactionsThread(DeviceManager deviceManager, JmxUtilities jmxUtilities, String cassandraNode) {
         this.deviceManager = deviceManager;
         this.jmxUtilities = jmxUtilities;
-        try {
-            compactionObjectName = new ObjectName(COMPACTION_NAME);
-        } catch (MalformedObjectNameException ex) {
-            throw DevFailedUtils.newDevFailed(ex.toString(), ex.toString());
-
-        }
         jmxToCompactions = new JmxToCompactions(cassandraNode);
     }
     //===============================================================
@@ -93,14 +82,14 @@ class CompactionsThread extends Thread {
     private void pushPipeEvent() throws DevFailed {
         EventManager.getInstance().pushPipeEvent(
                 deviceManager.getName(), "Compactions", pipeCompactions);
-            }
+    }
     //===============================================================
     //===============================================================
     public void run() {
         while (runThreads) {
             try {
                 //  Build compaction object list
-                Object jmxAtt = jmxUtilities.getAttribute(compactionObjectName, ATTR_COMPACTIONS);
+                Object jmxAtt = jmxUtilities.getAttribute(COMPACTION_SERVICE, ATTR_COMPACTIONS);
                 //noinspection unchecked
                 jmxToCompactions.setList((List<HashMap<String, String>>) jmxAtt);
                 if (jmxToCompactions.hasChanged()) {

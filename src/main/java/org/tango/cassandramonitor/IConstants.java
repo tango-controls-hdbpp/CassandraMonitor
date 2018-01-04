@@ -35,7 +35,7 @@ package org.tango.cassandramonitor;
 
 
 /**
- * This class is able to
+ * This class defines constants
  *
  * @author verdier
  */
@@ -46,15 +46,19 @@ public interface IConstants {
     int WRITE = 1;
 
     //  JMX services
-    int STORAGE_SERVICE = 0;
-    int STORAGE_LOAD = 1;
-    int WRITE_REQUESTS = 2;
-    int READ_REQUESTS = 3;
+    int COMPACTION_SERVICE = 0;
+    int STORAGE_SERVICE = 1;
+    int STORAGE_LOAD = 2;
+    int WRITE_REQUESTS = 3;
+    int READ_REQUESTS = 4;
+    int COLUMN_FAMILIES = 5;
     String[] JMX_SERVICES = {
+            "org.apache.cassandra.db:type=CompactionManager",
             "org.apache.cassandra.db:type=StorageService",
             "org.apache.cassandra.metrics:type=Storage,name=Load",
             "org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Latency",
             "org.apache.cassandra.metrics:type=ClientRequest,scope=Read,name=Latency",
+            "org.apache.cassandra.db:type=ColumnFamilies,keyspace=hdb,columnfamily=*",
     };
 
 

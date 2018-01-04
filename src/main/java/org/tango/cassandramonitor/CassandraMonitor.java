@@ -66,10 +66,8 @@ import org.tango.server.device.DeviceManager;
 import org.tango.server.dynamic.DynamicManager;
 import org.tango.server.pipe.PipeValue;
 
-import javax.management.ObjectName;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -100,7 +98,6 @@ public class CassandraMonitor {
 	/*----- PROTECTED REGION ID(CassandraMonitor.private) ENABLED START -----*/
 
     //	Put private variables here
-    private List<ObjectName> objectNameList = new ArrayList<>();
     private CompactionsThread compactionsThread;
 	private JmxUtilities jmxUtilities;
 
@@ -239,6 +236,7 @@ public class CassandraMonitor {
 		xlogger.entry();
 		logger.debug("init device " + deviceManager.getName());
 		/*----- PROTECTED REGION ID(CassandraMonitor.initDevice) ENABLED START -----*/
+        // ToDo initialize Device
 
 		//  Check if class property is OK
         if (distributionDeviceName==null || distributionDeviceName.isEmpty()) {
@@ -252,14 +250,8 @@ public class CassandraMonitor {
 
         //  Initialize the JMX utility
 		jmxUtilities = new JmxUtilities(node, jMXPort, jMXUser, jMXPassword, jMXConnectionTimeout);
-        objectNameList = jmxUtilities.getObjectNameList();
-        try {
-            jmxUtilities.connect();
-        } catch (DevFailed ex) {
-            xlogger.error(ex.getMessage());
-        }
 
-		compactionsThread = new CompactionsThread(deviceManager, jmxUtilities, node);
+        compactionsThread = new CompactionsThread(deviceManager, jmxUtilities, node);
         compactionsThread.start();
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.initDevice
 		xlogger.exit();
@@ -408,7 +400,7 @@ public class CassandraMonitor {
 		/*----- PROTECTED REGION ID(CassandraMonitor.getClusterName) ENABLED START -----*/
 
         //	Put read attribute code here
-        clusterName = jmxUtilities.getAttribute(objectNameList.get(STORAGE_SERVICE), ATTR_CLUSTER).toString();
+        clusterName = jmxUtilities.getAttribute(STORAGE_SERVICE, ATTR_CLUSTER).toString();
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getClusterName
 		attributeValue.setValue(clusterName);
 		xlogger.exit();
@@ -437,7 +429,7 @@ public class CassandraMonitor {
 		/*----- PROTECTED REGION ID(CassandraMonitor.getDataLoadStr) ENABLED START -----*/
 
         //	Put read attribute code here
-        dataLoadStr = jmxUtilities.getAttribute(objectNameList.get(STORAGE_SERVICE), ATTR_LOAD).toString();
+        dataLoadStr = jmxUtilities.getAttribute(STORAGE_SERVICE, ATTR_LOAD).toString();
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getDataLoadStr
 		attributeValue.setValue(dataLoadStr);
 		xlogger.exit();
@@ -466,7 +458,7 @@ public class CassandraMonitor {
 		/*----- PROTECTED REGION ID(CassandraMonitor.getOperationMode) ENABLED START -----*/
 
         //	Put read attribute code here
-        operationMode = jmxUtilities.getAttribute(objectNameList.get(STORAGE_SERVICE), ATTR_OPERATION_MODE).toString();
+        operationMode = jmxUtilities.getAttribute(STORAGE_SERVICE, ATTR_OPERATION_MODE).toString();
         switch (operationMode) {
             case "STARTING":
                 setState(DevState.INIT);
@@ -521,7 +513,7 @@ public class CassandraMonitor {
 		/*----- PROTECTED REGION ID(CassandraMonitor.getDataLoad) ENABLED START -----*/
 
         //	Put read attribute code here
-        dataLoad = (Long) jmxUtilities.getAttribute(objectNameList.get(STORAGE_LOAD), ATTR_COUNT);
+        dataLoad = (Long) jmxUtilities.getAttribute(STORAGE_LOAD, ATTR_COUNT);
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getDataLoad
 		attributeValue.setValue(dataLoad);
 		xlogger.exit();
@@ -549,7 +541,7 @@ public class CassandraMonitor {
 		/*----- PROTECTED REGION ID(CassandraMonitor.getCassandraVersion) ENABLED START -----*/
 
         //	Put read attribute code here
-        cassandraVersion = jmxUtilities.getAttribute(objectNameList.get(STORAGE_SERVICE), ATTR_RELEASE).toString();
+        cassandraVersion = jmxUtilities.getAttribute(STORAGE_SERVICE, ATTR_RELEASE).toString();
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getCassandraVersion
 		attributeValue.setValue(cassandraVersion);
 		xlogger.exit();
@@ -634,7 +626,7 @@ public class CassandraMonitor {
 		/*----- PROTECTED REGION ID(CassandraMonitor.getWriteRequests) ENABLED START -----*/
 		
 		//	ToDo Put read attribute code here
-        writeRequests = (double)jmxUtilities.getAttribute(objectNameList.get(WRITE_REQUESTS), ATTR_RATE);
+        writeRequests = (double)jmxUtilities.getAttribute(WRITE_REQUESTS, ATTR_RATE);
 
         /*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getWriteRequests
 		attributeValue.setValue(writeRequests);
@@ -664,7 +656,7 @@ public class CassandraMonitor {
 		/*----- PROTECTED REGION ID(CassandraMonitor.getReadRequests) ENABLED START -----*/
 
         //  Read done by JmsThread
-        readRequests = (double)jmxUtilities.getAttribute(objectNameList.get(READ_REQUESTS), ATTR_RATE);
+        readRequests = (double)jmxUtilities.getAttribute(READ_REQUESTS, ATTR_RATE);
 
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getReadRequests
 		attributeValue.setValue(readRequests);
@@ -694,7 +686,7 @@ public class CassandraMonitor {
 		/*----- PROTECTED REGION ID(CassandraMonitor.getUnreachableNodes) ENABLED START -----*/
 
         //	Put read attribute code here
-        java.util.List list = (List) jmxUtilities.getAttribute(objectNameList.get(STORAGE_SERVICE), ATTR_UNREACHABLE);
+        java.util.List list = (List) jmxUtilities.getAttribute(STORAGE_SERVICE, ATTR_UNREACHABLE);
         unreachableNodes = new String[list.size()];
         int i = 0;
         for (Object n : list) {
@@ -734,7 +726,7 @@ public class CassandraMonitor {
 		/*----- PROTECTED REGION ID(CassandraMonitor.getLiveNodes) ENABLED START -----*/
 
         //	Put read attribute code here
-        List list = (List) jmxUtilities.getAttribute(objectNameList.get(STORAGE_SERVICE), ATTR_LIVE_MODE);
+        List list = (List) jmxUtilities.getAttribute(STORAGE_SERVICE, ATTR_LIVE_MODE);
         liveNodes = new String[list.size()];
         int i = 0;
         for (Object n : list) {
