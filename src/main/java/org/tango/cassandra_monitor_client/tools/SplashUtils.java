@@ -58,7 +58,7 @@ public class SplashUtils {
     private static boolean splashActive = false;
     private static final String packageName = "EbsVacuum";
 
-    private static final String revNumber = "1.2  -  04-01-2018  14:40:23";
+    private static final String revNumber = "1.2  -  04-01-2018  14:43:43";
     private static SplashUtils instance = new SplashUtils();
     private static final String imageFile = "TangoLogo.gif";
     //=======================================================
