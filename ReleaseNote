@@ -13,6 +13,9 @@
 #-======================================================================
 
 
+CassandraMonitor-1.2 - 04/01/18:
+    Compaction pending and history added.
+
 CassandraMonitor-1.1 - 20/12/17:
     Client requests monitoring added
 
