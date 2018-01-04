@@ -130,7 +130,7 @@ public class CompactionChartDialog extends JDialog {
         table.setColumnSelectionAllowed(true);
         table.setDragEnabled(false);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        table.getTableHeader().setFont(new java.awt.Font("Dialog", Font.BOLD, 12));
+        table.getTableHeader().setFont(new Font("Dialog", Font.BOLD, 12));
         table.setDefaultRenderer(String.class, new LabelCellRenderer());
 
         //  Set column width
@@ -141,11 +141,8 @@ public class CompactionChartDialog extends JDialog {
             tableColumn = (TableColumn) columnEnum.nextElement();
             tableColumn.setPreferredWidth(columnWidth[i++]);
         }
-
-        //  Compute size to display
         scrollPane.add(table);
         scrollPane.setViewportView(table);
-        //scrollPane.setVisible(false);
     }
 	//===============================================================
 	//===============================================================

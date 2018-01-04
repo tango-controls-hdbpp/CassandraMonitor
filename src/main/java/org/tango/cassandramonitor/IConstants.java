@@ -46,12 +46,13 @@ public interface IConstants {
     int WRITE = 1;
 
     //  JMX services
-    int COMPACTION_SERVICE = 0;
+    int COMPACTION_MANAGER = 0;
     int STORAGE_SERVICE = 1;
     int STORAGE_LOAD = 2;
     int WRITE_REQUESTS = 3;
     int READ_REQUESTS = 4;
     int COLUMN_FAMILIES = 5;
+    int PENDING_TASKS = 6;
     String[] JMX_SERVICES = {
             "org.apache.cassandra.db:type=CompactionManager",
             "org.apache.cassandra.db:type=StorageService",
@@ -59,6 +60,7 @@ public interface IConstants {
             "org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Latency",
             "org.apache.cassandra.metrics:type=ClientRequest,scope=Read,name=Latency",
             "org.apache.cassandra.db:type=ColumnFamilies,keyspace=hdb,columnfamily=*",
+            "org.apache.cassandra.metrics:type=Compaction,name=PendingTasks",
     };
 
 
@@ -75,5 +77,6 @@ public interface IConstants {
 
     //  JMX attribute names (org.apache.cassandra.metrics)
     String ATTR_COUNT = "Count";
+    String ATTR_VALUE = "Value";
     String ATTR_RATE = "OneMinuteRate";
 }

@@ -44,7 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.tango.cassandramonitor.IConstants.ATTR_COMPACTIONS;
-import static org.tango.cassandramonitor.IConstants.COMPACTION_SERVICE;
+import static org.tango.cassandramonitor.IConstants.COMPACTION_MANAGER;
 
 
 /**
@@ -89,7 +89,7 @@ class CompactionsThread extends Thread {
         while (runThreads) {
             try {
                 //  Build compaction object list
-                Object jmxAtt = jmxUtilities.getAttribute(COMPACTION_SERVICE, ATTR_COMPACTIONS);
+                Object jmxAtt = jmxUtilities.getAttribute(COMPACTION_MANAGER, ATTR_COMPACTIONS);
                 //noinspection unchecked
                 jmxToCompactions.setList((List<HashMap<String, String>>) jmxAtt);
                 if (jmxToCompactions.hasChanged()) {

@@ -169,11 +169,16 @@ public class JmxUtilities {
     //===============================================================
     //===============================================================
     public Object getAttribute(int objectIndex, String jmxAttributeName) throws DevFailed {
+        return getAttribute(objectNameList.get(objectIndex), jmxAttributeName);
+    }
+    //===============================================================
+    //===============================================================
+    public Object getAttribute(ObjectName objectName, String jmxAttributeName) throws DevFailed {
         if (connectionError!=null) {
             connect();
         }
         try {
-            return connection.getAttribute(objectNameList.get(objectIndex), jmxAttributeName);
+            return connection.getAttribute(objectName, jmxAttributeName);
         } catch (AttributeNotFoundException | InstanceNotFoundException |
                 ReflectionException | MBeanException | IOException e) {
             connectionError = e.toString();

@@ -641,7 +641,7 @@ public class CassandraMonitor {
 	 */
 	@Attribute(name="ReadRequests", isPolled=true, pollingPeriod=10000)
 	@AttributeProperties(description="Read request (events/second)", label="Read requests",
-	                     unit="ev/s", standardUnit="%.1f", changeEventAbsolute="0.1")
+	                     unit="ev/s", format="%.1f", changeEventAbsolute="0.1", archiveEventRelative="0.1")
 	private double readRequests;
 	/**
 	 * Read attribute ReadRequests
@@ -655,11 +655,39 @@ public class CassandraMonitor {
 			attributeValue = new org.tango.server.attribute.AttributeValue();
 		/*----- PROTECTED REGION ID(CassandraMonitor.getReadRequests) ENABLED START -----*/
 
-        //  Read done by JmsThread
         readRequests = (double)jmxUtilities.getAttribute(READ_REQUESTS, ATTR_RATE);
-
+		
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getReadRequests
 		attributeValue.setValue(readRequests);
+		xlogger.exit();
+		return attributeValue;
+	}
+	
+	/**
+	 * Attribute PendingCompactionTasks, int, Scalar, READ
+	 * description:
+	 *     Pending Compaction tasks
+	 */
+	@Attribute(name="PendingCompactionTasks", isPolled=true, pollingPeriod=10000)
+	@AttributeProperties(description="Pending Compaction tasks", label="Pending Compaction Tasks",
+	                     changeEventAbsolute="0.1")
+	private int pendingCompactionTasks;
+	/**
+	 * Read attribute PendingCompactionTasks
+	 * 
+	 * @return attribute value
+	 * @throws DevFailed if read attribute failed.
+	 */
+	public org.tango.server.attribute.AttributeValue getPendingCompactionTasks() throws DevFailed {
+		xlogger.entry();
+		org.tango.server.attribute.AttributeValue
+			attributeValue = new org.tango.server.attribute.AttributeValue();
+		/*----- PROTECTED REGION ID(CassandraMonitor.getPendingCompactionTasks) ENABLED START -----*/
+
+        pendingCompactionTasks = (int) jmxUtilities.getAttribute(PENDING_TASKS, "Value");
+
+		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getPendingCompactionTasks
+		attributeValue.setValue(pendingCompactionTasks);
 		xlogger.exit();
 		return attributeValue;
 	}

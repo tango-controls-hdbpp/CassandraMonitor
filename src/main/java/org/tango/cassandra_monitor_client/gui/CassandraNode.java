@@ -79,6 +79,7 @@ public class CassandraNode extends DeviceProxy {
     private StateViewer stateViewer;
     private SimpleScalarViewer dataLoadViewer;
     private SimpleScalarViewer[] requestViewers;
+    private SimpleScalarViewer pendingViewer;
     private AttributeList attributeList = new AttributeList();
     private JLabel compactionLabel;
     private CompactionChart compactionChart;
@@ -101,7 +102,7 @@ public class CassandraNode extends DeviceProxy {
         initializeFromDevice();
         buildStateViewer(deviceName);
         buildDataLoadViewer(deviceName);
-        buildRequestViewers(deviceName);
+        buildScalarViewers(deviceName);
         initialize();
         compactionChart = new CompactionChart(this);
 
@@ -195,6 +196,11 @@ public class CassandraNode extends DeviceProxy {
     }
     //===============================================================
     //===============================================================
+    public SimpleScalarViewer getPendingViewer() {
+        return pendingViewer;
+    }
+    //===============================================================
+    //===============================================================
     public SimpleScalarViewer[] getRequestViewers() {
         return requestViewers;
     }
@@ -250,12 +256,10 @@ public class CassandraNode extends DeviceProxy {
     public void buildDataLoadViewer(String deviceName) throws DevFailed {
         try {
             dataLoadViewer = new SimpleScalarViewer();
-            IStringScalar stringScalar =
-                    (IStringScalar) attributeList.add(deviceName + "/DataLoadStr");
-            dataLoadViewer.setModel(stringScalar);
             dataLoadViewer.setBackgroundColor(Color.white);
             dataLoadViewer.setBackground(Color.white);
             dataLoadViewer.setToolTipText(" Data  Load ");
+            dataLoadViewer.setModel((IStringScalar) attributeList.add(deviceName + "/DataLoadStr"));
         }
         catch (ConnectionException e) {
             Except.throw_exception("ConnectionFailed", e.getDescription());
@@ -263,24 +267,27 @@ public class CassandraNode extends DeviceProxy {
     }
     //===========================================================
     //===========================================================
-    public void buildRequestViewers(String deviceName) throws DevFailed {
+    public void buildScalarViewers(String deviceName) throws DevFailed {
         try {
             requestViewers = new SimpleScalarViewer[2];
             requestViewers[READ] = new SimpleScalarViewer();
-            INumberScalar readScalar =
-                    (INumberScalar) attributeList.add(deviceName + "/ReadRequests");
-            requestViewers[READ].setModel(readScalar);
             requestViewers[READ].setBackgroundColor(Color.white);
             requestViewers[READ].setBackground(Color.white);
-            requestViewers[READ].setToolTipText("Read Client Requests ");
+            requestViewers[READ].setToolTipText(" Read Client Requests ");
+            requestViewers[READ].setModel((INumberScalar) attributeList.add(deviceName + "/ReadRequests"));
 
             requestViewers[WRITE] = new SimpleScalarViewer();
-            INumberScalar writeScalar =
-                    (INumberScalar) attributeList.add(deviceName + "/WriteRequests");
-            requestViewers[WRITE].setModel(writeScalar);
             requestViewers[WRITE].setBackgroundColor(Color.white);
             requestViewers[WRITE].setBackground(Color.white);
-            requestViewers[WRITE].setToolTipText("Write Client Requests ");
+            requestViewers[WRITE].setToolTipText(" Write Client Requests ");
+            requestViewers[WRITE].setModel((INumberScalar) attributeList.add(deviceName + "/WriteRequests"));
+
+            pendingViewer = new SimpleScalarViewer();
+            pendingViewer.setBackgroundColor(Color.white);
+            pendingViewer.setBackground(Color.white);
+            pendingViewer.setToolTipText(" Pending Compaction Tasks ");
+            pendingViewer.setUnitVisible(false);
+            pendingViewer.setModel((INumberScalar) attributeList.add(deviceName + "/PendingCompactionTasks"));
         }
         catch (ConnectionException e) {
             Except.throw_exception("ConnectionFailed", e.getDescription());
