@@ -3,7 +3,7 @@
 
     <groupId>org.tango.server</groupId>
     <artifactId>CassandraMonitor</artifactId>
-    <version>1.3-SNAPSHOT</version>
+    <version>1.3</version>
     <packaging>jar</packaging>
 
     <name>CassandraMonitor Tango server</name>
@@ -31,7 +31,7 @@
         <connection>scm:git:git@github.com:tango-controls-hdbpp/${project.artifactId}.git</connection>
         <developerConnection>scm:git:git@github.com:tango-controls-hdbpp/${project.artifactId}.git</developerConnection>
         <url>https://github.com/tango-controls-hdbpp/${project.artifactId}</url>
-        <tag>HEAD</tag>
+        <tag>CassandraMonitor-1.3</tag>
     </scm>
 
     <distributionManagement>
