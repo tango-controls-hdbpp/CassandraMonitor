@@ -34,6 +34,7 @@
 package org.tango.cassandra_monitor_client.gui;
 
 import fr.esrf.Tango.DevFailed;
+import fr.esrf.Tango.DevVarDoubleStringArray;
 import fr.esrf.TangoApi.*;
 import fr.esrf.TangoApi.events.ITangoPipeListener;
 import fr.esrf.TangoApi.events.TangoEventsAdapter;
@@ -80,6 +81,7 @@ public class CassandraNode extends DeviceProxy {
     private SimpleScalarViewer dataLoadViewer;
     private SimpleScalarViewer[] requestViewers;
     private SimpleScalarViewer pendingViewer;
+    private SimpleScalarViewer ssTableViewer;
     private AttributeList attributeList = new AttributeList();
     private JLabel compactionLabel;
     private CompactionChart compactionChart;
@@ -201,6 +203,11 @@ public class CassandraNode extends DeviceProxy {
     }
     //===============================================================
     //===============================================================
+    public SimpleScalarViewer getSsTableViewer() {
+        return ssTableViewer;
+    }
+    //===============================================================
+    //===============================================================
     public SimpleScalarViewer[] getRequestViewers() {
         return requestViewers;
     }
@@ -288,6 +295,13 @@ public class CassandraNode extends DeviceProxy {
             pendingViewer.setToolTipText(" Pending Compaction Tasks ");
             pendingViewer.setUnitVisible(false);
             pendingViewer.setModel((INumberScalar) attributeList.add(deviceName + "/PendingCompactionTasks"));
+
+            ssTableViewer = new SimpleScalarViewer();
+            ssTableViewer.setBackgroundColor(Color.white);
+            ssTableViewer.setBackground(Color.white);
+            ssTableViewer.setToolTipText(" SS Table Number ");
+            ssTableViewer.setUnitVisible(false);
+            ssTableViewer.setModel((INumberScalar) attributeList.add(deviceName + "/SsTableNumber"));
         }
         catch (ConnectionException e) {
             Except.throw_exception("ConnectionFailed", e.getDescription());
@@ -339,6 +353,11 @@ public class CassandraNode extends DeviceProxy {
                 System.err.println(e.errors[0]);
             }
         }
+    }
+    //===============================================================
+    //===============================================================
+    public DevVarDoubleStringArray readHdbTableSizes() throws DevFailed {
+        return command_inout("ReadHdbTableSizes").extractDoubleStringArray();
     }
     //===============================================================
     //===============================================================

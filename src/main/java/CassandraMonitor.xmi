@@ -58,6 +58,15 @@
       </argout>
       <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
     </commands>
+    <commands name="ReadHdbTableSizes" description="Returns the size of each hdb table in bytes." execMethod="read_hdb_table_sizes" displayLevel="OPERATOR" polledPeriod="0" isDynamic="false">
+      <argin description="">
+        <type xsi:type="pogoDsl:VoidType"/>
+      </argin>
+      <argout description="Hdb table sizes in Mb">
+        <type xsi:type="pogoDsl:DoubleStringArrayType"/>
+      </argout>
+      <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
+    </commands>
     <attributes name="DataCenter" attType="Scalar" rwType="READ" displayLevel="OPERATOR" polledPeriod="60000" maxX="" maxY="" allocReadMember="true" isDynamic="false">
       <dataType xsi:type="pogoDsl:StringType"/>
       <changeEvent fire="false" libCheckCriteria="false"/>
@@ -160,6 +169,15 @@
       <dataReadyEvent fire="false" libCheckCriteria="true"/>
       <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
       <properties description="Pending Compaction tasks" label="Pending Compaction Tasks" unit="" standardUnit="" displayUnit="" format="" maxValue="" minValue="" maxAlarm="" minAlarm="" maxWarning="" minWarning="" deltaTime="" deltaValue=""/>
+      <eventCriteria relChange="" absChange="0.1" period=""/>
+    </attributes>
+    <attributes name="SsTableNumber" attType="Scalar" rwType="READ" displayLevel="OPERATOR" polledPeriod="10000" maxX="" maxY="" allocReadMember="true" isDynamic="false">
+      <dataType xsi:type="pogoDsl:IntType"/>
+      <changeEvent fire="false" libCheckCriteria="false"/>
+      <archiveEvent fire="false" libCheckCriteria="false"/>
+      <dataReadyEvent fire="false" libCheckCriteria="true"/>
+      <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
+      <properties description="SS Table number" label="SS Table number" unit="" standardUnit="" displayUnit="" format="" maxValue="" minValue="" maxAlarm="" minAlarm="" maxWarning="" minWarning="" deltaTime="" deltaValue=""/>
       <eventCriteria relChange="" absChange="0.1" period=""/>
     </attributes>
     <attributes name="UnreachableNodes" attType="Spectrum" rwType="READ" displayLevel="OPERATOR" polledPeriod="3000" maxX="2000" maxY="" allocReadMember="true" isDynamic="false">

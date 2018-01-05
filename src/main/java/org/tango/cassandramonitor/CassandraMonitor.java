@@ -50,6 +50,7 @@ package org.tango.cassandramonitor;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.Tango.DevState;
+import fr.esrf.Tango.DevVarDoubleStringArray;
 import fr.esrf.Tango.DispLevel;
 import fr.esrf.TangoApi.DeviceAttribute;
 import fr.esrf.TangoApi.DeviceData;
@@ -59,6 +60,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
+import org.tango.cassandradistribution.HdbTable;
 import org.tango.server.InvocationContext;
 import org.tango.server.ServerManager;
 import org.tango.server.annotation.*;
@@ -250,6 +252,8 @@ public class CassandraMonitor {
 
         //  Initialize the JMX utility
 		jmxUtilities = new JmxUtilities(node, jMXPort, jMXUser, jMXPassword, jMXConnectionTimeout);
+
+        //System.out.println(jmxUtilities.getAttribute(SS_TABLE_COUNT, ATTR_VALUE));
 
         compactionsThread = new CompactionsThread(deviceManager, jmxUtilities, node);
         compactionsThread.start();
@@ -693,6 +697,35 @@ public class CassandraMonitor {
 	}
 	
 	/**
+	 * Attribute SsTableNumber, int, Scalar, READ
+	 * description:
+	 *     SS Table number
+	 */
+	@Attribute(name="SsTableNumber", isPolled=true, pollingPeriod=10000)
+	@AttributeProperties(description="SS Table number", label="SS Table number",
+	                     changeEventAbsolute="0.1")
+	private int ssTableNumber;
+	/**
+	 * Read attribute SsTableNumber
+	 * 
+	 * @return attribute value
+	 * @throws DevFailed if read attribute failed.
+	 */
+	public org.tango.server.attribute.AttributeValue getSsTableNumber() throws DevFailed {
+		xlogger.entry();
+		org.tango.server.attribute.AttributeValue
+			attributeValue = new org.tango.server.attribute.AttributeValue();
+		/*----- PROTECTED REGION ID(CassandraMonitor.getSsTableNumber) ENABLED START -----*/
+		
+		ssTableNumber = (int) jmxUtilities.getAttribute(SS_TABLE_COUNT, ATTR_VALUE);
+		
+		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getSsTableNumber
+		attributeValue.setValue(ssTableNumber);
+		xlogger.exit();
+		return attributeValue;
+	}
+	
+	/**
 	 * Attribute UnreachableNodes, String, Spectrum, READ
 	 * description:
 	 *     List of Cassandra nodes from the cluster which are currently unreachable.
@@ -887,6 +920,34 @@ public class CassandraMonitor {
 		return readCompactionHistoryOut;
 	}
 	
+	/**
+	 * Execute command "ReadHdbTableSizes".
+	 * description: Returns the size of each hdb table in bytes.
+	 * @return Hdb table sizes in Mb
+	 * @throws DevFailed if command execution failed.
+	 */
+	@Command(name="ReadHdbTableSizes", inTypeDesc="", outTypeDesc="Hdb table sizes in Mb")
+	public DevVarDoubleStringArray ReadHdbTableSizes() throws DevFailed {
+		xlogger.entry();
+		DevVarDoubleStringArray readHdbTableSizesOut;
+		/*----- PROTECTED REGION ID(CassandraMonitor.readHdbTableSizes) ENABLED START -----*/
+
+		List<HdbTable> hdbTableList = jmxUtilities.getTableSizes();
+		readHdbTableSizesOut = new DevVarDoubleStringArray();
+		readHdbTableSizesOut.svalue = new String[hdbTableList.size()];
+		readHdbTableSizesOut.dvalue = new double[hdbTableList.size()];
+		int i=0;
+		for (HdbTable hdbTable : hdbTableList) {
+		    readHdbTableSizesOut.svalue[i] = hdbTable.getName();
+		    readHdbTableSizesOut.dvalue[i] = hdbTable.getSize();
+		    i++;
+        }
+
+		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.readHdbTableSizes
+		xlogger.exit();
+		return readHdbTableSizesOut;
+	}
+	
 
 	//========================================================
 	//	Programmer's methods
@@ -975,6 +1036,24 @@ public class CassandraMonitor {
 //         long used = (long) jmxUtilities.getAttribute(DISK_USED, ATTR_VALUE);
 //         diskUsed = ((double)used/1073741824);
 // 		attributeValue.setValue(diskUsed);
+// 		xlogger.exit();
+// 		return attributeValue;
+// 	}
+
+// /**
+// 	 * Read attribute HdbTableSizes
+// 	 * 
+// 	 * @return attribute value
+// 	 * @throws DevFailed if read attribute failed.
+// 	 */
+// 	public org.tango.server.attribute.AttributeValue getHdbTableSizes() throws DevFailed {
+// 		xlogger.entry();
+// 		org.tango.server.attribute.AttributeValue
+// 			attributeValue = new org.tango.server.attribute.AttributeValue();
+// 		
+// 		hdbTableSizes = jmxUtilities.getTableSizes();
+// 		
+// 		attributeValue.setValue(hdbTableSizes);
 // 		xlogger.exit();
 // 		return attributeValue;
 // 	}

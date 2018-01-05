@@ -34,6 +34,7 @@
 package org.tango.cassandramonitor;
 
 import fr.esrf.Tango.DevFailed;
+import org.tango.cassandradistribution.HdbTable;
 import org.tango.utils.DevFailedUtils;
 
 import javax.management.*;
@@ -64,7 +65,7 @@ public class JmxUtilities {
     private int timeout;
     private ConnectionThread connectionThread = null;
     private List<ObjectName> objectNameList = new ArrayList<>();
-    private List<String> hdbTableList = new ArrayList<>();
+    private List<HdbTable> hdbTableList = new ArrayList<>();
     //===============================================================
     //===============================================================
     public JmxUtilities(String node, short port, String user, String password, int timeout) throws DevFailed {
@@ -75,7 +76,6 @@ public class JmxUtilities {
         this.timeout = timeout;
         connect();
         initObjectNameList();
-        initHdbTableList();
     }
     //===============================================================
     //===============================================================
@@ -159,7 +159,7 @@ public class JmxUtilities {
                 String name = objectName.toString();
                 int idx = name.lastIndexOf("=");
                 if (idx>0)
-                    hdbTableList.add(name.substring(++idx));
+                    hdbTableList.add(new HdbTable(name.substring(++idx)));
             }
         } catch (IOException e) {
             connectionError = e.toString();
@@ -184,6 +184,21 @@ public class JmxUtilities {
             connectionError = e.toString();
             throw DevFailedUtils.newDevFailed(e.toString(), e.getMessage());
         }
+    }
+    //===============================================================
+    //===============================================================
+    public List<HdbTable> getTableSizes()throws DevFailed {
+        if (hdbTableList.isEmpty())
+            initHdbTableList();
+
+        List<String> list = new ArrayList<>();
+        long t0 = System.currentTimeMillis();
+        for (HdbTable hdbTable : hdbTableList) {
+            long size = (long)getAttribute(hdbTable.getReadSizeObjectName(), "Count");
+            hdbTable.setSize((double) size/1.e6); // to Mb
+        }
+        System.out.println((System.currentTimeMillis()-t0) + " ms");
+        return hdbTableList;
     }
     //===============================================================
     //===============================================================

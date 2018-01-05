@@ -53,6 +53,7 @@ public interface IConstants {
     int READ_REQUESTS = 4;
     int COLUMN_FAMILIES = 5;
     int PENDING_TASKS = 6;
+    int SS_TABLE_COUNT = 7;
     String[] JMX_SERVICES = {
             "org.apache.cassandra.db:type=CompactionManager",
             "org.apache.cassandra.db:type=StorageService",
@@ -61,6 +62,7 @@ public interface IConstants {
             "org.apache.cassandra.metrics:type=ClientRequest,scope=Read,name=Latency",
             "org.apache.cassandra.db:type=ColumnFamilies,keyspace=hdb,columnfamily=*",
             "org.apache.cassandra.metrics:type=Compaction,name=PendingTasks",
+            "org.apache.cassandra.metrics:type=ColumnFamily,keyspace=hdb,scope=members,name=LiveSSTableCount",
     };
 
 

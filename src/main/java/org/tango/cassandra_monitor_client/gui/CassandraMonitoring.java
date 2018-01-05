@@ -180,6 +180,7 @@ public class CassandraMonitoring extends JFrame {
         javax.swing.JMenuItem overviewItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem compactionsItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem requestTrendItem = new javax.swing.JMenuItem();
+        javax.swing.JMenuItem tableSizeItem = new javax.swing.JMenuItem();
         javax.swing.JMenu helpMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem releaseMenuItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem aboutMenuItem = new javax.swing.JMenuItem();
@@ -243,6 +244,16 @@ public class CassandraMonitoring extends JFrame {
             }
         });
         viewMenu.add(requestTrendItem);
+
+        tableSizeItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_T, java.awt.event.InputEvent.ALT_MASK));
+        tableSizeItem.setMnemonic('T');
+        tableSizeItem.setText("Table sizes");
+        tableSizeItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tableSizeItemActionPerformed(evt);
+            }
+        });
+        viewMenu.add(tableSizeItem);
 
         menuBar.add(viewMenu);
 
@@ -332,7 +343,6 @@ public class CassandraMonitoring extends JFrame {
     //=======================================================
     @SuppressWarnings("UnusedParameters")
     private void overviewItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_overviewItemActionPerformed
-        // TODO add your handling code here:
         JTabbedPane tabbedPane = new JTabbedPane();
         int i=0;
         for (DataCenter dataCenter : dataCenterList) {
@@ -344,6 +354,20 @@ public class CassandraMonitoring extends JFrame {
         ATKGraphicsUtils.centerDialog(dialog);
         dialog.setVisible(true);
     }//GEN-LAST:event_overviewItemActionPerformed
+
+    //=======================================================
+    //=======================================================
+    @SuppressWarnings("UnusedParameters")
+    private void tableSizeItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tableSizeItemActionPerformed
+        // TODO add your handling code here:
+        try {
+            //  display dialog
+            new HdbTableSizesDialog(this, dataCenterList).setVisible(true);
+        }
+        catch (DevFailed e) {
+            ErrorPane.showErrorMessage(this, null, e);
+        }
+    }//GEN-LAST:event_tableSizeItemActionPerformed
 	//=======================================================
 	//=======================================================
     private void doClose() {

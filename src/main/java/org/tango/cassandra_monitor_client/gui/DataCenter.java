@@ -67,7 +67,7 @@ public class DataCenter extends ArrayList<CassandraNode> {
 
     private static final String[] columnHeaders = {
             "Node",  "State", " Data  Load ", "R Requests ",
-            "W Requests ", "Comp.", "Pending",
+            "W Requests ", "Comp.", "Pending", "SS Tables",
     };
 
     private static final Font labelFont = new Font("Dialog", Font.PLAIN, 12);
@@ -125,6 +125,8 @@ public class DataCenter extends ArrayList<CassandraNode> {
             panel.add(node.getCompactionLabel(), gbc);
             gbc.gridx++;
             panel.add(node.getPendingViewer(), gbc);
+            gbc.gridx++;
+            panel.add(node.getSsTableViewer(), gbc);
             gbc.gridx++;
         }
     }
