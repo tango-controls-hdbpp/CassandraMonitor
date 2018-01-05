@@ -13,6 +13,10 @@
 #-======================================================================
 
 
+CassandraMonitor-1.3 - 05/01/18:
+    SS tables added.
+    HDB table sizes added
+
 CassandraMonitor-1.2 - 04/01/18:
     Compaction pending and history added.
 

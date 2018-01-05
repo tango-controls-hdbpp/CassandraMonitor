@@ -239,7 +239,7 @@ public class HdbTableSizesDialog extends JDialog {
             this.name = name;
             this.size = size;
             if (size<1.0)
-                sizeStr = Double.toString(size) + " Mb";
+                sizeStr =  String.format("%.1f", size*1000.0) + " Kb";
             else
             if (size<1000)
                 sizeStr = String.format("%.1f", size) + " Mb";
