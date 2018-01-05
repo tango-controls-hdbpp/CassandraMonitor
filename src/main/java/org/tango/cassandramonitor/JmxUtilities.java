@@ -191,13 +191,10 @@ public class JmxUtilities {
         if (hdbTableList.isEmpty())
             initHdbTableList();
 
-        List<String> list = new ArrayList<>();
-        long t0 = System.currentTimeMillis();
         for (HdbTable hdbTable : hdbTableList) {
             long size = (long)getAttribute(hdbTable.getReadSizeObjectName(), "Count");
             hdbTable.setSize((double) size/1.e6); // to Mb
         }
-        System.out.println((System.currentTimeMillis()-t0) + " ms");
         return hdbTableList;
     }
     //===============================================================
