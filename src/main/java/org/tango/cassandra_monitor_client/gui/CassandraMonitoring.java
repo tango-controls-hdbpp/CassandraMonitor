@@ -81,14 +81,13 @@ public class CassandraMonitoring extends JFrame {
         buildDeviceList();
         SplashUtils.getInstance().setSplashProgress(30, "Building GUI");
         buildDataCenterPanels();
-        compactionChartDialog = new CompactionChartDialog(this, dataCenterList);
         requestTrendDialog = new RequestTrendDialog(this, dataCenterList);
 
         setTitle("CassandraMonitoring - " + SplashUtils.getRevisionNumber());
         ImageIcon icon = IconUtils.getInstance().getIcon("cassandra.jpeg", 0.10);
         setIconImage(icon.getImage());
         pack();
-        ATKGraphicsUtils.centerFrameOnScreen(this);
+        setLocation(new Point(50, 30));
         SplashUtils.getInstance().stopSplash();
 	}
 	//=======================================================
@@ -313,6 +312,8 @@ public class CassandraMonitoring extends JFrame {
     //=======================================================
     @SuppressWarnings("UnusedParameters")
     private void compactionsItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_compactionsItemActionPerformed
+        if (compactionChartDialog==null)
+            compactionChartDialog = new CompactionChartDialog(this, dataCenterList);
         compactionChartDialog.setVisible(true);
     }//GEN-LAST:event_compactionsItemActionPerformed
     //=======================================================

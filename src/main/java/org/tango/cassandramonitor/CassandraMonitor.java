@@ -497,7 +497,7 @@ public class CassandraMonitor {
 	 */
 	@Attribute(name="DataLoad", isPolled=true, pollingPeriod=60000)
 	@AttributeProperties(description="Data Load on disk of the Cassandra node (node from the node property).",
-	                     label="Data Load", unit="KB", standardUnit="1", displayUnit="0.0009765625",
+	                     label="Data Load", unit="Kb", standardUnit="1", displayUnit="0.0009765625",
 	                     changeEventAbsolute="1", archiveEventPeriod="3600000", archiveEventAbsolute="1")
 	private long dataLoad;
 	/**
@@ -960,6 +960,23 @@ public class CassandraMonitor {
 // 		
 // 		xlogger.exit();
 // 		return readCompactionHistoryOut;
+// 	}
+
+// /**
+// 	 * Read attribute DiskUsed
+// 	 * 
+// 	 * @return attribute value
+// 	 * @throws DevFailed if read attribute failed.
+// 	 */
+// 	public org.tango.server.attribute.AttributeValue getDiskUsed() throws DevFailed {
+// 		xlogger.entry();
+// 		org.tango.server.attribute.AttributeValue
+// 			attributeValue = new org.tango.server.attribute.AttributeValue();
+//         long used = (long) jmxUtilities.getAttribute(DISK_USED, ATTR_VALUE);
+//         diskUsed = ((double)used/1073741824);
+// 		attributeValue.setValue(diskUsed);
+// 		xlogger.exit();
+// 		return attributeValue;
 // 	}
 
 

@@ -66,8 +66,8 @@ public class DataCenter extends ArrayList<CassandraNode> {
     private PanelPopupMenu popupMenu = new PanelPopupMenu();
 
     private static final String[] columnHeaders = {
-            "Node",  "State", " Data  Load ",
-            "R Requests ", "W Requests ", "Comp.", "Pending",
+            "Node",  "State", " Data  Load ", "R Requests ",
+            "W Requests ", "Comp.", "Pending",
     };
 
     private static final Font labelFont = new Font("Dialog", Font.PLAIN, 12);

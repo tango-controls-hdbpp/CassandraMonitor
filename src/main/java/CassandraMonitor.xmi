@@ -105,7 +105,7 @@
       <archiveEvent fire="false" libCheckCriteria="false"/>
       <dataReadyEvent fire="false" libCheckCriteria="true"/>
       <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
-      <properties description="Data Load on disk of the Cassandra node (node from the node property)." label="Data Load" unit="KB" standardUnit="1" displayUnit="0.0009765625" format="" maxValue="" minValue="" maxAlarm="" minAlarm="" maxWarning="" minWarning="" deltaTime="" deltaValue=""/>
+      <properties description="Data Load on disk of the Cassandra node (node from the node property)." label="Data Load" unit="Kb" standardUnit="1" displayUnit="0.0009765625" format="" maxValue="" minValue="" maxAlarm="" minAlarm="" maxWarning="" minWarning="" deltaTime="" deltaValue=""/>
       <eventCriteria relChange="" absChange="1" period=""/>
       <evArchiveCriteria relChange="" absChange="1" period="3600000"/>
     </attributes>

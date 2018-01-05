@@ -103,7 +103,10 @@ public class CompactionChartDialog extends JDialog {
             gbc.gridy++;
         }
 		pack();
- 		ATKGraphicsUtils.centerDialog(this);
+
+        Point point = parent.getLocationOnScreen();
+        point.y += parent.getHeight();
+ 		setLocation(point);
 	}
 	//===============================================================
 	//===============================================================
