@@ -16,7 +16,7 @@ public interface ReleaseNote {
 		"<body text=\"#000000\" bgColor=\"#FFFFFF\" link=\"#0000FF\" vLink=\"#7F00FF\" aLink=\"#FF0000\">\n" + 
 		"<p><!-------TITLE------></p>\n" + 
 		"<center>	<h2>CassandraMonitoring Release Notes </h2>\n" + 
-		"	(Generated 05-01-2018  13:32:39)</center><br>\n" + 
+		"	(Generated 05-01-2018  13:32:44)</center><br>\n" + 
 		"<li><b>CassandraMonitor-1.3 - 05/01/18:</b><br>" + 
 		"&nbsp; &nbsp; &nbsp; SS tables added.<br>" + 
 		"&nbsp; &nbsp; &nbsp; HDB table sizes added<br>" + 
