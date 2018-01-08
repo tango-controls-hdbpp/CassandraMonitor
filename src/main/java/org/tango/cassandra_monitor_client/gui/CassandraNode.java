@@ -361,6 +361,11 @@ public class CassandraNode extends DeviceProxy {
     }
     //===============================================================
     //===============================================================
+    public String[] readSsTableNumbers() throws DevFailed {
+        return read_attribute("ssTableNumberList").extractStringArray();
+    }
+    //===============================================================
+    //===============================================================
 
 
 

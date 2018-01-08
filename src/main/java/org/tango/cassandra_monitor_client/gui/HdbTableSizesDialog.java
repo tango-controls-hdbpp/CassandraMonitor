@@ -38,8 +38,11 @@ import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
 
@@ -53,21 +56,37 @@ public class HdbTableSizesDialog extends JDialog {
     private DisplayedData displayedData;
     private List<CassandraNode> cassandraNodesList = new ArrayList<>();
     private String[] rowHeaders;
+    private JTable jTable;
+    private int selectedRow = -1;
+    private int mode;
+
+    public static final int HDB_TABLE_SIZE = 0;
+    public static final int HDB_SS_TABLE_NUMBER = 1;
+
+    private static final Color firstColumnBackground = new Color(0xe0e0e0);
+    private static final Color selectionBackground = new Color(0xe0e0ff);
     //===============================================================
 	/**
 	 *	Creates new form CompactionHistoryDialog
 	 */
 	//===============================================================
-	public HdbTableSizesDialog(JFrame parent, List<DataCenter> dataCenterList) throws DevFailed {
+	public HdbTableSizesDialog(JFrame parent, List<DataCenter> dataCenterList, int mode) throws DevFailed {
 		super(parent, true);
+		this.mode = mode;
 		initComponents();
 
         //  Read the table size from cassandra nodes and build JTable object
         List<HdbTableList> hdbTableLists = buildHdbTablesList(dataCenterList);
-        buildFinalData(hdbTableLists);
+        buildDisplayedData(hdbTableLists);
         buildSizeTable();
 
-		titleLabel.setText("HDB table sizes");
+        switch (mode) {
+            case HDB_TABLE_SIZE:
+                titleLabel.setText("HDB table sizes");
+                break;
+            case HDB_SS_TABLE_NUMBER:
+                titleLabel.setText("SS Tables");
+        }
 		pack();
  		ATKGraphicsUtils.centerDialog(this);
 	}
@@ -102,7 +121,7 @@ public class HdbTableSizesDialog extends JDialog {
     }
     //===============================================================
     //===============================================================
-    private void buildFinalData(List<HdbTableList> hdbTableLists) {
+    private void buildDisplayedData(List<HdbTableList> hdbTableLists) {
 	    //  Build row headers with first cassandra node
         int i=0;
         rowHeaders = new String[hdbTableLists.get(0).size()];
@@ -113,7 +132,7 @@ public class HdbTableSizesDialog extends JDialog {
         displayedData = new DisplayedData(rowHeaders, cassandraNodesList.size());
         int index = 0;
         for (HdbTableList hdbTableList : hdbTableLists) {
-            displayedData.addSize(index++, hdbTableList);
+            displayedData.addText(index++, hdbTableList);
         }
     }
     //===============================================================
@@ -121,16 +140,21 @@ public class HdbTableSizesDialog extends JDialog {
     public void buildSizeTable() {
         // Create the table
         DataTableModel dataTableModel = new DataTableModel();
-        JTable table;
-        table = new JTable(dataTableModel);
-        table.setRowSelectionAllowed(true);
-        table.setColumnSelectionAllowed(true);
-        table.setDragEnabled(false);
-        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        table.getTableHeader().setFont(new Font("Dialog", Font.BOLD, 12));
+        jTable = new JTable(dataTableModel);
+        jTable.setRowSelectionAllowed(true);
+        jTable.setColumnSelectionAllowed(true);
+        jTable.setDragEnabled(false);
+        jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        jTable.getTableHeader().setFont(new Font("Dialog", Font.BOLD, 12));
+        jTable.setDefaultRenderer(String.class, new LabelCellRenderer());
+        jTable.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                tableActionPerformed(evt);
+            }
+        });
 
         //  Set column width
-        final Enumeration columnEnum = table.getColumnModel().getColumns();
+        final Enumeration columnEnum = jTable.getColumnModel().getColumns();
         int i = 0;
         int tableWidth = 0;
         TableColumn tableColumn;
@@ -142,9 +166,16 @@ public class HdbTableSizesDialog extends JDialog {
         }
 
         //	Put it in scrolled pane
-        JScrollPane scrollPane = new JScrollPane(table);
+        JScrollPane scrollPane = new JScrollPane(jTable);
         scrollPane.setPreferredSize(new Dimension(tableWidth, 640));
         getContentPane().add(scrollPane, BorderLayout.CENTER);
+    }
+    //=======================================================
+    //=======================================================
+    private void tableActionPerformed(MouseEvent event) {
+        Point clickedPoint = new Point(event.getX(), event.getY());
+        selectedRow = jTable.rowAtPoint(clickedPoint);
+        jTable.repaint();
     }
 	//===============================================================
 	//===============================================================
@@ -203,8 +234,7 @@ public class HdbTableSizesDialog extends JDialog {
 	private void closeDialog(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_closeDialog
 		doClose();
 	}//GEN-LAST:event_closeDialog
-
-//===============================================================
+    //===============================================================
 	//===============================================================
 	private void doClose() {
 		setVisible(false);
@@ -224,22 +254,28 @@ public class HdbTableSizesDialog extends JDialog {
 
 
 	//===============================================================
+    /*
+     *  A JTable line
+     */
 	//===============================================================
     private class DisplayedLine {
         private String tableName;
-        private String[] sizeSt;
+        private String[] text;
         //===========================================================
         private DisplayedLine(String tableName, int arraySize) {
             this.tableName = tableName;
-            sizeSt = new String[arraySize];
+            text = new String[arraySize];
         }
         //===========================================================
-        private void addSize(int index, String sizeStr) {
-            this.sizeSt[index] = sizeStr;
+        private void setTexAt(int index, String text) {
+            this.text[index] = text;
         }
         //===========================================================
     }
 	//===============================================================
+    /*
+     * A list of JTable line (Displayed table data)
+     */
 	//===============================================================
     private class DisplayedData extends ArrayList<DisplayedLine> {
         //===========================================================
@@ -249,16 +285,22 @@ public class HdbTableSizesDialog extends JDialog {
             }
         }
         //===========================================================
-        private void addSize(int index, HdbTableList hdbTables) {
+        private void addText(int index, HdbTableList hdbTables) {
             for (HdbTable hdbTable : hdbTables) {
-                addSize(hdbTable.name, index, hdbTable.sizeStr);
+                switch (mode) {
+                    case HDB_TABLE_SIZE:
+                        addText(hdbTable.name, index, hdbTable.sizeStr);
+                        break;
+                    case HDB_SS_TABLE_NUMBER:
+                        addText(hdbTable.name, index, Integer.toString(hdbTable.ssTableNumber));
+                }
             }
         }
         //===========================================================
-        private void addSize(String tableName, int index, String sizeSrt) {
+        private void addText(String tableName, int index, String text) {
             for (DisplayedLine line : this) {
                 if (line.tableName.equals(tableName))
-                    line.addSize(index, sizeSrt);
+                    line.setTexAt(index, text);
             }
         }
         //===========================================================
@@ -266,78 +308,6 @@ public class HdbTableSizesDialog extends JDialog {
 	//===============================================================
 	//===============================================================
 
-
-
-	//===============================================================
-	//===============================================================
-    private class HdbTable {
-        private String name;
-        private double size;
-        private String sizeStr;
-        //===========================================================
-        private HdbTable(String name, double size) {
-            this.name = name;
-            this.size = size;
-            if (size<1.0)
-                sizeStr =  String.format("%.1f", size*1000.0) + " Kb";
-            else
-            if (size<1000)
-                sizeStr = String.format("%.1f", size) + " Mb";
-            else
-                sizeStr = String.format("%.1f", size/1000.0) + " Gb";
-         }
-        //===========================================================
-        public String toString() {
-            return name + ":\t" + size;
-        }
-        //===========================================================
-    }
-	//===============================================================
-	//===============================================================
-
-
-
-	//===============================================================
-	//===============================================================
-    private class HdbTableList extends ArrayList<HdbTable> {
-        private CassandraNode cassandraNode;
-        private ReadDataThread thread;
-        //===========================================================
-        private HdbTableList(CassandraNode cassandraNode) {
-            this.cassandraNode = cassandraNode;
-            thread = new ReadDataThread(this);
-            thread.start();
-        }
-        //===========================================================
-        private HdbTable getHdbTable(String tableName) {
-            for (HdbTable hdbTable : this)
-                if (hdbTable.name.equals(tableName))
-                    return hdbTable;
-            return null;
-        }
-        //===========================================================
-    }
-	//===============================================================
-	//===============================================================
-
-
-
-    //==============================================================
-    /**
-     * To sort record by time order
-     */
-    //==============================================================
-    private class TableComparator implements Comparator<HdbTable> {
-        @Override
-        public int compare(HdbTable hdbTable1, HdbTable hdbTable2) {
-            if (hdbTable1.size==hdbTable2.size)
-                return hdbTable2.name.compareTo(hdbTable1.name);
-            else
-                return Double.compare(hdbTable2.size, hdbTable1.size);
-        }
-    }
-    //==============================================================
-    //==============================================================
 
 
 
@@ -368,15 +338,69 @@ public class HdbTableSizesDialog extends JDialog {
         }
         //==========================================================
         public Object getValueAt(int row, int column) {
-            switch (column) {
-                case 0: return rowHeaders[row];
-                default: return displayedData.get(row).sizeSt[column-1];
-            }
+            //  Value to display is returned by
+            // LabelCellRenderer.getTableCellRendererComponent()
+            return "";
+        }
+        //==========================================================
+        /**
+         * JTable uses this method to determine the default renderer/
+         * editor for each cell.  If we didn't implement this method,
+         * then the last column would contain text ("true"/"false"),
+         * rather than a check box.
+         *
+         * @param  column the specified co;umn number
+         * @return the cell class at first row for specified column.
+         */
+        //==========================================================
+        public Class getColumnClass(int column) {
+            if (isVisible())
+                return getValueAt(0, column).getClass();
+            else
+                return null;
         }
         //==========================================================
     }
     //==============================================================
     //==============================================================
+
+
+    //=========================================================================
+    /**
+     * Renderer to set cell color
+     */
+    //=========================================================================
+    public class LabelCellRenderer extends JLabel implements TableCellRenderer {
+        //==========================================================
+        public LabelCellRenderer() {
+            //setFont(new Font("Dialog", Font.BOLD, 11));
+            setOpaque(true); //MUST do this for background to show up.
+        }
+        //==========================================================
+        public Component getTableCellRendererComponent(
+                JTable table, Object value,
+                boolean isSelected, boolean hasFocus,
+                int row, int column) {
+            switch (column) {
+                case 0:
+                    if (row==selectedRow)
+                        setBackground(selectionBackground);
+                    else
+                        setBackground(firstColumnBackground);
+                    setText(rowHeaders[row]);
+                    break;
+                default:
+                    if (row==selectedRow)
+                        setBackground(selectionBackground);
+                    else
+                        setBackground(Color.white);
+                    setText(displayedData.get(row).text[column-1]);
+                    break;
+            }
+            return this;
+        }
+    }
+    //=========================================================================
 
 
 
@@ -390,18 +414,120 @@ public class HdbTableSizesDialog extends JDialog {
         }
         public void run() {
             try {
-                DevVarDoubleStringArray dsa = hdbTableList.cassandraNode.readHdbTableSizes();
-
-                //  Build HdbTable objects
-                for (int i=0 ; i<dsa.dvalue.length ; i++) {
-                    HdbTable hdbTable = new HdbTable(dsa.svalue[i], dsa.dvalue[i]);
-                    hdbTableList.add(hdbTable);
+                switch (mode) {
+                    case HDB_TABLE_SIZE:
+                        DevVarDoubleStringArray dsa = hdbTableList.cassandraNode.readHdbTableSizes();
+                        //  Build HdbTable objects
+                        for (int i = 0 ; i<dsa.dvalue.length ; i++) {
+                            hdbTableList.add(new HdbTable(dsa.svalue[i], dsa.dvalue[i]));
+                        }
+                        break;
+                    case HDB_SS_TABLE_NUMBER:
+                        String[] array = hdbTableList.cassandraNode.readSsTableNumbers();
+                        for (String line : array) {
+                            StringTokenizer stk = new StringTokenizer(line, ":");
+                            String name = stk.nextToken().trim();
+                            String nbStr = stk.nextToken().trim();
+                            int nb = Integer.parseInt(nbStr);
+                            hdbTableList.add(new HdbTable(name, nb));
+                        }
+                        break;
                 }
                 Collections.sort(hdbTableList, new TableComparator());
             }
             catch (DevFailed e) {
                 error = e.errors[0].desc;
             }
+        }
+    }
+    //==============================================================
+    //==============================================================
+
+
+
+
+
+
+    //=========== HDB table size management ==================
+
+
+    //===============================================================
+    /*
+     * A class defining a HDB table
+     */
+    //===============================================================
+    private class HdbTable {
+        private String name;
+        private double size;
+        private String sizeStr;
+        private int ssTableNumber=0;
+        //===========================================================
+        private HdbTable(String name, int ssTableNumber) {
+            this.name = name;
+            this.ssTableNumber = ssTableNumber;
+        }
+        //===========================================================
+        private HdbTable(String name, double size) {
+            this.name = name;
+            this.size = size;
+            if (size<1.0)
+                sizeStr =  String.format("%.1f", size*1000.0) + " Kb";
+            else
+            if (size<1000)
+                sizeStr = String.format("%.1f", size) + " Mb";
+            else
+                sizeStr = String.format("%.1f", size/1000.0) + " Gb";
+        }
+        //===========================================================
+    }
+    //===============================================================
+    //===============================================================
+
+
+
+    //===============================================================
+    /*
+     * A list of HDB table in a cassandra node
+     */
+    //===============================================================
+    private class HdbTableList extends ArrayList<HdbTable> {
+        private CassandraNode cassandraNode;
+        private ReadDataThread thread;
+        //===========================================================
+        private HdbTableList(CassandraNode cassandraNode) {
+            this.cassandraNode = cassandraNode;
+            thread = new ReadDataThread(this);
+            thread.start();
+        }
+        //===========================================================
+    }
+    //===============================================================
+    //===============================================================
+
+
+
+    //==============================================================
+    /**
+     * To sort record by size order
+     */
+    //==============================================================
+    private class TableComparator implements Comparator<HdbTable> {
+        @Override
+        public int compare(HdbTable hdbTable1, HdbTable hdbTable2) {
+            switch (mode) {
+                case HDB_TABLE_SIZE:
+                    if (hdbTable1.size == hdbTable2.size)
+                        return hdbTable2.name.compareTo(hdbTable1.name);
+                    else
+                        return Double.compare(hdbTable2.size, hdbTable1.size);
+
+                case  HDB_SS_TABLE_NUMBER:
+                    if (hdbTable1.ssTableNumber == hdbTable2.ssTableNumber)
+                        return hdbTable2.name.compareTo(hdbTable1.name);
+                    else
+                        return Double.compare(hdbTable2.ssTableNumber, hdbTable1.ssTableNumber);
+            }
+            return 0;
         }
     }
     //==============================================================

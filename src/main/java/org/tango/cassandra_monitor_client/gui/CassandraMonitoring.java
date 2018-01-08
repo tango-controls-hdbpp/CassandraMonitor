@@ -181,6 +181,7 @@ public class CassandraMonitoring extends JFrame {
         javax.swing.JMenuItem compactionsItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem requestTrendItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem tableSizeItem = new javax.swing.JMenuItem();
+        javax.swing.JMenuItem ssTableNumberItem = new javax.swing.JMenuItem();
         javax.swing.JMenu helpMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem releaseMenuItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem aboutMenuItem = new javax.swing.JMenuItem();
@@ -254,6 +255,16 @@ public class CassandraMonitoring extends JFrame {
             }
         });
         viewMenu.add(tableSizeItem);
+
+        ssTableNumberItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.ALT_MASK));
+        ssTableNumberItem.setMnemonic('S');
+        ssTableNumberItem.setText("SS Table number");
+        ssTableNumberItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ssTableNumberItemActionPerformed(evt);
+            }
+        });
+        viewMenu.add(ssTableNumberItem);
 
         menuBar.add(viewMenu);
 
@@ -354,20 +365,31 @@ public class CassandraMonitoring extends JFrame {
         ATKGraphicsUtils.centerDialog(dialog);
         dialog.setVisible(true);
     }//GEN-LAST:event_overviewItemActionPerformed
-
     //=======================================================
     //=======================================================
     @SuppressWarnings("UnusedParameters")
     private void tableSizeItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tableSizeItemActionPerformed
-        // TODO add your handling code here:
         try {
             //  display dialog
-            new HdbTableSizesDialog(this, dataCenterList).setVisible(true);
+            new HdbTableSizesDialog(this, dataCenterList, HdbTableSizesDialog.HDB_TABLE_SIZE).setVisible(true);
         }
         catch (DevFailed e) {
             ErrorPane.showErrorMessage(this, null, e);
         }
     }//GEN-LAST:event_tableSizeItemActionPerformed
+    //=======================================================
+    //=======================================================
+    @SuppressWarnings("UnusedParameters")
+    private void ssTableNumberItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ssTableNumberItemActionPerformed
+        // TODO add your handling code here:
+        try {
+            //  display dialog
+            new HdbTableSizesDialog(this, dataCenterList, HdbTableSizesDialog.HDB_SS_TABLE_NUMBER).setVisible(true);
+        }
+        catch (DevFailed e) {
+            ErrorPane.showErrorMessage(this, null, e);
+        }
+    }//GEN-LAST:event_ssTableNumberItemActionPerformed
 	//=======================================================
 	//=======================================================
     private void doClose() {
