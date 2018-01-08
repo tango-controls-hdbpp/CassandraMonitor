@@ -88,7 +88,12 @@ public class HdbTableSizesDialog extends JDialog {
                 titleLabel.setText("SS Tables");
         }
 		pack();
- 		ATKGraphicsUtils.centerDialog(this);
+
+ 		// set the dialog location
+ 		Point location = parent.getLocationOnScreen();
+ 		location.x += 30;
+ 		location.y += 50;
+ 		setLocation(location);
 	}
     //===============================================================
     //===============================================================
