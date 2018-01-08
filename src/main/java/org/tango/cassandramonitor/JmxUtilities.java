@@ -44,8 +44,7 @@ import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
 import java.util.*;
 
-import static org.tango.cassandramonitor.IConstants.COLUMN_FAMILIES;
-import static org.tango.cassandramonitor.IConstants.JMX_SERVICES;
+import static org.tango.cassandramonitor.IConstants.*;
 
 
 /**
@@ -187,15 +186,30 @@ public class JmxUtilities {
     }
     //===============================================================
     //===============================================================
-    public List<HdbTable> getTableSizes()throws DevFailed {
+    public List<HdbTable> getHdbTableList()throws DevFailed {
         if (hdbTableList.isEmpty())
             initHdbTableList();
-
+        return hdbTableList;
+    }
+    //===============================================================
+    //===============================================================
+    public void readTableSizes() throws DevFailed {
+        if (hdbTableList.isEmpty())
+            initHdbTableList();
         for (HdbTable hdbTable : hdbTableList) {
-            long size = (long)getAttribute(hdbTable.getReadSizeObjectName(), "Count");
+            long size = (long)getAttribute(hdbTable.getReadSizeObjectName(), ATTR_COUNT);
             hdbTable.setSize((double) size/1.e6); // to Mb
         }
-        return hdbTableList;
+    }
+    //===============================================================
+    //===============================================================
+    public void readSsTables() throws DevFailed {
+        if (hdbTableList.isEmpty())
+            initHdbTableList();
+        for (HdbTable hdbTable : hdbTableList) {
+            int nbPending = (int)getAttribute(hdbTable.getSsTableObjectName(), ATTR_VALUE);
+            hdbTable.setSsTableCount(nbPending);
+        }
     }
     //===============================================================
     //===============================================================

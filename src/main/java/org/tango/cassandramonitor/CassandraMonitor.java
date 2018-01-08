@@ -717,8 +717,7 @@ public class CassandraMonitor {
 			attributeValue = new org.tango.server.attribute.AttributeValue();
 		/*----- PROTECTED REGION ID(CassandraMonitor.getSsTableNumber) ENABLED START -----*/
 		
-		ssTableNumber = (int) jmxUtilities.getAttribute(SS_TABLE_COUNT, ATTR_VALUE);
-		
+
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getSsTableNumber
 		attributeValue.setValue(ssTableNumber);
 		xlogger.exit();
@@ -801,6 +800,43 @@ public class CassandraMonitor {
         }
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getLiveNodes
 		attributeValue.setValue(liveNodes);
+		xlogger.exit();
+		return attributeValue;
+	}
+	
+	/**
+	 * Attribute SsTableNumberList, String, Spectrum, READ
+	 * description:
+	 *     SS Table number per HDB table
+	 */
+	@Attribute(name="SsTableNumberList", isPolled=true, pollingPeriod=10000)
+	@AttributeProperties(description="SS Table number per HDB table", label="SS Table number list",
+	                     changeEventAbsolute="0.1")
+	private String[] ssTableNumberList = new String[1024];
+	/**
+	 * Read attribute SsTableNumberList
+	 * 
+	 * @return attribute value
+	 * @throws DevFailed if read attribute failed.
+	 */
+	public org.tango.server.attribute.AttributeValue getSsTableNumberList() throws DevFailed {
+		xlogger.entry();
+		org.tango.server.attribute.AttributeValue
+			attributeValue = new org.tango.server.attribute.AttributeValue();
+		/*----- PROTECTED REGION ID(CassandraMonitor.getSsTableNumberList) ENABLED START -----*/
+
+		jmxUtilities.readSsTables();
+		List<HdbTable> hdbTableList = jmxUtilities.getHdbTableList();
+		ssTableNumber = 0;
+		ssTableNumberList = new String[hdbTableList.size()];
+		int i=0;
+		for (HdbTable hdbTable : hdbTableList) {
+			ssTableNumberList[i++] = hdbTable.getName()+":\t" + hdbTable.getSsTableCount();
+			ssTableNumber += hdbTable.getSsTableCount();
+		}
+
+		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getSsTableNumberList
+		attributeValue.setValue(ssTableNumberList);
 		xlogger.exit();
 		return attributeValue;
 	}
@@ -932,7 +968,8 @@ public class CassandraMonitor {
 		DevVarDoubleStringArray readHdbTableSizesOut;
 		/*----- PROTECTED REGION ID(CassandraMonitor.readHdbTableSizes) ENABLED START -----*/
 
-		List<HdbTable> hdbTableList = jmxUtilities.getTableSizes();
+		jmxUtilities.readTableSizes();
+		List<HdbTable> hdbTableList = jmxUtilities.getHdbTableList();
 		readHdbTableSizesOut = new DevVarDoubleStringArray();
 		readHdbTableSizesOut.svalue = new String[hdbTableList.size()];
 		readHdbTableSizesOut.dvalue = new double[hdbTableList.size()];

@@ -196,6 +196,15 @@
       <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
       <properties description="List of Cassandra nodes from the cluster which are currently alive" label="Live nodes" unit="" standardUnit="" displayUnit="" format="" maxValue="" minValue="" maxAlarm="" minAlarm="" maxWarning="" minWarning="" deltaTime="" deltaValue=""/>
     </attributes>
+    <attributes name="SsTableNumberList" attType="Spectrum" rwType="READ" displayLevel="OPERATOR" polledPeriod="10000" maxX="1024" maxY="" allocReadMember="true" isDynamic="false">
+      <dataType xsi:type="pogoDsl:StringType"/>
+      <changeEvent fire="false" libCheckCriteria="false"/>
+      <archiveEvent fire="false" libCheckCriteria="false"/>
+      <dataReadyEvent fire="false" libCheckCriteria="true"/>
+      <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
+      <properties description="SS Table number per HDB table" label="SS Table number list" unit="" standardUnit="" displayUnit="" format="" maxValue="" minValue="" maxAlarm="" minAlarm="" maxWarning="" minWarning="" deltaTime="" deltaValue=""/>
+      <eventCriteria relChange="" absChange="0.1" period=""/>
+    </attributes>
     <pipes name="Compactions" description="Give the compactions status" label="Compactions" rwType="READ" displayLevel="OPERATOR"/>
     <preferences docHome="./doc_html" makefileHome="/segfs/tango/cppserver/env"/>
   </classes>

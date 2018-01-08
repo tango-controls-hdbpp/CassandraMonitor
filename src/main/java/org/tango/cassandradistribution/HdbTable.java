@@ -34,10 +34,6 @@
 package org.tango.cassandradistribution;
 
 import fr.esrf.Tango.DevFailed;
-import fr.esrf.Tango.DevState;
-import fr.esrf.TangoApi.DeviceProxy;
-import fr.esrf.TangoDs.Except;
-import fr.esrf.TangoDs.TangoConst;
 import org.tango.utils.DevFailedUtils;
 
 import javax.management.MalformedObjectNameException;
@@ -53,16 +49,20 @@ import javax.management.ObjectName;
 public class HdbTable {
     private String name;
     private ObjectName readSizeObjectName;
+    private ObjectName ssTableObjectName;
     private double size;
+    private int ssTableCount;
 
-    private static final String sizeHeader = "org.apache.cassandra.metrics:type=ColumnFamily,keyspace=hdb,scope=";
+    private static final String metricsHeader = "org.apache.cassandra.metrics:type=ColumnFamily,keyspace=hdb,scope=";
     private static final String sizeEnd = ",name=LiveDiskSpaceUsed";
+    private static final String ssTableEnd = ",name=LiveSSTableCount";
     //===============================================================
     //===============================================================
     public HdbTable(String tableName) throws DevFailed {
         this.name = tableName;
         try {
-            readSizeObjectName = new ObjectName(sizeHeader + name + sizeEnd);
+            readSizeObjectName = new ObjectName(metricsHeader + name + sizeEnd);
+            ssTableObjectName = new ObjectName(metricsHeader + name + ssTableEnd);
         }catch (MalformedObjectNameException e) {
             throw DevFailedUtils.newDevFailed(e.toString(), e.getMessage());
         }
@@ -71,6 +71,11 @@ public class HdbTable {
     //===============================================================
     public String getName() {
         return name;
+    }
+    //===============================================================
+    //===============================================================
+    public ObjectName getSsTableObjectName() {
+        return ssTableObjectName;
     }
     //===============================================================
     //===============================================================
@@ -86,6 +91,16 @@ public class HdbTable {
     //===============================================================
     public void setSize(double size) {
         this.size = size;
+    }
+    //===============================================================
+    //===============================================================
+    public int getSsTableCount() {
+        return ssTableCount;
+    }
+    //===============================================================
+    //===============================================================
+    public void setSsTableCount(int ssTableCount) {
+        this.ssTableCount = ssTableCount;
     }
     //===============================================================
     //===============================================================
