@@ -121,8 +121,8 @@ public class CompactionChartDialog extends JDialog {
     private static final int RATIO = 4;
     static final Color VALIDATION_COLOR = new Color(0x66ff66);
     static final Color CLEANUP_COLOR    = new Color(0x0fccff);
+    static final Color ERROR_COLOR = new Color(0xff8080);
     private static final Color SELECTION_COLOR  = new Color(0xffffdd);
-    private static final Color ERROR_COLOR = new Color(0xff8080);
     //===============================================================
     private void buildTable() {
         tableModel = new DataTableModel();

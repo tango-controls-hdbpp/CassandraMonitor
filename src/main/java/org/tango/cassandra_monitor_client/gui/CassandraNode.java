@@ -55,6 +55,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.tango.cassandra_monitor_client.gui.CompactionChartDialog.ERROR_COLOR;
 import static org.tango.cassandra_monitor_client.gui.DataCenter.BACKGROUND;
 import static org.tango.cassandramonitor.IConstants.READ;
 import static org.tango.cassandramonitor.IConstants.WRITE;
@@ -325,6 +326,7 @@ public class CassandraNode extends DeviceProxy {
         else
         if (type.equals("ERROR")) {
             icon = IconUtils.getRedBall();
+            compactionChart.setBackground(ERROR_COLOR);
             PipeDataElement dataElement = pipeBlob.get(0);
             String errorDescription = dataElement.extractStringArray()[0];
             compactionLabel.setToolTipText(errorDescription);
