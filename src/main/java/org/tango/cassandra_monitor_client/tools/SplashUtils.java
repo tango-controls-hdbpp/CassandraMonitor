@@ -56,7 +56,7 @@ public class SplashUtils {
     private static Splash splash = null;
     private static int splashProgress = 0;
     private static boolean splashActive = false;
-    private static final String packageName = "EbsVacuum";
+    private static final String packageName = "CassandraMonitor";
 
     private static final String revNumber = "1.4  -  08-01-2018  13:49:21";
     private static SplashUtils instance = new SplashUtils();

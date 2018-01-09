@@ -88,9 +88,10 @@ public class CassandraNode extends DeviceProxy {
     private boolean selected;
 
     private static final String pipeName = "Compactions";
-    public static final int COMPACTION = 0;
-    public static final int VALIDATION = 1;
-    public static final int CLEANUP = 2;
+    public static final int PIPE_ERROR = 0;
+    public static final int COMPACTION = 1;
+    public static final int VALIDATION = 2;
+    public static final int CLEANUP = 3;
     //===============================================================
     //===============================================================
     public CassandraNode(String deviceName) throws DevFailed {
@@ -313,11 +314,21 @@ public class CassandraNode extends DeviceProxy {
         //  Compaction modified -> update display
         compactionList.clear();
         ImageIcon icon = null;
-        if (pipeBlob.getName().equals("Compactions")) {
+        compactionLabel.setToolTipText(null);
+        String type = pipeBlob.getName();
+        if (type.equals("Compactions")) {
             icon = IconUtils.getGreenBall();
             for (PipeDataElement dataElement : pipeBlob) {
                 compactionList.add(new Compaction(dataElement));
             }
+        }
+        else
+        if (type.equals("ERROR")) {
+            icon = IconUtils.getRedBall();
+            PipeDataElement dataElement = pipeBlob.get(0);
+            String errorDescription = dataElement.extractStringArray()[0];
+            compactionLabel.setToolTipText(errorDescription);
+            compactionList.add(new Compaction(errorDescription));
         }
         compactionLabel.setIcon(icon);
 
@@ -387,6 +398,12 @@ public class CassandraNode extends DeviceProxy {
         double ratio = 0.0;
         String totalStr;
         String ratioStr;
+        //=================================================================
+        private Compaction(String errorDescription) {
+            taskType = PIPE_ERROR;
+            tableName = errorDescription;
+            taskName = "Error";
+        }
         //=================================================================
         private Compaction(PipeDataElement pipeDataElement) {
             tableName = pipeDataElement.getName();

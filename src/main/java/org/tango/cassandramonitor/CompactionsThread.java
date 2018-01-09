@@ -35,6 +35,7 @@ package org.tango.cassandramonitor;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.PipeBlob;
+import fr.esrf.TangoApi.PipeDataElement;
 import fr.esrf.TangoDs.Except;
 import org.tango.server.device.DeviceManager;
 import org.tango.server.events.EventManager;
@@ -59,12 +60,14 @@ class CompactionsThread extends Thread {
     private DeviceManager deviceManager;
     private JmxToCompactions jmxToCompactions;
     private JmxUtilities jmxUtilities;
+    private String cassandraNode;
     private boolean runThreads = true;
     //===============================================================
     //===============================================================
     CompactionsThread(DeviceManager deviceManager, JmxUtilities jmxUtilities, String cassandraNode) {
         this.deviceManager = deviceManager;
         this.jmxUtilities = jmxUtilities;
+        this.cassandraNode = cassandraNode;
         jmxToCompactions = new JmxToCompactions(cassandraNode);
     }
     //===============================================================
@@ -85,6 +88,24 @@ class CompactionsThread extends Thread {
     }
     //===============================================================
     //===============================================================
+    private void pushErrorPipeEvent(String errorDescription) {
+        try {
+            //  Build pipe with error description and send event
+            PipeBlob pipeBlob = new PipeBlob("ERROR");
+            pipeBlob.add(new PipeDataElement(cassandraNode, errorDescription));
+            pipeCompactions = new PipeValue(pipeBlob);
+            pushPipeEvent();
+        } catch (DevFailed devFailed) {
+            Except.print_exception(devFailed);
+        }
+    }
+    //===============================================================
+    //===============================================================
+
+
+
+    //===============================================================
+    //===============================================================
     public void run() {
         while (runThreads) {
             try {
@@ -93,26 +114,22 @@ class CompactionsThread extends Thread {
                 //noinspection unchecked
                 jmxToCompactions.setList((List<HashMap<String, String>>) jmxAtt);
                 if (jmxToCompactions.hasChanged()) {
-                    PipeBlob pipeBlob = jmxToCompactions.getPipeBlob();
                     //  And sent it to pipe and event
-                    pipeCompactions = new PipeValue(pipeBlob);
+                    pipeCompactions = new PipeValue(jmxToCompactions.getPipeBlob());
                     pushPipeEvent();
                     //System.out.println("Compactions  change");
                 } else {
-                    //  Check if first call
-                    if (pipeCompactions ==null)
+                    //  Check if first call without change
+                    if (pipeCompactions==null)
                         pipeCompactions = new PipeValue(jmxToCompactions.getPipeBlob());
                     //System.out.println("No change");
                 }
-            } catch (DevFailed e) {
-                //  Build pipe with error description and send event
-                pipeCompactions = new PipeValue(new PipeBlob(e.errors[0].desc));
-                try {
-                    pushPipeEvent();
-                } catch (DevFailed devFailed) {
-                    Except.print_exception(devFailed);
-                }
-            }
+            } catch (Exception e) {
+                if (e instanceof DevFailed)
+                    pushErrorPipeEvent(((DevFailed)e).errors[0].desc);
+                else
+                    pushErrorPipeEvent(e.toString());
+             }
             try {
                 sleep(1000);
             } catch (InterruptedException e) {

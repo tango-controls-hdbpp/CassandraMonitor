@@ -35,8 +35,6 @@
 
 package org.tango.cassandra_monitor_client.gui;
 
-import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
-
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -47,6 +45,7 @@ import java.util.List;
 
 import static org.tango.cassandra_monitor_client.gui.CassandraNode.CLEANUP;
 import static org.tango.cassandra_monitor_client.gui.CassandraNode.VALIDATION;
+import static org.tango.cassandra_monitor_client.gui.CassandraNode.PIPE_ERROR;
 
 
 //===============================================================
@@ -123,6 +122,7 @@ public class CompactionChartDialog extends JDialog {
     static final Color VALIDATION_COLOR = new Color(0x66ff66);
     static final Color CLEANUP_COLOR    = new Color(0x0fccff);
     private static final Color SELECTION_COLOR  = new Color(0xffffdd);
+    private static final Color ERROR_COLOR = new Color(0xff8080);
     //===============================================================
     private void buildTable() {
         tableModel = new DataTableModel();
@@ -376,6 +376,8 @@ public class CompactionChartDialog extends JDialog {
                     return VALIDATION_COLOR;
                 case CLEANUP:
                     return CLEANUP_COLOR;
+                case PIPE_ERROR:
+                    return ERROR_COLOR;
             }
             return Color.white;
         }
