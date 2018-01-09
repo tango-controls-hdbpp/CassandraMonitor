@@ -146,6 +146,10 @@ public class DataCenter extends ArrayList<CassandraNode> {
     //===============================================================
     private void nodeActionPerformed(MouseEvent event, CassandraNode node) {
         selectedNode = node;
+        if (event.getClickCount()==2 && (event.getModifiers() & MouseEvent.BUTTON1_MASK) != 0) {
+            displayStatus();
+        }
+        else
         if ((event.getModifiers() & MouseEvent.BUTTON3_MASK) != 0) {
             popupMenu.showMenu(event);
         }
@@ -163,6 +167,15 @@ public class DataCenter extends ArrayList<CassandraNode> {
     //===============================================================
     public void sort() {
         Collections.sort(this, new NodeComparator());
+    }
+    //===============================================================
+    //===============================================================
+    private void displayStatus() {
+        try {
+            JOptionPane.showMessageDialog(parentFrame,selectedNode.status());
+        } catch (DevFailed e) {
+            ErrorPane.showErrorMessage(parentFrame, null, e);
+        }
     }
     //===============================================================
     //===============================================================
@@ -291,12 +304,13 @@ public class DataCenter extends ArrayList<CassandraNode> {
 
     //=======================================================
     //=======================================================
-    private static final int TEST_DEVICE = 0;
-    private static final int COMPACTION_HISTORY = 1;
+    private static final int STATUS = 0;
+    private static final int TEST_DEVICE = 1;
+    private static final int COMPACTION_HISTORY = 2;
     private static final int OFFSET = 2;    //	Label And separator
 
     private static String[] menuLabels = {
-            "Test Device", "Compaction History"
+            "Status", "Test Device", "Compaction History"
     };
     //=======================================================
     //=======================================================
@@ -334,6 +348,9 @@ public class DataCenter extends ArrayList<CassandraNode> {
                 if (getComponent(OFFSET + i) == obj)
                     itemIndex = i;
             switch (itemIndex) {
+                case STATUS:
+                    displayStatus();
+                    break;
                 case TEST_DEVICE:
                     testDevice();
                     break;

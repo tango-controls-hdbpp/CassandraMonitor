@@ -73,7 +73,7 @@ public class JmxUtilities {
         this.user = user;
         this.password = password;
         this.timeout = timeout;
-        connect();
+        try { connect(); } catch (DevFailed e) { System.err.println(e.toString()); }
         initObjectNameList();
     }
     //===============================================================
@@ -215,6 +215,7 @@ public class JmxUtilities {
     //===============================================================
 
 
+    private int nbError = 0;
 
     //===============================================================
     /*
@@ -222,8 +223,8 @@ public class JmxUtilities {
      */
     //===============================================================
     private class ConnectionThread extends Thread {
-        IOException exception = null;
-        boolean running = true;
+        private IOException exception = null;
+        private boolean running = true;
         public void run() {
             String jmxUrl = "service:jmx:rmi:///jndi/rmi://" + node + ":" + port + "/jmxrmi";
             Map<String, String[]> map = new HashMap<>();
