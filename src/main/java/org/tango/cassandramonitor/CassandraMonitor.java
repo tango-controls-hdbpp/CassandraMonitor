@@ -487,7 +487,7 @@ public class CassandraMonitor {
             default:
                 setState(DevState.UNKNOWN);
         }
-        setStatus(operationMode);
+        setStatus("Node " + node + " is " + operationMode);
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getOperationMode
 		attributeValue.setValue(operationMode);
 		xlogger.exit();

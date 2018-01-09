@@ -59,7 +59,7 @@ import static org.tango.cassandramonitor.IConstants.WRITE;
  */
 
 public class DataCenter extends ArrayList<CassandraNode> {
-    private JFrame parentFrame;
+    private CassandraMonitoring monitoring;
     private String name;
     private JPanel panel;
     private CassandraNode selectedNode = null;
@@ -75,9 +75,9 @@ public class DataCenter extends ArrayList<CassandraNode> {
     static final Color BACKGROUND = new Color(0xdddddd);
     //===============================================================
     //===============================================================
-    public DataCenter(JFrame parentFrame, String name) {
+    public DataCenter(CassandraMonitoring monitoring, String name) {
         this.name = name;
-        this.parentFrame = parentFrame;
+        this.monitoring = monitoring;
     }
     //===============================================================
     //===============================================================
@@ -128,26 +128,50 @@ public class DataCenter extends ArrayList<CassandraNode> {
             gbc.gridx++;
             panel.add(node.getSsTableViewer(), gbc);
             gbc.gridx++;
+
+            addMouseListener(node.getStateViewer(), node);
+            addMouseListener(node.getDataLoadViewer(), node);
+            addMouseListener(node.getRequestViewers()[READ], node);
+            addMouseListener(node.getRequestViewers()[WRITE], node);
+            addMouseListener(node.getCompactionLabel(), node);
+            addMouseListener(node.getPendingViewer(), node);
+            addMouseListener(node.getSsTableViewer(), node);
         }
+    }
+    //===============================================================
+    //===============================================================
+    private void addMouseListener(JComponent viewer, final CassandraNode node) {
+        final boolean compactions = viewer == node.getCompactionLabel();
+        for (int i=0 ; i<viewer.getComponentCount() ; i++) {
+            viewer.getComponent(i).addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseClicked(MouseEvent evt) {
+                    nodeActionPerformed(evt, node, compactions);
+                }
+            });
+        }
+        viewer.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                nodeActionPerformed(evt, node, compactions);
+            }
+        });
     }
     //===============================================================
     //===============================================================
     private JLabel buildLabel(String text, final CassandraNode node) {
         JLabel label = new JLabel(text);
         label.setFont(labelFont);
-        label.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(MouseEvent evt) {
-                nodeActionPerformed(evt, node);
-            }
-        });
+        addMouseListener(label, node);
         return label;
     }
     //===============================================================
     //===============================================================
-    private void nodeActionPerformed(MouseEvent event, CassandraNode node) {
+    private void nodeActionPerformed(MouseEvent event, CassandraNode node, boolean compactions) {
         selectedNode = node;
         if (event.getClickCount()==2 && (event.getModifiers() & MouseEvent.BUTTON1_MASK) != 0) {
-            displayStatus();
+            if (compactions)
+                monitoring.displayCompactionChartDialog(node);
+            else
+                displayStatus();
         }
         else
         if ((event.getModifiers() & MouseEvent.BUTTON3_MASK) != 0) {
@@ -172,9 +196,9 @@ public class DataCenter extends ArrayList<CassandraNode> {
     //===============================================================
     private void displayStatus() {
         try {
-            JOptionPane.showMessageDialog(parentFrame,selectedNode.status());
+            JOptionPane.showMessageDialog(monitoring,selectedNode.status());
         } catch (DevFailed e) {
-            ErrorPane.showErrorMessage(parentFrame, null, e);
+            ErrorPane.showErrorMessage(monitoring, null, e);
         }
     }
     //===============================================================
@@ -186,10 +210,10 @@ public class DataCenter extends ArrayList<CassandraNode> {
     //===============================================================
     private void displayCompactionHistory() {
         try {
-            new CompactionHistoryDialog(parentFrame, selectedNode).setVisible(true);
+            new CompactionHistoryDialog(monitoring, selectedNode).setVisible(true);
         }
         catch (DevFailed e) {
-            ErrorPane.showErrorMessage(parentFrame, null , e);
+            ErrorPane.showErrorMessage(monitoring, null , e);
         }
     }
     //===============================================================

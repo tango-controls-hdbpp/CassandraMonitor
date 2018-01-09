@@ -334,12 +334,17 @@ public class CassandraMonitoring extends JFrame {
     //=======================================================
     @SuppressWarnings("UnusedParameters")
     private void compactionsItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_compactionsItemActionPerformed
-        if (compactionChartDialog==null)
-            compactionChartDialog = new CompactionChartDialog(this, dataCenterList);
-        compactionChartDialog.setVisible(true);
+        displayCompactionChartDialog(null);
     }//GEN-LAST:event_compactionsItemActionPerformed
     //=======================================================
     //=======================================================
+    void displayCompactionChartDialog(CassandraNode cassandraNode) {
+        if (compactionChartDialog == null)
+            compactionChartDialog = new CompactionChartDialog(this, dataCenterList);
+        if (cassandraNode!=null)
+            CompactionChartDialog.setSelection(cassandraNode);
+        compactionChartDialog.setVisible(true);
+    }
     @SuppressWarnings("UnusedParameters")
     private void releaseMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_releaseMenuItemActionPerformed
         new PopupHtml(this).show(ReleaseNote.str);
