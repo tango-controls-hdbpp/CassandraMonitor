@@ -67,6 +67,8 @@ public class CassandraMonitoring extends JFrame {
     private List<CassandraNode> cassandraNodeList = new ArrayList<>();
     private List<DataCenter> dataCenterList = new ArrayList<>();
     private RequestTrendDialog requestTrendDialog;
+    private HdbTableInformationDialog hdbTableSizeDialog = null;
+    private HdbTableInformationDialog hdbSsTableDialog = null;
 	//=======================================================
     /**
 	 *	Creates new form CassandraMonitoring
@@ -375,8 +377,13 @@ public class CassandraMonitoring extends JFrame {
     @SuppressWarnings("UnusedParameters")
     private void tableSizeItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tableSizeItemActionPerformed
         try {
+            if (hdbTableSizeDialog!=null) {
+                hdbTableSizeDialog.doClose();
+            }
             //  display dialog
-            new HdbTableSizesDialog(this, dataCenterList, HdbTableSizesDialog.HDB_TABLE_SIZE).setVisible(true);
+            hdbTableSizeDialog = new HdbTableInformationDialog(this,
+                    dataCenterList, HdbTableInformationDialog.HDB_TABLE_SIZE);
+            hdbTableSizeDialog.setVisible(true);
         }
         catch (DevFailed e) {
             ErrorPane.showErrorMessage(this, null, e);
@@ -388,8 +395,13 @@ public class CassandraMonitoring extends JFrame {
     private void ssTableNumberItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ssTableNumberItemActionPerformed
         // TODO add your handling code here:
         try {
+            if (hdbSsTableDialog!=null) {
+                hdbSsTableDialog.doClose();
+            }
             //  display dialog
-            new HdbTableSizesDialog(this, dataCenterList, HdbTableSizesDialog.HDB_SS_TABLE_NUMBER).setVisible(true);
+            hdbSsTableDialog = new HdbTableInformationDialog(this,
+                    dataCenterList, HdbTableInformationDialog.HDB_SS_TABLE_NUMBER);
+            hdbSsTableDialog.setVisible(true);
         }
         catch (DevFailed e) {
             ErrorPane.showErrorMessage(this, null, e);

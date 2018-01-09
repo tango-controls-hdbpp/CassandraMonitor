@@ -31,7 +31,7 @@
 //
 //-======================================================================
 
-package org.tango.cassandradistribution;
+package org.tango.cassandramonitor;
 
 import fr.esrf.Tango.DevFailed;
 import org.tango.utils.DevFailedUtils;

@@ -34,7 +34,6 @@ package org.tango.cassandra_monitor_client.gui;
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.Tango.DevVarDoubleStringArray;
 import fr.esrf.TangoDs.Except;
-import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -52,7 +51,7 @@ import java.util.List;
  *	@author  Pascal Verdier
  */
 
-public class HdbTableSizesDialog extends JDialog {
+public class HdbTableInformationDialog extends JDialog {
     private DisplayedData displayedData;
     private List<CassandraNode> cassandraNodesList = new ArrayList<>();
     private String[] rowHeaders;
@@ -63,15 +62,15 @@ public class HdbTableSizesDialog extends JDialog {
     public static final int HDB_TABLE_SIZE = 0;
     public static final int HDB_SS_TABLE_NUMBER = 1;
 
-    private static final Color firstColumnBackground = new Color(0xe0e0e0);
+    private static final Color firstColumnBackground = new Color(0xd0d0d0);
     private static final Color selectionBackground = new Color(0xe0e0ff);
     //===============================================================
 	/**
 	 *	Creates new form CompactionHistoryDialog
 	 */
 	//===============================================================
-	public HdbTableSizesDialog(JFrame parent, List<DataCenter> dataCenterList, int mode) throws DevFailed {
-		super(parent, true);
+	public HdbTableInformationDialog(JFrame parent, List<DataCenter> dataCenterList, int mode) throws DevFailed {
+		super(parent, false);
 		this.mode = mode;
 		initComponents();
 
@@ -129,7 +128,8 @@ public class HdbTableSizesDialog extends JDialog {
     private void buildDisplayedData(List<HdbTableList> hdbTableLists) {
 	    //  Build row headers with first cassandra node
         int i=0;
-        rowHeaders = new String[hdbTableLists.get(0).size()];
+        rowHeaders = new String[hdbTableLists.get(0).size()+1];
+        rowHeaders[i++] = "TOTAL";
         for (HdbTable hdbTable : hdbTableLists.get(0))
             rowHeaders[i++] = hdbTable.name;
 
@@ -150,7 +150,7 @@ public class HdbTableSizesDialog extends JDialog {
         jTable.setColumnSelectionAllowed(true);
         jTable.setDragEnabled(false);
         jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        jTable.getTableHeader().setFont(new Font("Dialog", Font.BOLD, 12));
+        jTable.getTableHeader().setFont(new Font("Dialog", Font.BOLD, 14));
         jTable.setDefaultRenderer(String.class, new LabelCellRenderer());
         jTable.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
@@ -181,6 +181,17 @@ public class HdbTableSizesDialog extends JDialog {
         Point clickedPoint = new Point(event.getX(), event.getY());
         selectedRow = jTable.rowAtPoint(clickedPoint);
         jTable.repaint();
+    }
+    //===============================================================
+    //===============================================================
+    private static String formatSize(double size) {
+        if (size<1.0)
+            return String.format("%.1f", size*1024.0) + " K";
+        else
+        if (size<1024)
+            return String.format("%.1f", size) + " M";
+        else
+            return String.format("%.1f", size/1024.0) + " G";
     }
 	//===============================================================
 	//===============================================================
@@ -241,7 +252,7 @@ public class HdbTableSizesDialog extends JDialog {
 	}//GEN-LAST:event_closeDialog
     //===============================================================
 	//===============================================================
-	private void doClose() {
+	void doClose() {
 		setVisible(false);
 		dispose();
 	}
@@ -273,7 +284,7 @@ public class HdbTableSizesDialog extends JDialog {
         }
         //===========================================================
         private void setTexAt(int index, String text) {
-            this.text[index] = text;
+            this.text[index] = "  " + text;
         }
         //===========================================================
     }
@@ -290,8 +301,10 @@ public class HdbTableSizesDialog extends JDialog {
             }
         }
         //===========================================================
-        private void addText(int index, HdbTableList hdbTables) {
-            for (HdbTable hdbTable : hdbTables) {
+        private void addText(int index, HdbTableList hdbTableList) {
+            //  First is sum
+            addText("TOTAL", index, hdbTableList.getSumStr());
+            for (HdbTable hdbTable : hdbTableList) {
                 switch (mode) {
                     case HDB_TABLE_SIZE:
                         addText(hdbTable.name, index, hdbTable.sizeStr);
@@ -386,17 +399,24 @@ public class HdbTableSizesDialog extends JDialog {
                 JTable table, Object value,
                 boolean isSelected, boolean hasFocus,
                 int row, int column) {
+            if (row==0)
+                setFont(new Font("Dialog", Font.BOLD, 14));
+            else
+                setFont(new Font("Dialog", Font.BOLD, 12));
             switch (column) {
                 case 0:
                     if (row==selectedRow)
                         setBackground(selectionBackground);
                     else
                         setBackground(firstColumnBackground);
-                    setText(rowHeaders[row]);
+                    setText("  "+rowHeaders[row]);
                     break;
                 default:
                     if (row==selectedRow)
                         setBackground(selectionBackground);
+                    else
+                    if (row==0)
+                        setBackground(firstColumnBackground);
                     else
                         setBackground(Color.white);
                     setText(displayedData.get(row).text[column-1]);
@@ -439,6 +459,7 @@ public class HdbTableSizesDialog extends JDialog {
                         break;
                 }
                 Collections.sort(hdbTableList, new TableComparator());
+                hdbTableList.computeSum();
             }
             catch (DevFailed e) {
                 error = e.errors[0].desc;
@@ -453,7 +474,7 @@ public class HdbTableSizesDialog extends JDialog {
 
 
 
-    //=========== HDB table size management ==================
+    //=========== HDB table (size+ss) management ==================
 
 
     //===============================================================
@@ -475,13 +496,7 @@ public class HdbTableSizesDialog extends JDialog {
         private HdbTable(String name, double size) {
             this.name = name;
             this.size = size;
-            if (size<1.0)
-                sizeStr =  String.format("%.1f", size*1000.0) + " Kb";
-            else
-            if (size<1000)
-                sizeStr = String.format("%.1f", size) + " Mb";
-            else
-                sizeStr = String.format("%.1f", size/1000.0) + " Gb";
+            sizeStr = formatSize(size);
         }
         //===========================================================
     }
@@ -498,11 +513,35 @@ public class HdbTableSizesDialog extends JDialog {
     private class HdbTableList extends ArrayList<HdbTable> {
         private CassandraNode cassandraNode;
         private ReadDataThread thread;
+        private double sum = 0;
         //===========================================================
         private HdbTableList(CassandraNode cassandraNode) {
             this.cassandraNode = cassandraNode;
             thread = new ReadDataThread(this);
             thread.start();
+        }
+        //===========================================================
+        private void computeSum() {
+            for (HdbTable hdbTable : this) {
+                switch (mode) {
+                    case HDB_TABLE_SIZE:
+                        sum += hdbTable.size;
+                        break;
+                    case HDB_SS_TABLE_NUMBER:
+                        sum += hdbTable.ssTableNumber;
+                        break;
+                }
+            }
+        }
+        //===========================================================
+        private String getSumStr() {
+            switch (mode) {
+                case HDB_TABLE_SIZE:
+                    return formatSize(sum);
+                case HDB_SS_TABLE_NUMBER:
+                    return Integer.toString((int)sum);
+            }
+            return "";
         }
         //===========================================================
     }

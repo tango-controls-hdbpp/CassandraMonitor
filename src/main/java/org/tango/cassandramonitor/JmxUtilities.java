@@ -34,7 +34,6 @@
 package org.tango.cassandramonitor;
 
 import fr.esrf.Tango.DevFailed;
-import org.tango.cassandradistribution.HdbTable;
 import org.tango.utils.DevFailedUtils;
 
 import javax.management.*;
@@ -198,7 +197,7 @@ public class JmxUtilities {
             initHdbTableList();
         for (HdbTable hdbTable : hdbTableList) {
             long size = (long)getAttribute(hdbTable.getReadSizeObjectName(), ATTR_COUNT);
-            hdbTable.setSize((double) size/1.e6); // to Mb
+            hdbTable.setSize((double) size/_1_Mb); // to Mb
         }
     }
     //===============================================================
@@ -215,7 +214,6 @@ public class JmxUtilities {
     //===============================================================
 
 
-    private int nbError = 0;
 
     //===============================================================
     /*

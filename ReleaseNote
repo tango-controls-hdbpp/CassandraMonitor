@@ -13,6 +13,10 @@
 #-======================================================================
 
 
+CassandraMonitor-1.5 - 09/01/18:
+    Improve table display for Hdb tables info.
+    Improve error management.
+
 CassandraMonitor-1.4 - 08/01/18:
     HDB table sizes and SS tables displayed for each table on each node.
 
