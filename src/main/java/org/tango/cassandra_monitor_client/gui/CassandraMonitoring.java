@@ -347,6 +347,8 @@ public class CassandraMonitoring extends JFrame {
             CompactionChartDialog.setSelection(cassandraNode);
         compactionChartDialog.setVisible(true);
     }
+    //=======================================================
+    //=======================================================
     @SuppressWarnings("UnusedParameters")
     private void releaseMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_releaseMenuItemActionPerformed
         new PopupHtml(this).show(ReleaseNote.str);

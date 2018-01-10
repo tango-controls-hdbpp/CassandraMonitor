@@ -36,6 +36,7 @@
 package org.tango.cassandra_monitor_client.gui;
 
 import javax.swing.*;
+import javax.swing.border.SoftBevelBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -47,17 +48,12 @@ import static org.tango.cassandra_monitor_client.gui.CassandraNode.CLEANUP;
 import static org.tango.cassandra_monitor_client.gui.CassandraNode.VALIDATION;
 import static org.tango.cassandra_monitor_client.gui.CassandraNode.PIPE_ERROR;
 
-
-//===============================================================
 /**
  *	JDialog Class to display info
  *
  *	@author  Pascal Verdier
  */
-//===============================================================
 
-
-@SuppressWarnings("MagicConstant")
 public class CompactionChartDialog extends JDialog {
 
 	private JFrame	parent;
@@ -101,12 +97,55 @@ public class CompactionChartDialog extends JDialog {
             centerTopPanel.add(new JLabel("   "), gbc);
             gbc.gridy++;
         }
+
+        buildLegendPanel();
 		pack();
 
         Point point = parent.getLocationOnScreen();
         point.y += parent.getHeight();
  		setLocation(point);
 	}
+	//===============================================================
+    private GridBagConstraints legendGbc = new GridBagConstraints();
+	private static final Dimension legendDimension = new Dimension(20, 10);
+	//===============================================================
+    private void buildLegendPanel(String text, Color background) {
+        if (text!=null) {
+            if (background!=null) {
+                JButton button = new JButton("  ");
+                button.setBackground(background);
+                button.setBorder(new SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+                button.setEnabled(false);
+                button.setPreferredSize(legendDimension);
+                legendPanel.add(button, legendGbc);
+                legendGbc.gridx++;
+            }
+            JLabel label = new JLabel(text + "  ");
+            label.setFont(new Font("Dialog", Font.BOLD, 11));
+            legendPanel.add(label, legendGbc);
+            legendGbc.gridx++;
+        }
+        else {
+            //  Add a label as separator
+            legendPanel.add(new JLabel("           "), legendGbc);
+            legendGbc.gridx++;
+        }
+    }
+	//===============================================================
+	//===============================================================
+    private void buildLegendPanel() {
+        legendGbc.insets = new Insets(5,0,0,5);
+        legendGbc.gridx = 0;
+        legendGbc.gridy = 0;
+        buildLegendPanel("Bars:", null);
+        buildLegendPanel("Compactions", Color.red);
+        buildLegendPanel("Validations", VALIDATION_COLOR);
+        buildLegendPanel("Cleanups", CLEANUP_COLOR);
+        buildLegendPanel(null, null);
+        buildLegendPanel("Chart:", null);
+        buildLegendPanel("Selected node", SELECTION_COLOR);
+        buildLegendPanel("Error or compaction pipe", ERROR_COLOR);
+    }
 	//===============================================================
 	//===============================================================
     private static DataTableModel tableModel;
@@ -184,7 +223,9 @@ public class CompactionChartDialog extends JDialog {
     private void initComponents() {
 
         javax.swing.JPanel topPanel = new javax.swing.JPanel();
+        javax.swing.JPanel titlePanel = new javax.swing.JPanel();
         javax.swing.JLabel titleLabel = new javax.swing.JLabel();
+        legendPanel = new javax.swing.JPanel();
         javax.swing.JPanel centerPanel1 = new javax.swing.JPanel();
         centerTopPanel = new javax.swing.JPanel();
         scrollPane = new javax.swing.JScrollPane();
@@ -196,10 +237,18 @@ public class CompactionChartDialog extends JDialog {
                 closeDialog(evt);
             }
         });
+        getContentPane().setLayout(new java.awt.BorderLayout());
 
-        titleLabel.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        topPanel.setLayout(new java.awt.BorderLayout());
+
+        titleLabel.setFont(new java.awt.Font("Dialog", Font.BOLD, 18));
         titleLabel.setText("Compaction Activity");
-        topPanel.add(titleLabel);
+        titlePanel.add(titleLabel);
+
+        topPanel.add(titlePanel, java.awt.BorderLayout.NORTH);
+
+        legendPanel.setLayout(new java.awt.GridBagLayout());
+        topPanel.add(legendPanel, java.awt.BorderLayout.SOUTH);
 
         getContentPane().add(topPanel, java.awt.BorderLayout.NORTH);
 
@@ -208,7 +257,7 @@ public class CompactionChartDialog extends JDialog {
         centerTopPanel.setLayout(new java.awt.GridBagLayout());
         centerPanel1.add(centerTopPanel, java.awt.BorderLayout.NORTH);
 
-        scrollPane.setPreferredSize(new java.awt.Dimension(500, 80));
+        scrollPane.setPreferredSize(new java.awt.Dimension(500, 100));
         centerPanel1.add(scrollPane, java.awt.BorderLayout.CENTER);
 
         getContentPane().add(centerPanel1, java.awt.BorderLayout.CENTER);
@@ -260,6 +309,7 @@ public class CompactionChartDialog extends JDialog {
 	//===============================================================
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel centerTopPanel;
+    private javax.swing.JPanel legendPanel;
     private javax.swing.JScrollPane scrollPane;
     // End of variables declaration//GEN-END:variables
 	//===============================================================

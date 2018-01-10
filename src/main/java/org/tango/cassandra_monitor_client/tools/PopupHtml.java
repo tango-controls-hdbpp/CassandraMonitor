@@ -227,7 +227,7 @@ public class PopupHtml extends JDialog implements TangoConst {
      */
     //======================================================
     public void show(String code) {
-        show(code, 500, 600);
+        show(code, 750, 640);
     }
     //======================================================
     /**
