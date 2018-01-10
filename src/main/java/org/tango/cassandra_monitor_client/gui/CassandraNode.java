@@ -55,7 +55,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.tango.cassandra_monitor_client.gui.CompactionChartDialog.ERROR_COLOR;
+import static org.tango.cassandra_monitor_client.gui.CompactionDialog.ERROR_COLOR;
 import static org.tango.cassandra_monitor_client.gui.DataCenter.BACKGROUND;
 import static org.tango.cassandramonitor.IConstants.READ;
 import static org.tango.cassandramonitor.IConstants.WRITE;
@@ -86,7 +86,6 @@ public class CassandraNode extends DeviceProxy {
     private AttributeList attributeList = new AttributeList();
     private JLabel compactionLabel;
     private CompactionChart compactionChart;
-    private boolean selected;
 
     private static final String pipeName = "Compactions";
     public static final int PIPE_ERROR = 0;
@@ -137,16 +136,6 @@ public class CassandraNode extends DeviceProxy {
         rackName   = attributes[i++].extractString();
         owns       = attributes[i++].extractString();
         tokens     = attributes[i].extractString();
-    }
-    //===============================================================
-    //===============================================================
-    public boolean isSelected() {
-        return selected;
-    }
-    //===============================================================
-    //===============================================================
-    public void setSelected(boolean selected) {
-        this.selected = selected;
     }
     //===============================================================
     //===============================================================
@@ -379,76 +368,6 @@ public class CassandraNode extends DeviceProxy {
     }
     //===============================================================
     //===============================================================
-
-
-
-
-
-
-
-    //=========================================================================
-    /**
-     * Compaction class
-     */
-    //=========================================================================
-    class Compaction {
-        String tableName;
-        String taskName;
-        int    taskType = COMPACTION;
-        long   total = -1;
-        long   completed = -1;
-        double ratio = 0.0;
-        String totalStr;
-        String ratioStr;
-        //=================================================================
-        private Compaction(String errorDescription) {
-            taskType = PIPE_ERROR;
-            tableName = errorDescription;
-            taskName = "Error";
-        }
-        //=================================================================
-        private Compaction(PipeDataElement pipeDataElement) {
-            tableName = pipeDataElement.getName();
-
-            //  Decode info from pipe
-            PipeBlob pipeBlob = pipeDataElement.extractPipeBlob();
-            taskName = pipeBlob.getName();
-            if (taskName.equalsIgnoreCase("validation"))
-                taskType = VALIDATION;
-            else
-            if (taskName.equalsIgnoreCase("cleanup"))
-                taskType = CLEANUP;
-
-            for (PipeDataElement dataElement : pipeBlob) {
-                String str = dataElement.getName();
-                switch (str) {
-                    case "total":
-                        total = dataElement.extractLong64Array()[0];
-                        if (total>1.e9)
-                            totalStr = String.format("%.3f", 1.0e-9*total) +" Gbytes";
-                        else
-                            totalStr = String.format("%.3f", 1.0e-6*total) +" Mbytes";
-                        break;
-                    case "completed":
-                        completed = dataElement.extractLong64Array()[0];
-                        break;
-                    case "ratio":
-                        ratio = dataElement.extractDoubleArray()[0];
-                        ratioStr = String.format("%.3f", ratio*100) +" %";
-                        break;
-                }
-            }
-        }
-        //=================================================================
-        public String toString() {
-            return tableName + "(" + taskName + "): " +
-                    completed + "/" + total + " bytes\t"+ ratioStr;
-        }
-        //=================================================================
-    }
-    //=========================================================================
-    //=========================================================================
-
 
 
 

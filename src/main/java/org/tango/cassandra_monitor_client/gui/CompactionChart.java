@@ -43,18 +43,14 @@ import java.util.List;
 import static org.tango.cassandra_monitor_client.gui.CassandraNode.CLEANUP;
 import static org.tango.cassandra_monitor_client.gui.CassandraNode.COMPACTION;
 import static org.tango.cassandra_monitor_client.gui.CassandraNode.VALIDATION;
-import static org.tango.cassandra_monitor_client.gui.CompactionChartDialog.CLEANUP_COLOR;
-import static org.tango.cassandra_monitor_client.gui.CompactionChartDialog.VALIDATION_COLOR;
+import static org.tango.cassandra_monitor_client.gui.CompactionDialog.CLEANUP_COLOR;
+import static org.tango.cassandra_monitor_client.gui.CompactionDialog.VALIDATION_COLOR;
 
-
-//===============================================================
 /**
- *	JDialog Class to display info
+ *	Chart to display compactions/validations/cleanups/....
  *
  *	@author  Pascal Verdier
  */
-//===============================================================
-
 
 public class CompactionChart extends JLChart implements IJLChartListener {
 	private CassandraNode cassandraNode;
@@ -114,30 +110,28 @@ public class CompactionChart extends JLChart implements IJLChartListener {
         compactionDataView.reset();
         validationDataView.reset();
         cleanupDataView.reset();
-        List<CassandraNode.Compaction> compactionList = cassandraNode.getCompactionList();
+        List<Compaction> compactionList = cassandraNode.getCompactionList();
         if (compactionList.isEmpty()) {
             setHeader(cassandraNode.getName() + " (No Compaction)");
         }
         else {
             setHeader(cassandraNode.getName());
             int x = 1;
-            for (CassandraNode.Compaction compaction : compactionList) {
-                switch (compaction.taskType) {
+            for (Compaction compaction : compactionList) {
+                switch (compaction.getTaskType()) {
                     case COMPACTION:
-                        compactionDataView.add(x++, 100.0 * compaction.ratio);
+                        compactionDataView.add(x++, 100.0 * compaction.getRatio());
                         break;
                     case CLEANUP:
-                        cleanupDataView.add(x++, 100.0 * compaction.ratio);
+                        cleanupDataView.add(x++, 100.0 * compaction.getRatio());
                         break;
                     default:
-                        validationDataView.add(x++, 100.0 * compaction.ratio);
+                        validationDataView.add(x++, 100.0 * compaction.getRatio());
                 }
             }
             getXAxis().setMaximum(compactionList.size() + 1);
         }
         repaint();
-        if (cassandraNode.isSelected())
-            CompactionChartDialog.fireDataChanged();
     }
     //===============================================================
     //===============================================================
@@ -145,24 +139,36 @@ public class CompactionChart extends JLChart implements IJLChartListener {
     public String[] clickOnChart(JLChartEvent chartEvent) {
         JLDataView dataView = chartEvent.getDataView();
         int index = chartEvent.getDataViewIndex();
-        List<CassandraNode.Compaction> compactionList = cassandraNode.getCompactionList();
-        CompactionChartDialog.setSelection(cassandraNode);
+        List<Compaction> compactionList = cassandraNode.getCompactionList();
 
         int i=0;
-        for (CassandraNode.Compaction compaction : compactionList) {
+        for (Compaction compaction : compactionList) {
             //  Search index for specified data view
-            if ((dataView == compactionDataView && compaction.taskType == COMPACTION) ||
-                (dataView == validationDataView && compaction.taskType == VALIDATION)) {
+            if (isDataView(dataView, COMPACTION) ||
+                    isDataView(dataView, VALIDATION) || isDataView(dataView, CLEANUP)) {
 
                 //  If found, return compaction/validation parameters
                 if (i == index) {
-                    return new String[]  { compaction.tableName };
+                    return new String[]  { compaction.getTableName() };
                 }
                 i++;
             }
         }
 
         return new String[] { "index " + index + " not found in " + dataView.getName()};
+    }
+    //===============================================================
+    //===============================================================
+    private boolean isDataView(JLDataView dataView, int taskType) {
+	    switch (taskType) {
+            case COMPACTION:
+                return dataView==compactionDataView;
+            case VALIDATION:
+                return dataView==validationDataView;
+            case CLEANUP:
+                return dataView==cleanupDataView;
+        }
+        return false;
     }
     //===============================================================
 	//===============================================================

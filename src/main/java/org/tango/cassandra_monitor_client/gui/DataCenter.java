@@ -169,7 +169,7 @@ public class DataCenter extends ArrayList<CassandraNode> {
         selectedNode = node;
         if (event.getClickCount()==2 && (event.getModifiers() & MouseEvent.BUTTON1_MASK) != 0) {
             if (compactions)
-                monitoring.displayCompactionChartDialog(node);
+                monitoring.displayCompactionChartDialog();
             else
                 displayStatus();
         }

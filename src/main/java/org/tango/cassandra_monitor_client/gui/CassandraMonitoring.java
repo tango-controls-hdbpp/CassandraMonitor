@@ -63,7 +63,7 @@ import java.util.List;
  */
 //=======================================================
 public class CassandraMonitoring extends JFrame {
-    private CompactionChartDialog compactionChartDialog;
+    private CompactionDialog compactionDialog;
     private List<CassandraNode> cassandraNodeList = new ArrayList<>();
     private List<DataCenter> dataCenterList = new ArrayList<>();
     private RequestTrendDialog requestTrendDialog;
@@ -336,16 +336,14 @@ public class CassandraMonitoring extends JFrame {
     //=======================================================
     @SuppressWarnings("UnusedParameters")
     private void compactionsItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_compactionsItemActionPerformed
-        displayCompactionChartDialog(null);
+        displayCompactionChartDialog();
     }//GEN-LAST:event_compactionsItemActionPerformed
     //=======================================================
     //=======================================================
-    void displayCompactionChartDialog(CassandraNode cassandraNode) {
-        if (compactionChartDialog == null)
-            compactionChartDialog = new CompactionChartDialog(this, dataCenterList);
-        if (cassandraNode!=null)
-            CompactionChartDialog.setSelection(cassandraNode);
-        compactionChartDialog.setVisible(true);
+    void displayCompactionChartDialog() {
+        if (compactionDialog == null)
+            compactionDialog = new CompactionDialog(this, dataCenterList);
+        compactionDialog.setVisible(true);
     }
     //=======================================================
     //=======================================================
