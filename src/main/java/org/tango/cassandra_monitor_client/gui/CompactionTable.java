@@ -243,24 +243,26 @@ public class CompactionTable extends JTable {
                 JTable table, Object value,
                 boolean isSelected, boolean hasFocus,
                 int row, int column) {
-            Record record = recordList.get(row);
-            setBackground(getBackground(record.taskType));
-            switch (column) {
-                case NODE:
-                    setText(record.nodeName);
-                    break;
-                case TABLE:
-                    setText(record.tableName);
-                    break;
-                case TASK:
-                    setText(record.taskName);
-                    break;
-                case SIZE:
-                    setText(record.total);
-                    break;
-                case RATIO:
-                    setText(record.ratio);
-                    break;
+            if (row<recordList.size()) {
+                Record record = recordList.get(row);
+                setBackground(getBackground(record.taskType));
+                switch (column) {
+                    case NODE:
+                        setText(record.nodeName);
+                        break;
+                    case TABLE:
+                        setText(record.tableName);
+                        break;
+                    case TASK:
+                        setText(record.taskName);
+                        break;
+                    case SIZE:
+                        setText(record.total);
+                        break;
+                    case RATIO:
+                        setText(record.ratio);
+                        break;
+                }
             }
             return this;
         }

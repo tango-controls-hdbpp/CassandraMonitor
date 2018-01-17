@@ -79,11 +79,6 @@ public class CompactionDialog extends JDialog {
 	}
 	//===============================================================
 	//===============================================================
-    void setChartDisplayed() {
-	    tabbedPane.setSelectedIndex(1);
-    }
-	//===============================================================
-	//===============================================================
     private void buildChartPanel() {
         // Build the chart panel
         GridBagConstraints gbc = new GridBagConstraints();

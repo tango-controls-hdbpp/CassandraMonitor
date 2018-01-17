@@ -47,7 +47,7 @@ import static org.tango.cassandramonitor.IConstants.*;
 
 
 /**
- * This class is able to
+ * This class is a set of JMX utilities
  *
  * @author verdier
  */

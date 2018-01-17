@@ -72,42 +72,6 @@ public class JmxToCompactions {
         checkIfChanged();
     }
     //===============================================================
-    /*
-     * A constructor to simulate
-     */
-    //===============================================================
-    private static final int total = 1000000;
-    private static final int total2 = 400000;
-    private static final int defaultValue = 100000;
-    private int completed = total;
-    private int completed2 = total2;
-    public void setList() {
-        compactionList = new ArrayList<>();
-        if (completed<=total) {
-            compactionList.add(new Compaction("Compaction", "hdb.table_1", "" + total, "" + completed));
-            compactionList.add(new Compaction("Compaction", "hdb.table_2", "6000000", "3000000"));
-            compactionList.add(new Compaction("Compaction", "hdb.table_3", "5000000", "2000000"));
-            completed += 10000;
-            //  Simulate a validation faster
-            if (completed2<total2) {
-                compactionList.add(new Compaction("Validation", "hdb.table_4", "" + total2, "" + completed2));
-                completed2 += 10000;
-            }
-        }
-        /*
-        else {
-            // list will be empty -> no compaction
-        }
-        */
-        checkIfChanged();
-    }
-    //===============================================================
-    //===============================================================
-    void startSimulation() {
-        completed = defaultValue;
-        completed2 = defaultValue;
-    }
-    //===============================================================
     //===============================================================
     private void checkIfChanged() {
         changed = false;

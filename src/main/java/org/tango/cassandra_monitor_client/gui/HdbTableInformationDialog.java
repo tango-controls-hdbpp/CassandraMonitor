@@ -34,6 +34,7 @@ package org.tango.cassandra_monitor_client.gui;
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.Tango.DevVarDoubleStringArray;
 import fr.esrf.TangoDs.Except;
+import fr.esrf.tangoatk.widget.util.ErrorPane;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -58,6 +59,7 @@ public class HdbTableInformationDialog extends JDialog {
     private JTable jTable;
     private int selectedRow = -1;
     private int mode;
+    private DataTableModel dataTableModel;
 
     public static final int HDB_TABLE_SIZE = 0;
     public static final int HDB_SS_TABLE_NUMBER = 1;
@@ -74,8 +76,13 @@ public class HdbTableInformationDialog extends JDialog {
 		this.mode = mode;
 		initComponents();
 
+		//  Build cassandra node list
+        for (DataCenter dataCenter : dataCenterList) {
+            cassandraNodesList.addAll(dataCenter);
+        }
+
         //  Read the table size from cassandra nodes and build JTable object
-        List<HdbTableList> hdbTableLists = buildHdbTablesList(dataCenterList);
+        List<HdbTableList> hdbTableLists = buildHdbTablesList();
         buildDisplayedData(hdbTableLists);
         buildSizeTable();
 
@@ -96,16 +103,14 @@ public class HdbTableInformationDialog extends JDialog {
 	}
     //===============================================================
     //===============================================================
-    private List<HdbTableList> buildHdbTablesList(List<DataCenter> dataCenterList) throws DevFailed {
+    private List<HdbTableList> buildHdbTablesList() throws DevFailed {
 	    List<HdbTableList> hdbTableLists = new ArrayList<>();
-	    //  For each Cassandra node, start a thread to rad the table sizes
-        for (DataCenter dataCenter : dataCenterList) {
-            for (CassandraNode cassandraNode : dataCenter) {
-                cassandraNodesList.add(cassandraNode);
-                //noinspection MismatchedQueryAndUpdateOfCollection
-                HdbTableList hdbTableList = new HdbTableList(cassandraNode);
-                hdbTableLists.add(hdbTableList);
-            }
+
+        //  For each Cassandra node, start a thread to get the table sizes
+        for (CassandraNode cassandraNode : cassandraNodesList) {
+            //noinspection MismatchedQueryAndUpdateOfCollection
+            HdbTableList hdbTableList = new HdbTableList(cassandraNode);
+            hdbTableLists.add(hdbTableList);
         }
 
         //  Wait for the end of each thread
@@ -144,7 +149,7 @@ public class HdbTableInformationDialog extends JDialog {
     //===============================================================
     public void buildSizeTable() {
         // Create the table
-        DataTableModel dataTableModel = new DataTableModel();
+        dataTableModel = new DataTableModel();
         jTable = new JTable(dataTableModel);
         jTable.setRowSelectionAllowed(true);
         jTable.setColumnSelectionAllowed(true);
@@ -211,6 +216,8 @@ public class HdbTableInformationDialog extends JDialog {
         javax.swing.JPanel topPanel = new javax.swing.JPanel();
         titleLabel = new javax.swing.JLabel();
         javax.swing.JPanel bottomPanel = new javax.swing.JPanel();
+        javax.swing.JButton refreshButton = new javax.swing.JButton();
+        javax.swing.JLabel jLabel1 = new javax.swing.JLabel();
         javax.swing.JButton cancelBtn = new javax.swing.JButton();
 
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -218,12 +225,24 @@ public class HdbTableInformationDialog extends JDialog {
                 closeDialog(evt);
             }
         });
+        getContentPane().setLayout(new java.awt.BorderLayout());
 
         titleLabel.setFont(new java.awt.Font("Dialog", Font.BOLD, 18));
         titleLabel.setText("Dialog Title");
         topPanel.add(titleLabel);
 
         getContentPane().add(topPanel, java.awt.BorderLayout.NORTH);
+
+        refreshButton.setText("Refresh");
+        refreshButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                refreshButtonActionPerformed(evt);
+            }
+        });
+        bottomPanel.add(refreshButton);
+
+        jLabel1.setText("                           ");
+        bottomPanel.add(jLabel1);
 
         cancelBtn.setText("Cancel");
         cancelBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -250,6 +269,19 @@ public class HdbTableInformationDialog extends JDialog {
 	private void closeDialog(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_closeDialog
 		doClose();
 	}//GEN-LAST:event_closeDialog
+    //===============================================================
+    //===============================================================
+    @SuppressWarnings("UnusedParameters")
+    private void refreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshButtonActionPerformed
+        // TODO add your handling code here:
+        try {
+            buildDisplayedData(buildHdbTablesList());
+            dataTableModel.fireTableDataChanged();
+        }
+        catch (DevFailed e) {
+            ErrorPane.showErrorMessage(this, null, e);
+        }
+    }//GEN-LAST:event_refreshButtonActionPerformed
     //===============================================================
 	//===============================================================
 	void doClose() {
