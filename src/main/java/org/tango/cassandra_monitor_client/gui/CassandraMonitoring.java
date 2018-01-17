@@ -376,36 +376,26 @@ public class CassandraMonitoring extends JFrame {
     //=======================================================
     @SuppressWarnings("UnusedParameters")
     private void tableSizeItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tableSizeItemActionPerformed
-        try {
-            if (hdbTableSizeDialog!=null) {
-                hdbTableSizeDialog.doClose();
-            }
-            //  display dialog
-            hdbTableSizeDialog = new HdbTableInformationDialog(this,
-                    dataCenterList, HdbTableInformationDialog.HDB_TABLE_SIZE);
-            hdbTableSizeDialog.setVisible(true);
+        if (hdbTableSizeDialog!=null) {
+            hdbTableSizeDialog.doClose();
         }
-        catch (DevFailed e) {
-            ErrorPane.showErrorMessage(this, null, e);
-        }
+        //  display dialog
+        hdbTableSizeDialog = new HdbTableInformationDialog(this,
+                dataCenterList, HdbTableInformationDialog.HDB_TABLE_SIZE);
+        hdbTableSizeDialog.setVisible(true);
     }//GEN-LAST:event_tableSizeItemActionPerformed
     //=======================================================
     //=======================================================
     @SuppressWarnings("UnusedParameters")
     private void ssTableNumberItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ssTableNumberItemActionPerformed
         // TODO add your handling code here:
-        try {
-            if (hdbSsTableDialog!=null) {
-                hdbSsTableDialog.doClose();
-            }
-            //  display dialog
-            hdbSsTableDialog = new HdbTableInformationDialog(this,
-                    dataCenterList, HdbTableInformationDialog.HDB_SS_TABLE_NUMBER);
-            hdbSsTableDialog.setVisible(true);
+        if (hdbSsTableDialog!=null) {
+            hdbSsTableDialog.doClose();
         }
-        catch (DevFailed e) {
-            ErrorPane.showErrorMessage(this, null, e);
-        }
+        //  display dialog
+        hdbSsTableDialog = new HdbTableInformationDialog(this,
+                dataCenterList, HdbTableInformationDialog.HDB_SS_TABLE_NUMBER);
+        hdbSsTableDialog.setVisible(true);
     }//GEN-LAST:event_ssTableNumberItemActionPerformed
 	//=======================================================
 	//=======================================================

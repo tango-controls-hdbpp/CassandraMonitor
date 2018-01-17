@@ -33,7 +33,6 @@ package org.tango.cassandra_monitor_client.gui;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.Tango.DevVarDoubleStringArray;
-import fr.esrf.TangoDs.Except;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
 
 import javax.swing.*;
@@ -71,7 +70,7 @@ public class HdbTableInformationDialog extends JDialog {
 	 *	Creates new form CompactionHistoryDialog
 	 */
 	//===============================================================
-	public HdbTableInformationDialog(JFrame parent, List<DataCenter> dataCenterList, int mode) throws DevFailed {
+	public HdbTableInformationDialog(JFrame parent, List<DataCenter> dataCenterList, int mode) {
 		super(parent, false);
 		this.mode = mode;
 		initComponents();
@@ -103,7 +102,7 @@ public class HdbTableInformationDialog extends JDialog {
 	}
     //===============================================================
     //===============================================================
-    private List<HdbTableList> buildHdbTablesList() throws DevFailed {
+    private List<HdbTableList> buildHdbTablesList() {
 	    List<HdbTableList> hdbTableLists = new ArrayList<>();
 
         //  For each Cassandra node, start a thread to get the table sizes
@@ -112,7 +111,6 @@ public class HdbTableInformationDialog extends JDialog {
             HdbTableList hdbTableList = new HdbTableList(cassandraNode);
             hdbTableLists.add(hdbTableList);
         }
-
         //  Wait for the end of each thread
         StringBuilder errorMessage = new StringBuilder();
         for (HdbTableList hdbTableList : hdbTableLists) {
@@ -124,7 +122,8 @@ public class HdbTableInformationDialog extends JDialog {
             }
         }
         if (errorMessage.length()>0) {
-            Except.throw_exception("", errorMessage.toString());
+            System.out.println("error from threads");
+            ErrorPane.showErrorMessage(this, null, new Exception(errorMessage.toString()));
         }
         return hdbTableLists;
     }
@@ -274,13 +273,8 @@ public class HdbTableInformationDialog extends JDialog {
     @SuppressWarnings("UnusedParameters")
     private void refreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshButtonActionPerformed
         // TODO add your handling code here:
-        try {
-            buildDisplayedData(buildHdbTablesList());
-            dataTableModel.fireTableDataChanged();
-        }
-        catch (DevFailed e) {
-            ErrorPane.showErrorMessage(this, null, e);
-        }
+        buildDisplayedData(buildHdbTablesList());
+        dataTableModel.fireTableDataChanged();
     }//GEN-LAST:event_refreshButtonActionPerformed
     //===============================================================
 	//===============================================================
