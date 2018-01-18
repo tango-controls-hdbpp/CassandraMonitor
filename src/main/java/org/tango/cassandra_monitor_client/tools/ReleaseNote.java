@@ -16,7 +16,11 @@ public interface ReleaseNote {
 		"<body text=\"#000000\" bgColor=\"#FFFFFF\" link=\"#0000FF\" vLink=\"#7F00FF\" aLink=\"#FF0000\">\n" + 
 		"<p><!-------TITLE------></p>\n" + 
 		"<center>	<h2>CassandraMonitoring Release Notes </h2>\n" + 
-		"	(Generated 09-01-2018  16:20:27)</center><br>\n" + 
+		"	(Generated 18-01-2018  09:18:57)</center><br>\n" + 
+		"<li><b>CassandraMonitor-1.6 - 18/01/18:</b><br>" + 
+		"&nbsp; &nbsp; &nbsp; ATK ErrorHistory and Diagnostics added.<br>" + 
+		"&nbsp; &nbsp; &nbsp; Refresh button on SS Tables window.<br>" + 
+		"&nbsp; &nbsp; &nbsp; Bug fixes.<br>" + 
 		"<li><b>CassandraMonitor-1.5 - 09/01/18:</b><br>" + 
 		"&nbsp; &nbsp; &nbsp; Improve table display for Hdb tables info.<br>" + 
 		"&nbsp; &nbsp; &nbsp; Improve error management.<br>" + 

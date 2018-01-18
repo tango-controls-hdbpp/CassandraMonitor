@@ -160,7 +160,7 @@ public class AtkMoniTrend extends Trend {
             "window_pos:1087,527\n" +
             "window_size:1024,640\n" +
             "show_device_name:0\n" +
-            "refresh_time:1000\n" +
+            "refresh_time:10000\n" +
             "source:2\n" +
             "min_refresh_time:0\n" +
             "xvisible:true\n" +

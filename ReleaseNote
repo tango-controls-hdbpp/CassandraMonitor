@@ -13,6 +13,11 @@
 #-======================================================================
 
 
+CassandraMonitor-1.6 - 18/01/18:
+    ATK ErrorHistory and Diagnostics added.
+    Refresh button on SS Tables window.
+    Bug fixes.
+
 CassandraMonitor-1.5 - 09/01/18:
     Improve table display for Hdb tables info.
     Improve error management.
