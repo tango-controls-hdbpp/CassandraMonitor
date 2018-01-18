@@ -45,6 +45,7 @@ import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.widget.attribute.SimpleScalarViewer;
 import fr.esrf.tangoatk.widget.attribute.StateViewer;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
+import fr.esrf.tangoatk.widget.util.ErrorHistory;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
 import org.tango.cassandra_monitor_client.tools.IconUtils;
 
@@ -83,7 +84,6 @@ public class CassandraNode extends DeviceProxy {
     private SimpleScalarViewer[] requestViewers;
     private SimpleScalarViewer pendingViewer;
     private SimpleScalarViewer ssTableViewer;
-    private AttributeList attributeList = new AttributeList();
     private JLabel compactionLabel;
     private CompactionChart compactionChart;
 
@@ -92,6 +92,8 @@ public class CassandraNode extends DeviceProxy {
     public static final int COMPACTION = 1;
     public static final int VALIDATION = 2;
     public static final int CLEANUP = 3;
+    private static AttributeList attributeList = null;
+    private static final ErrorHistory errorHistory = new ErrorHistory();
     //===============================================================
     //===============================================================
     public CassandraNode(String deviceName) throws DevFailed {
@@ -102,7 +104,18 @@ public class CassandraNode extends DeviceProxy {
             name = "? ?";
         else
             name = datum.extractString();
+
+        //  Read static info from node
         initializeFromDevice();
+
+        //  Initialize attribute list and error history
+        if (attributeList==null) {
+            attributeList = new AttributeList();
+            attributeList.addErrorListener(errorHistory);
+            attributeList.addSetErrorListener(errorHistory);
+        }
+
+        //  Build viewers
         buildStateViewer(deviceName);
         buildDataLoadViewer(deviceName);
         buildScalarViewers(deviceName);
@@ -234,6 +247,11 @@ public class CassandraNode extends DeviceProxy {
     }
     //===============================================================
     //===============================================================
+    public static ErrorHistory getErrorHistory() {
+        return errorHistory;
+    }
+    //===============================================================
+    //===============================================================
     private void buildStateViewer(String deviceName) throws DevFailed {
         try {
             //  Add a state viewer
@@ -243,6 +261,7 @@ public class CassandraNode extends DeviceProxy {
             IDevStateScalar stateScalar =
                     (IDevStateScalar) attributeList.add(deviceName + "/state");
             stateViewer.setModel(stateScalar);
+            errorHistory.add(stateViewer);
             attributeList.refresh();
         }
         catch (ConnectionException e) {
@@ -258,6 +277,7 @@ public class CassandraNode extends DeviceProxy {
             dataLoadViewer.setBackground(Color.white);
             dataLoadViewer.setToolTipText(" Data  Load ");
             dataLoadViewer.setModel((IStringScalar) attributeList.add(deviceName + "/DataLoadStr"));
+            errorHistory.add(dataLoadViewer);
         }
         catch (ConnectionException e) {
             Except.throw_exception("ConnectionFailed", e.getDescription());
@@ -293,6 +313,11 @@ public class CassandraNode extends DeviceProxy {
             ssTableViewer.setToolTipText(" SS Table Number ");
             ssTableViewer.setUnitVisible(false);
             ssTableViewer.setModel((INumberScalar) attributeList.add(deviceName + "/SsTableNumber"));
+
+            errorHistory.add(requestViewers[READ]);
+            errorHistory.add(requestViewers[WRITE]);
+            errorHistory.add(pendingViewer);
+            errorHistory.add(ssTableViewer);
         }
         catch (ConnectionException e) {
             Except.throw_exception("ConnectionFailed", e.getDescription());

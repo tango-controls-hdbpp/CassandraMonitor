@@ -184,6 +184,9 @@ public class CassandraMonitoring extends JFrame {
         javax.swing.JMenuItem requestTrendItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem tableSizeItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem ssTableNumberItem = new javax.swing.JMenuItem();
+        javax.swing.JPopupMenu.Separator jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        javax.swing.JMenuItem atkErrorsItem = new javax.swing.JMenuItem();
+        javax.swing.JMenuItem atkDiagnosticsItem = new javax.swing.JMenuItem();
         javax.swing.JMenu helpMenu = new javax.swing.JMenu();
         javax.swing.JMenuItem releaseMenuItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem aboutMenuItem = new javax.swing.JMenuItem();
@@ -193,6 +196,7 @@ public class CassandraMonitoring extends JFrame {
                 exitForm(evt);
             }
         });
+        getContentPane().setLayout(new java.awt.BorderLayout());
 
         titleLabel.setFont(new java.awt.Font("Dialog", Font.BOLD, 18));
         titleLabel.setText("Cassandra Monitoring Client");
@@ -267,6 +271,23 @@ public class CassandraMonitoring extends JFrame {
             }
         });
         viewMenu.add(ssTableNumberItem);
+        viewMenu.add(jSeparator1);
+
+        atkErrorsItem.setText("ATK Errors");
+        atkErrorsItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                atkErrorsItemActionPerformed(evt);
+            }
+        });
+        viewMenu.add(atkErrorsItem);
+
+        atkDiagnosticsItem.setText("ATK Diagnostics");
+        atkDiagnosticsItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                atkDiagnosticsItemActionPerformed(evt);
+            }
+        });
+        viewMenu.add(atkDiagnosticsItem);
 
         menuBar.add(viewMenu);
 
@@ -397,6 +418,20 @@ public class CassandraMonitoring extends JFrame {
                 dataCenterList, HdbTableInformationDialog.HDB_SS_TABLE_NUMBER);
         hdbSsTableDialog.setVisible(true);
     }//GEN-LAST:event_ssTableNumberItemActionPerformed
+    //=======================================================
+    //=======================================================
+    @SuppressWarnings("UnusedParameters")
+    private void atkErrorsItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_atkErrorsItemActionPerformed
+        // TODO add your handling code here:
+        CassandraNode.getErrorHistory().setVisible(true);
+    }//GEN-LAST:event_atkErrorsItemActionPerformed
+    //=======================================================
+    //=======================================================
+    @SuppressWarnings("UnusedParameters")
+    private void atkDiagnosticsItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_atkDiagnosticsItemActionPerformed
+        // TODO add your handling code here:
+        fr.esrf.tangoatk.widget.util.ATKDiagnostic.showDiagnostic();
+    }//GEN-LAST:event_atkDiagnosticsItemActionPerformed
 	//=======================================================
 	//=======================================================
     private void doClose() {
