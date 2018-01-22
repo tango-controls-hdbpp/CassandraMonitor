@@ -60,6 +60,7 @@ import static org.tango.cassandra_monitor_client.gui.CompactionDialog.ERROR_COLO
 import static org.tango.cassandra_monitor_client.gui.DataCenter.BACKGROUND;
 import static org.tango.cassandramonitor.IConstants.READ;
 import static org.tango.cassandramonitor.IConstants.WRITE;
+import static org.tango.cassandramonitor.IConstants.refreshMonitor;
 
 
 /**
@@ -331,20 +332,20 @@ public class CassandraNode extends DeviceProxy {
         ImageIcon icon = null;
         compactionLabel.setToolTipText(null);
         String type = pipeBlob.getName();
-        if (type.equals("Compactions")) {
-            icon = IconUtils.getGreenBall();
-            for (PipeDataElement dataElement : pipeBlob) {
-                compactionList.add(new Compaction(dataElement));
+        synchronized (refreshMonitor) {
+            if (type.equals("Compactions")) {
+                icon = IconUtils.getGreenBall();
+                for (PipeDataElement dataElement : pipeBlob) {
+                    compactionList.add(new Compaction(dataElement));
+                }
+            } else if (type.equals("ERROR")) {
+                icon = IconUtils.getRedBall();
+                compactionChart.setBackground(ERROR_COLOR);
+                PipeDataElement dataElement = pipeBlob.get(0);
+                String errorDescription = dataElement.extractStringArray()[0];
+                compactionLabel.setToolTipText(errorDescription);
+                compactionList.add(new Compaction(errorDescription));
             }
-        }
-        else
-        if (type.equals("ERROR")) {
-            icon = IconUtils.getRedBall();
-            compactionChart.setBackground(ERROR_COLOR);
-            PipeDataElement dataElement = pipeBlob.get(0);
-            String errorDescription = dataElement.extractStringArray()[0];
-            compactionLabel.setToolTipText(errorDescription);
-            compactionList.add(new Compaction(errorDescription));
         }
         compactionLabel.setIcon(icon);
 

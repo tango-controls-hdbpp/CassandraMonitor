@@ -48,6 +48,7 @@ import static org.tango.cassandra_monitor_client.gui.CassandraNode.VALIDATION;
 import static org.tango.cassandra_monitor_client.gui.CompactionDialog.CLEANUP_COLOR;
 import static org.tango.cassandra_monitor_client.gui.CompactionDialog.ERROR_COLOR;
 import static org.tango.cassandra_monitor_client.gui.CompactionDialog.VALIDATION_COLOR;
+import static org.tango.cassandramonitor.IConstants.refreshMonitor;
 
 
 /**
@@ -123,9 +124,12 @@ public class CompactionTable extends JTable {
             //noinspection InfiniteLoopStatement
             while (true) {
                 recordList = new ArrayList<>();
-                for (CassandraNode cassandraNode : cassandraNodeList) {
-                    for (Compaction compaction : cassandraNode.getCompactionList()) {
-                        recordList.add(new Record(cassandraNode.getName(), compaction));
+                synchronized (refreshMonitor) {
+                    for (CassandraNode cassandraNode : cassandraNodeList) {
+                        for (Compaction compaction : cassandraNode.getCompactionList()) {
+                            if (compaction!=null)
+                                recordList.add(new Record(cassandraNode.getName(), compaction));
+                        }
                     }
                 }
                 updateTable();

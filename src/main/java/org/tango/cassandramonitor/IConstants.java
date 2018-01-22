@@ -80,4 +80,6 @@ public interface IConstants {
     String ATTR_COUNT = "Count";
     String ATTR_VALUE = "Value";
     String ATTR_RATE = "OneMinuteRate";
+
+    Object refreshMonitor = new Object();
 }

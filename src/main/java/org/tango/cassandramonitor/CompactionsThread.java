@@ -36,9 +36,7 @@ package org.tango.cassandramonitor;
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoApi.PipeBlob;
 import fr.esrf.TangoApi.PipeDataElement;
-import fr.esrf.TangoDs.Except;
 import org.tango.server.device.DeviceManager;
-import org.tango.server.events.EventManager;
 import org.tango.server.pipe.PipeValue;
 
 import java.util.HashMap;
@@ -82,54 +80,57 @@ class CompactionsThread extends Thread {
     }
     //===============================================================
     //===============================================================
-    private void pushPipeEvent() throws DevFailed {
-        EventManager.getInstance().pushPipeEvent(
-                deviceManager.getName(), "Compactions", pipeCompactions);
-    }
-    //===============================================================
-    //===============================================================
-    private void pushErrorPipeEvent(String errorDescription) {
-        try {
-            //  Build pipe with error description and send event
-            PipeBlob pipeBlob = new PipeBlob("ERROR");
-            pipeBlob.add(new PipeDataElement(cassandraNode, errorDescription));
-            pipeCompactions = new PipeValue(pipeBlob);
-            pushPipeEvent();
-        } catch (DevFailed devFailed) {
-            Except.print_exception(devFailed);
+    void pushPipeEventIfNeeded() throws DevFailed {
+        synchronized (monitor) {
+            if (changed) {
+                deviceManager.pushPipeEvent("Compactions", pipeCompactions);
+                changed = false;
+            }
         }
     }
     //===============================================================
     //===============================================================
 
 
-
+    private final Object monitor = new Object();
+    private boolean changed = false;
     //===============================================================
     //===============================================================
     public void run() {
         while (runThreads) {
-            try {
-                //  Build compaction object list
-                Object jmxAtt = jmxUtilities.getAttribute(COMPACTION_MANAGER, ATTR_COMPACTIONS);
-                //noinspection unchecked
-                jmxToCompactions.setList((List<HashMap<String, String>>) jmxAtt);
-                if (jmxToCompactions.hasChanged()) {
-                    //  And sent it to pipe and event
-                    pipeCompactions = new PipeValue(jmxToCompactions.getPipeBlob());
-                    pushPipeEvent();
-                    //System.out.println("Compactions  change");
-                } else {
-                    //  Check if first call without change
-                    if (pipeCompactions==null)
+            synchronized (monitor) {
+                try {
+                    //  Build compaction object list
+                    Object jmxAtt = jmxUtilities.getAttribute(COMPACTION_MANAGER, ATTR_COMPACTIONS);
+                    //noinspection unchecked
+                    jmxToCompactions.setList((List<HashMap<String, String>>) jmxAtt);
+                    if (jmxToCompactions.hasChanged()) {
+                        //  And sent it to pipe and event
                         pipeCompactions = new PipeValue(jmxToCompactions.getPipeBlob());
-                    //System.out.println("No change");
+                        changed = true;
+                        //pushPipeEvent();
+                        //System.out.println("Compactions  change");
+                    } else {
+                        //  Check if first call without change
+                        if (pipeCompactions == null)
+                            pipeCompactions = new PipeValue(jmxToCompactions.getPipeBlob());
+                        changed = false;
+                        //System.out.println("No change");
+                    }
+                } catch (Exception e) {
+                    String errorDescription;
+                    if (e instanceof DevFailed)
+                        errorDescription = ((DevFailed) e).errors[0].desc;
+                    else
+                        errorDescription = e.toString();
+
+                    //  Build pipe with error description and send event
+                    PipeBlob pipeBlob = new PipeBlob("ERROR");
+                    pipeBlob.add(new PipeDataElement(cassandraNode, errorDescription));
+                    pipeCompactions = new PipeValue(pipeBlob);
+                    changed = true;
                 }
-            } catch (Exception e) {
-                if (e instanceof DevFailed)
-                    pushErrorPipeEvent(((DevFailed)e).errors[0].desc);
-                else
-                    pushErrorPipeEvent(e.toString());
-             }
+            }
             try {
                 sleep(1000);
             } catch (InterruptedException e) {

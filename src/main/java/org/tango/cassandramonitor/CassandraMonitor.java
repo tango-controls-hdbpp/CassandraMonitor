@@ -750,8 +750,8 @@ public class CassandraMonitor {
         int i = 0;
         for (Object n : list) {
             try {
-                InetAddress addr = InetAddress.getByName(n.toString());
-                unreachableNodes[i] = addr.getHostName();
+                InetAddress inetAddress = InetAddress.getByName(n.toString());
+                unreachableNodes[i] = inetAddress.getHostName();
             } catch (UnknownHostException ex) {
                 unreachableNodes[i] = n.toString();
             }
@@ -890,7 +890,8 @@ public class CassandraMonitor {
         //	If connection failed set as UNKNOWN
 		if (jmxUtilities.connectionFailed())
 			state = DevState.UNKNOWN;
-		
+		else
+			compactionsThread.pushPipeEventIfNeeded();
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getState
 		return state;
 	}

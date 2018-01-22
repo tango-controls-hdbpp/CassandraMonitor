@@ -16,7 +16,7 @@ public interface ReleaseNote {
 		"<body text=\"#000000\" bgColor=\"#FFFFFF\" link=\"#0000FF\" vLink=\"#7F00FF\" aLink=\"#FF0000\">\n" + 
 		"<p><!-------TITLE------></p>\n" + 
 		"<center>	<h2>CassandraMonitoring Release Notes </h2>\n" + 
-		"	(Generated 18-01-2018  09:18:57)</center><br>\n" + 
+		"	(Generated 19-01-2018  08:03:49)</center><br>\n" + 
 		"<li><b>CassandraMonitor-1.6 - 18/01/18:</b><br>" + 
 		"&nbsp; &nbsp; &nbsp; ATK ErrorHistory and Diagnostics added.<br>" + 
 		"&nbsp; &nbsp; &nbsp; Refresh button on SS Tables window.<br>" + 

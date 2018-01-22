@@ -45,6 +45,7 @@ import static org.tango.cassandra_monitor_client.gui.CassandraNode.COMPACTION;
 import static org.tango.cassandra_monitor_client.gui.CassandraNode.VALIDATION;
 import static org.tango.cassandra_monitor_client.gui.CompactionDialog.CLEANUP_COLOR;
 import static org.tango.cassandra_monitor_client.gui.CompactionDialog.VALIDATION_COLOR;
+import static org.tango.cassandramonitor.IConstants.refreshMonitor;
 
 /**
  *	Chart to display compactions/validations/cleanups/....
@@ -110,26 +111,27 @@ public class CompactionChart extends JLChart implements IJLChartListener {
         compactionDataView.reset();
         validationDataView.reset();
         cleanupDataView.reset();
-        List<Compaction> compactionList = cassandraNode.getCompactionList();
-        if (compactionList.isEmpty()) {
-            setHeader(cassandraNode.getName() + " (No Compaction)");
-        }
-        else {
-            setHeader(cassandraNode.getName());
-            int x = 1;
-            for (Compaction compaction : compactionList) {
-                switch (compaction.getTaskType()) {
-                    case COMPACTION:
-                        compactionDataView.add(x++, 100.0 * compaction.getRatio());
-                        break;
-                    case CLEANUP:
-                        cleanupDataView.add(x++, 100.0 * compaction.getRatio());
-                        break;
-                    default:
-                        validationDataView.add(x++, 100.0 * compaction.getRatio());
+        synchronized (refreshMonitor) {
+            List<Compaction> compactionList = cassandraNode.getCompactionList();
+            if (compactionList.isEmpty()) {
+                setHeader(cassandraNode.getName() + " (No Compaction)");
+            } else {
+                setHeader(cassandraNode.getName());
+                int x = 1;
+                for (Compaction compaction : compactionList) {
+                    switch (compaction.getTaskType()) {
+                        case COMPACTION:
+                            compactionDataView.add(x++, 100.0 * compaction.getRatio());
+                            break;
+                        case CLEANUP:
+                            cleanupDataView.add(x++, 100.0 * compaction.getRatio());
+                            break;
+                        default:
+                            validationDataView.add(x++, 100.0 * compaction.getRatio());
+                    }
                 }
+                getXAxis().setMaximum(compactionList.size() + 1);
             }
-            getXAxis().setMaximum(compactionList.size() + 1);
         }
         repaint();
     }
