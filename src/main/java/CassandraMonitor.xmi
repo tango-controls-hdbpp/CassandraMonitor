@@ -5,10 +5,6 @@
       <inheritances classname="Device_Impl" sourcePath=""/>
       <identification contact="at esrf.fr - accelerator-control" author="accelerator-control" emailDomain="esrf.fr" classFamily="SoftwareSystem" siteSpecific="" platform="All Platforms" bus="JMX" manufacturer="none" reference=""/>
     </description>
-    <classProperties name="DistributionDeviceName" description="Device name for CassandraDistribution class.">
-      <type xsi:type="pogoDsl:StringType"/>
-      <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
-    </classProperties>
     <deviceProperties name="JMXPort" description="JMX port">
       <type xsi:type="pogoDsl:ShortType"/>
       <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
@@ -48,15 +44,6 @@
         <type xsi:type="pogoDsl:ConstStringType"/>
       </argout>
       <status abstract="true" inherited="true" concrete="true" concreteHere="false"/>
-    </commands>
-    <commands name="ReadCompactionHistory" description="Read the compaction history for this host." execMethod="read_compaction_history" displayLevel="OPERATOR" polledPeriod="0" isDynamic="false">
-      <argin description="">
-        <type xsi:type="pogoDsl:VoidType"/>
-      </argin>
-      <argout description="compation history as:&#xA;compacted_at, keyspace_name, columnfamily_name, bytes_in, bytes_out">
-        <type xsi:type="pogoDsl:StringArrayType"/>
-      </argout>
-      <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
     </commands>
     <commands name="ReadHdbTableSizes" description="Returns the size of each hdb table in bytes." execMethod="read_hdb_table_sizes" displayLevel="OPERATOR" polledPeriod="0" isDynamic="false">
       <argin description="">
@@ -125,14 +112,6 @@
       <dataReadyEvent fire="false" libCheckCriteria="true"/>
       <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
       <properties description="Cassandra release version" label="Cassandra Version" unit="" standardUnit="" displayUnit="" format="" maxValue="" minValue="" maxAlarm="" minAlarm="" maxWarning="" minWarning="" deltaTime="" deltaValue=""/>
-    </attributes>
-    <attributes name="Owns" attType="Scalar" rwType="READ" displayLevel="OPERATOR" polledPeriod="60000" maxX="" maxY="" allocReadMember="true" isDynamic="false">
-      <dataType xsi:type="pogoDsl:StringType"/>
-      <changeEvent fire="false" libCheckCriteria="false"/>
-      <archiveEvent fire="false" libCheckCriteria="false"/>
-      <dataReadyEvent fire="false" libCheckCriteria="true"/>
-      <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
-      <properties description="Node`s owns" label="Owns" unit="" standardUnit="" displayUnit="" format="" maxValue="" minValue="" maxAlarm="" minAlarm="" maxWarning="" minWarning="" deltaTime="" deltaValue=""/>
     </attributes>
     <attributes name="Tokens" attType="Scalar" rwType="READ" displayLevel="OPERATOR" polledPeriod="60000" maxX="" maxY="" allocReadMember="true" isDynamic="false">
       <dataType xsi:type="pogoDsl:StringType"/>

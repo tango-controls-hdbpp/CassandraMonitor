@@ -36,10 +36,7 @@
 package org.tango.cassandra_monitor_client.gui;
 
 import fr.esrf.Tango.DevFailed;
-import fr.esrf.TangoApi.DbClass;
-import fr.esrf.TangoApi.DbDatum;
 import fr.esrf.TangoApi.DbServer;
-import fr.esrf.TangoApi.DeviceProxy;
 import fr.esrf.TangoDs.Except;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
@@ -75,7 +72,6 @@ public class CassandraMonitoring extends JFrame {
 	 */
 	//=======================================================
     public CassandraMonitoring() throws DevFailed {
-        checkDistributionDevice();
         SplashUtils.getInstance().startSplash();
         SplashUtils.getInstance().setSplashProgress(10, "Building GUI");
         initComponents();
@@ -147,21 +143,6 @@ public class CassandraMonitoring extends JFrame {
     }
 	//=======================================================
 	//=======================================================
-    private void checkDistributionDevice() throws DevFailed {
-        DbClass clazz = new DbClass("CassandraMonitor");
-        DbDatum datum = clazz.get_property("DistributionDeviceName");
-        if (datum.is_empty())
-            Except.throw_exception("PropertyNotDefined",
-                    "CassandraMonitor.DistributionDeviceName class property not defined !");
-        try {
-            new DeviceProxy(datum.extractString()).ping();
-        } catch (DevFailed e) {
-            String message = "Device   "+datum.extractString()+"   is not alive";
-            ErrorPane.showErrorMessage(this, null, new Exception(message));
-        }
-    }
-	//=======================================================
-	//=======================================================
 
 	//=======================================================
     /** This method is called from within the constructor to
@@ -184,6 +165,7 @@ public class CassandraMonitoring extends JFrame {
         javax.swing.JMenuItem requestTrendItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem tableSizeItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem ssTableNumberItem = new javax.swing.JMenuItem();
+        javax.swing.JMenuItem distributionItem = new javax.swing.JMenuItem();
         javax.swing.JPopupMenu.Separator jSeparator1 = new javax.swing.JPopupMenu.Separator();
         javax.swing.JMenuItem atkErrorsItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem atkDiagnosticsItem = new javax.swing.JMenuItem();
@@ -196,7 +178,6 @@ public class CassandraMonitoring extends JFrame {
                 exitForm(evt);
             }
         });
-        getContentPane().setLayout(new java.awt.BorderLayout());
 
         titleLabel.setFont(new java.awt.Font("Dialog", Font.BOLD, 18));
         titleLabel.setText("Cassandra Monitoring Client");
@@ -271,6 +252,16 @@ public class CassandraMonitoring extends JFrame {
             }
         });
         viewMenu.add(ssTableNumberItem);
+
+        distributionItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.event.InputEvent.ALT_MASK));
+        distributionItem.setMnemonic('A');
+        distributionItem.setText("Attribute distribution");
+        distributionItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                distributionItemActionPerformed(evt);
+            }
+        });
+        viewMenu.add(distributionItem);
         viewMenu.add(jSeparator1);
 
         atkErrorsItem.setText("ATK Errors");
@@ -422,17 +413,30 @@ public class CassandraMonitoring extends JFrame {
     //=======================================================
     @SuppressWarnings("UnusedParameters")
     private void atkErrorsItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_atkErrorsItemActionPerformed
-        // TODO add your handling code here:
         CassandraNode.getErrorHistory().setVisible(true);
     }//GEN-LAST:event_atkErrorsItemActionPerformed
     //=======================================================
     //=======================================================
     @SuppressWarnings("UnusedParameters")
     private void atkDiagnosticsItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_atkDiagnosticsItemActionPerformed
-        // TODO add your handling code here:
         fr.esrf.tangoatk.widget.util.ATKDiagnostic.showDiagnostic();
     }//GEN-LAST:event_atkDiagnosticsItemActionPerformed
+    //=======================================================
+    //=======================================================
+    @SuppressWarnings("UnusedParameters")
+    private void distributionItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_distributionItemActionPerformed
+        // TODO add your handling code here:
+        try {
+            if (hdbTableMainFrame==null)
+                hdbTableMainFrame = new HdbTableMainFrame(this);
+            hdbTableMainFrame.setVisible(true);
+        }
+        catch (DevFailed e) {
+            ErrorPane.showErrorMessage(this, null, e);
+        }
+    }//GEN-LAST:event_distributionItemActionPerformed
 	//=======================================================
+    private HdbTableMainFrame hdbTableMainFrame = null;
 	//=======================================================
     private void doClose() {
         System.exit(0);

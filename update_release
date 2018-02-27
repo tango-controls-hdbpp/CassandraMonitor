@@ -7,7 +7,7 @@ PACKAGE=org.tango.cassandra_monitor_client
 HOME_SRC=src/main/java
 SOURCE_FILES=org/tango/cassandra_monitor_client/tools
 
-RELEASE=1.7
+RELEASE=2.0
 
 
 TANGO_JAVA=$TANGO_HOME/release/java

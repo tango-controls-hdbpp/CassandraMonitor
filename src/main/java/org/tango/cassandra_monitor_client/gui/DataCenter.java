@@ -225,7 +225,7 @@ public class DataCenter extends ArrayList<CassandraNode> {
      */
     //===============================================================
     private static final String[] TABLE_COLUMNS = {
-            "Node", "Address",  "Rack", "Cluster", "Version", "Tokens", "Owns"
+            "Node", "Address",  "Rack", "Cluster", "Version", "Tokens"
     };
     //===============================================================
     public JScrollPane getTableScrollPane() {
@@ -298,8 +298,6 @@ public class DataCenter extends ArrayList<CassandraNode> {
                     return get(row).getVersion();
                 case 5:
                     return get(row).getTokens();
-                case 6:
-                    return get(row).getOwns();
             }
             return "";
         }

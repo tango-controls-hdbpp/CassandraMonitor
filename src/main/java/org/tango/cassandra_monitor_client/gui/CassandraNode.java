@@ -75,7 +75,6 @@ public class CassandraNode extends DeviceProxy {
     private String dataCenter;
     private String rackName;
     private String tokens;
-    private String owns;
     private String cluster;
     private String version;
     private String ipAddress;
@@ -144,11 +143,10 @@ public class CassandraNode extends DeviceProxy {
     //===============================================================
     private void initializeFromDevice() throws DevFailed {
         DeviceAttribute[] attributes = read_attribute(new String[] {
-                "DataCenter", "Rack", "Owns", "Tokens" });
+                "DataCenter", "Rack", "Tokens" });
         int i=0;
         dataCenter = attributes[i++].extractString();
         rackName   = attributes[i++].extractString();
-        owns       = attributes[i++].extractString();
         tokens     = attributes[i].extractString();
     }
     //===============================================================
@@ -240,11 +238,6 @@ public class CassandraNode extends DeviceProxy {
     //===============================================================
     public String getTokens() {
         return tokens;
-    }
-    //===============================================================
-    //===============================================================
-    public String getOwns() {
-        return owns;
     }
     //===============================================================
     //===============================================================

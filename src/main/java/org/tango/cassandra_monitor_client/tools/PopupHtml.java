@@ -48,6 +48,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
 /**
  * Class Description:
@@ -284,14 +285,31 @@ public class PopupHtml extends JDialog implements TangoConst {
     }
     //===============================================================
     //===============================================================
-    public static String htmlTableLine(String[] items, boolean bold) {
+    public void show(String[] headers, List<String[]> rows) {
+        String code = htmlTable(headers, rows);
+        show(code);
+    }
+    //===============================================================
+    //===============================================================
+    public static String htmlTable(String[] headers, List<String[]> rows) {
+        StringBuilder sb = new StringBuilder("<table width=\"100%\" Border=0 cellPadding=2>\n");
+        sb.append("\t<tr> ");
+        for (String header : headers)
+                sb.append("<td> <Font Size=+1><b> ").append(header).append("</b></Font></td>");
+        sb.append("</tr>\n");
+
+        for (String[] row : rows) {
+            sb.append(htmlTableLine(row)).append('\n');
+        }
+        sb.append("</table>");
+        return sb.toString();
+    }
+    //===============================================================
+    //===============================================================
+    public static String htmlTableLine(String[] items) {
         StringBuilder sb = new StringBuilder("<tr>\n  ");
         for (String item : items){
-            sb.append("<td>");
-            if (bold) sb.append("<b>");
-            sb.append(item);
-            if (bold) sb.append("</b>");
-            sb.append("</td> ");
+            sb.append("<td>").append(item).append("</td> ");
         }
         sb.append("</tr>");
         return sb.toString();

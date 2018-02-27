@@ -16,9 +16,12 @@ public interface ReleaseNote {
 		"<body text=\"#000000\" bgColor=\"#FFFFFF\" link=\"#0000FF\" vLink=\"#7F00FF\" aLink=\"#FF0000\">\n" + 
 		"<p><!-------TITLE------></p>\n" + 
 		"<center>	<h2>CassandraMonitoring Release Notes </h2>\n" + 
-		"	(Generated 23-01-2018  08:56:15)</center><br>\n" + 
+		"	(Generated 27-02-2018  13:45:19)</center><br>\n" + 
+		"<li><b>CassandraMonitor-2.0 - 27/02/18:</b><br>" + 
+		"&nbsp; &nbsp; &nbsp; Replace CassandraDistribution device class by connection information.<br>" + 
+		"&nbsp; &nbsp; &nbsp; Add hdb_tables package and display.<br>" + 
 		"<li><b>CassandraMonitor-1.7 - 23/01/18:</b><br>" + 
-		"&nbsp; &nbsp; &nbsp; Data protetion bug fix.<br>" + 
+		"&nbsp; &nbsp; &nbsp; Data protection bug fix.<br>" + 
 		"<li><b>CassandraMonitor-1.6 - 18/01/18:</b><br>" + 
 		"&nbsp; &nbsp; &nbsp; ATK ErrorHistory and Diagnostics added.<br>" + 
 		"&nbsp; &nbsp; &nbsp; Refresh button on SS Tables window.<br>" + 

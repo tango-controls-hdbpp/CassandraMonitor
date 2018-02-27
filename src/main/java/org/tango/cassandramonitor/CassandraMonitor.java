@@ -52,14 +52,12 @@ import fr.esrf.Tango.DevFailed;
 import fr.esrf.Tango.DevState;
 import fr.esrf.Tango.DevVarDoubleStringArray;
 import fr.esrf.Tango.DispLevel;
-import fr.esrf.TangoApi.DeviceAttribute;
-import fr.esrf.TangoApi.DeviceData;
-import fr.esrf.TangoApi.DeviceProxy;
-import fr.esrf.TangoDs.Except;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
+import org.tango.hdb_tables.CassandraConnection;
+import org.tango.hdb_tables.ConnectionInformation;
 import org.tango.server.InvocationContext;
 import org.tango.server.ServerManager;
 import org.tango.server.annotation.*;
@@ -70,7 +68,6 @@ import org.tango.server.pipe.PipeValue;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import static org.tango.cassandramonitor.IConstants.*;
 
@@ -107,24 +104,6 @@ public class CassandraMonitor {
 	//========================================================
 	//	Property data members and related methods
 	//========================================================
-	/**
-	 * Class Property DistributionDeviceName
-	 * Device name for CassandraDistribution class.
-	 */
-	@ClassProperty(name="DistributionDeviceName", description="Device name for CassandraDistribution class." )
-	private String distributionDeviceName;
-	/**
-	 * set property DistributionDeviceName
-	 * @param  distributionDeviceName  see description above.
-	 */
-	public void setDistributionDeviceName(String distributionDeviceName) {
-		this.distributionDeviceName = distributionDeviceName;
-		/*----- PROTECTED REGION ID(CassandraMonitor.setDistributionDeviceName) ENABLED START -----*/
-		
-
-		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.setDistributionDeviceName
-	}
-	
 	/**
 	 * Device Property JMXPort
 	 * JMX port
@@ -238,21 +217,15 @@ public class CassandraMonitor {
 		logger.debug("init device " + deviceManager.getName());
 		/*----- PROTECTED REGION ID(CassandraMonitor.initDevice) ENABLED START -----*/
         // ToDo initialize Device
-
-		//  Check if class property is OK
-        if (distributionDeviceName==null || distributionDeviceName.isEmpty()) {
-            System.err.println("*** Class property DistributionDeviceName is not defined ! ***");
-            System.exit(0);
-        }
-        //  Property has been set -> read it to initialize
-		//	Now done at DataCenter read
-        // initializeFromDistribution();
-
+		//  Property has been set -> read it to initialize
+		ConnectionInformation info = CassandraConnection.getInstance().getConnectionInformation(node);
+        System.out.println(node+":	"+ info.getDataCenter() + " - " + info.getRack());
+		dataCenter = info.getDataCenter();
+		rack = info.getRack();
+		tokens = info.getNbTokens();
 
         //  Initialize the JMX utility
 		jmxUtilities = new JmxUtilities(node, jMXPort, jMXUser, jMXPassword, jMXConnectionTimeout);
-
-        //System.out.println(jmxUtilities.getAttribute(SS_TABLE_COUNT, ATTR_VALUE));
 
         compactionsThread = new CompactionsThread(deviceManager, jmxUtilities, node);
         compactionsThread.start();
@@ -344,10 +317,7 @@ public class CassandraMonitor {
 		org.tango.server.attribute.AttributeValue
 			attributeValue = new org.tango.server.attribute.AttributeValue();
 		/*----- PROTECTED REGION ID(CassandraMonitor.getDataCenter) ENABLED START -----*/
-		//	If empty (not initialized) try again
-		if (dataCenter.isEmpty())
-			initializeFromDistribution();
-		
+
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getDataCenter
 		attributeValue.setValue(dataCenter);
 		xlogger.exit();
@@ -547,34 +517,6 @@ public class CassandraMonitor {
         cassandraVersion = jmxUtilities.getAttribute(STORAGE_SERVICE, ATTR_RELEASE).toString();
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getCassandraVersion
 		attributeValue.setValue(cassandraVersion);
-		xlogger.exit();
-		return attributeValue;
-	}
-	
-	/**
-	 * Attribute Owns, String, Scalar, READ
-	 * description:
-	 *     Node`s owns
-	 */
-	@Attribute(name="Owns", isPolled=true, pollingPeriod=60000)
-	@AttributeProperties(description="Node`s owns", label="Owns")
-	private String owns = "";
-	/**
-	 * Read attribute Owns
-	 * 
-	 * @return attribute value
-	 * @throws DevFailed if read attribute failed.
-	 */
-	public org.tango.server.attribute.AttributeValue getOwns() throws DevFailed {
-		xlogger.entry();
-		org.tango.server.attribute.AttributeValue
-			attributeValue = new org.tango.server.attribute.AttributeValue();
-		/*----- PROTECTED REGION ID(CassandraMonitor.getOwns) ENABLED START -----*/
-		
-		//	Put read attribute code here
-		
-		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.getOwns
-		attributeValue.setValue(owns);
 		xlogger.exit();
 		return attributeValue;
 	}
@@ -933,30 +875,6 @@ public class CassandraMonitor {
 	}
 	
 	/**
-	 * Execute command "ReadCompactionHistory".
-	 * description: Read the compaction history for this host.
-	 * @return compation history as:
-	 *         compacted_at, keyspace_name, columnfamily_name, bytes_in, bytes_out
-	 * @throws DevFailed if command execution failed.
-	 */
-	@Command(name="ReadCompactionHistory", inTypeDesc="", outTypeDesc="compation history as:\ncompacted_at, keyspace_name, columnfamily_name, bytes_in, bytes_out")
-	public String[] ReadCompactionHistory() throws DevFailed {
-		xlogger.entry();
-		String[] readCompactionHistoryOut;
-		/*----- PROTECTED REGION ID(CassandraMonitor.readCompactionHistory) ENABLED START -----*/
-
-		if (distributionProxy==null)
-			distributionProxy = new DeviceProxy(distributionDeviceName);
-		DeviceData argIn = new DeviceData();
-		argIn.insert(node);
-		DeviceData argOut = distributionProxy.command_inout("ReadCompactionHistory", argIn);
-		readCompactionHistoryOut = argOut.extractStringArray();
-		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.readCompactionHistory
-		xlogger.exit();
-		return readCompactionHistoryOut;
-	}
-	
-	/**
 	 * Execute command "ReadHdbTableSizes".
 	 * description: Returns the size of each hdb table in bytes.
 	 * @return Hdb table sizes in Mb
@@ -991,43 +909,6 @@ public class CassandraMonitor {
 	//========================================================
 	/*----- PROTECTED REGION ID(CassandraMonitor.methods) ENABLED START -----*/
 
-    //========================================================
-	private static DeviceProxy distributionProxy = null;
-    //========================================================
-    private void initializeFromDistribution() {
-        try {
-        	if (distributionProxy==null)
-        		distributionProxy = new DeviceProxy(distributionDeviceName);
-            DeviceAttribute attribute = distributionProxy.read_attribute("NodeDistribution");
-            String[] lines = attribute.extractStringArray();
-            for (String line : lines) {
-            	//	Get line for specified node
-                if (line.startsWith(node)) {
-                	int index = line.indexOf(':');
-                	if (index<0)
-						Except.throw_exception("SyntaxError",
-								"Syntax error in DistributionDevice attribute");
-
-					// split after removing node name
-                    StringTokenizer stk = new StringTokenizer(line.substring(++index), ",");
-                    if (stk.countTokens()!=4)
-                        Except.throw_exception("SyntaxError",
-                                "Syntax error in DistributionDevice attribute");
-                    dataCenter = stk.nextToken().trim();
-                    rack = stk.nextToken().trim();
-                    owns = stk.nextToken().trim();
-                    tokens = stk.nextToken().trim();
-                }
-            }
-        }
-        catch (DevFailed e) {
-            //System.err.println(e.errors[0].desc + "  (" + deviceManager.getName() + ")");
-        }
-    }
-    //========================================================
-    //========================================================
-
-
     /*----- PROTECTED REGION END -----*/	//	CassandraMonitor.methods
 
 
@@ -1041,60 +922,6 @@ public class CassandraMonitor {
 	 */
 	public static void main(final String[] args) {
 		/*----- PROTECTED REGION ID(CassandraMonitor.main) ENABLED START -----*/
-// /**
-// 	 * Execute command "ReadCompactionHistory".
-// 	 * description: Read the compaction history for specified host.
-// 	 *              Each record containns:keyspace_name, columnfamily_name, compacted_at, bytes_in, bytes_out
-// 	 * @param readCompactionHistoryIn Host name
-// 	 * @return 
-// 	 * @throws DevFailed if command execution failed.
-// 	 */
-// 	@Command(name="ReadCompactionHistory", inTypeDesc="Host name", outTypeDesc="")
-// 	public String[] ReadCompactionHistory(String readCompactionHistoryIn) throws DevFailed {
-// 		xlogger.entry();
-// 		String[] readCompactionHistoryOut;
-// 		
-// 		//	Put command code here
-// 		
-// 		xlogger.exit();
-// 		return readCompactionHistoryOut;
-// 	}
-
-// /**
-// 	 * Read attribute DiskUsed
-// 	 * 
-// 	 * @return attribute value
-// 	 * @throws DevFailed if read attribute failed.
-// 	 */
-// 	public org.tango.server.attribute.AttributeValue getDiskUsed() throws DevFailed {
-// 		xlogger.entry();
-// 		org.tango.server.attribute.AttributeValue
-// 			attributeValue = new org.tango.server.attribute.AttributeValue();
-//         long used = (long) jmxUtilities.getAttribute(DISK_USED, ATTR_VALUE);
-//         diskUsed = ((double)used/1073741824);
-// 		attributeValue.setValue(diskUsed);
-// 		xlogger.exit();
-// 		return attributeValue;
-// 	}
-
-// /**
-// 	 * Read attribute HdbTableSizes
-// 	 * 
-// 	 * @return attribute value
-// 	 * @throws DevFailed if read attribute failed.
-// 	 */
-// 	public org.tango.server.attribute.AttributeValue getHdbTableSizes() throws DevFailed {
-// 		xlogger.entry();
-// 		org.tango.server.attribute.AttributeValue
-// 			attributeValue = new org.tango.server.attribute.AttributeValue();
-// 		
-// 		hdbTableSizes = jmxUtilities.getTableSizes();
-// 		
-// 		attributeValue.setValue(hdbTableSizes);
-// 		xlogger.exit();
-// 		return attributeValue;
-// 	}
-
 
 		/*----- PROTECTED REGION END -----*/	//	CassandraMonitor.main
 		ServerManager.getInstance().start(args, CassandraMonitor.class);

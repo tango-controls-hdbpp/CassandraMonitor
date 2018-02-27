@@ -58,7 +58,7 @@ public class SplashUtils {
     private static boolean splashActive = false;
     private static final String packageName = "CassandraMonitor";
 
-    private static final String revNumber = "1.7  -  23-01-2018  08:56:15";
+    private static final String revNumber = "2.0  -  27-02-2018  13:45:19";
     private static SplashUtils instance = new SplashUtils();
     private static final String imageFile = "TangoLogo.gif";
     //=======================================================

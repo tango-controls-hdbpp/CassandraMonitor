@@ -125,11 +125,16 @@ public class CompactionTable extends JTable {
             while (true) {
                 recordList = new ArrayList<>();
                 synchronized (refreshMonitor) {
-                    for (CassandraNode cassandraNode : cassandraNodeList) {
-                        for (Compaction compaction : cassandraNode.getCompactionList()) {
-                            if (compaction!=null)
-                                recordList.add(new Record(cassandraNode.getName(), compaction));
+                    try {
+                        for (CassandraNode cassandraNode : cassandraNodeList) {
+                            for (Compaction compaction : cassandraNode.getCompactionList()) {
+                                if (compaction != null)
+                                    recordList.add(new Record(cassandraNode.getName(), compaction));
+                            }
                         }
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
                 updateTable();

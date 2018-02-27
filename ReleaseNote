@@ -13,8 +13,12 @@
 #-======================================================================
 
 
+CassandraMonitor-2.0 - 27/02/18:
+    Replace CassandraDistribution device class by connection information.
+    Add hdb_tables package and display.
+
 CassandraMonitor-1.7 - 23/01/18:
-    Data protetion bug fix.
+    Data protection bug fix.
 
 CassandraMonitor-1.6 - 18/01/18:
     ATK ErrorHistory and Diagnostics added.
