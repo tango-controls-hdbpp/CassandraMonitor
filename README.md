@@ -54,13 +54,13 @@ The device server can be started without Tango database too.
 Please refer to the Tango-Controls documentation for these steps.
 
 To run the device serer you will need the following jar files:
-* [![JTango.jar](https://api.bintray.com/packages/tango-controls/jtango/JTango/images/download.svg)](https://bintray.com/tango-controls/jtango/JTango)
-* [libhdbpp-java.jar](https://bintray.com/tango-controls/maven/libhdbpp-java)
+* JTango.jar: [![JTango.jar](https://api.bintray.com/packages/tango-controls/jtango/JTango/images/download.svg)](https://bintray.com/tango-controls/jtango/JTango)
+* libhdbpp-java.jar: [![libhdbpp-java.jar](https://api.bintray.com/packages/tango-controls/maven/libhdbpp-java/images/download.svg)](https://bintray.com/tango-controls/maven/libhdbpp-java)
 
 To run the client you will need the same jar files and:
-* [ATKCore.jar](https://bintray.com/tango-controls/maven/ATKCore)
-* [ATKWidget.jar](https://bintray.com/tango-controls/maven/ATKWidget)
-* [Jive.jar](https://bintray.com/tango-controls/maven/Jive)
+* ATKCore.jar: [![ATKCore.jar](https://api.bintray.com/packages/tango-controls/maven/ATKCore/images/download.svg)](https://bintray.com/tango-controls/maven/ATKCore)
+* ATKWidget.jar: [![ATKWidget.jar](https://api.bintray.com/packages/tango-controls/maven/ATKWidget/images/download.svg)](https://bintray.com/tango-controls/maven/ATKWidget)
+* Jive.jar: [![Jive.jar](https://api.bintray.com/packages/tango-controls/maven/Jive/images/download.svg)](https://bintray.com/tango-controls/maven/Jive)
 
 In run the device server or the client you must put all these jar files in the CLASSPATH environment.
 You need to set the HDB_TYPE to cassandra and set the HDB_CONTACT_POINTS to your cassandra cluster entry points.
