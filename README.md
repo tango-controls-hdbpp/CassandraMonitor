@@ -42,7 +42,9 @@ mvn package
 
 ### Installing
 
-You can download the jar file from [Bintray](https://bintray.com/tango-controls/maven/CassandraMonitor)
+You can download the jar file from Bintray:
+[![Download](https://api.bintray.com/packages/tango-controls/maven/CassandraMonitor/images/download.svg)](https://bintray.com/tango-controls/maven/CassandraMonitor/_latestVersion)
+
 To run a test instance of the device server (named test), you can execute the following instructions:
 An instance of the CassandraMonitor device server must be defined in the Tango database of your choice,
 if you are using a database.
