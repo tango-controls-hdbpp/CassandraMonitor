@@ -54,7 +54,7 @@ The device server can be started without Tango database too.
 Please refer to the Tango-Controls documentation for these steps.
 
 To run the device serer you will need the following jar files:
-* [![JTango.jar]https://api.bintray.com/packages/tango-controls/jtango/JTango/images/download.svg](https://bintray.com/tango-controls/jtango/JTango)
+* [![JTango.jar](https://api.bintray.com/packages/tango-controls/jtango/JTango/images/download.svg)](https://bintray.com/tango-controls/jtango/JTango)
 * [libhdbpp-java.jar](https://bintray.com/tango-controls/maven/libhdbpp-java)
 
 To run the client you will need the same jar files and:
