@@ -58,7 +58,6 @@ public class SplashUtils {
     private static boolean splashActive = false;
     private static final String packageName = "CassandraMonitor";
 
-    private static final String revNumber = "2.0  -  27-02-2018  13:45:19";
     private static SplashUtils instance = new SplashUtils();
     private static final String imageFile = "TangoLogo.gif";
     //=======================================================
@@ -66,18 +65,23 @@ public class SplashUtils {
     public static SplashUtils getInstance() {
         return instance;
     }
+    //===============================================================
+    //===============================================================
+    public String getApplicationName() {
+        String applicationName = getClass().getPackage().getImplementationTitle();
+        String release = getClass().getPackage().getImplementationVersion();
+        if (release!=null)
+            applicationName += "-" + release;
+        else
+            applicationName = packageName + " is not released";
+        return applicationName;
+    }
     //=======================================================
     //=======================================================
     public void startSplash() {
         if (splash!=null) {
             splash.setVisible(false);
         }
-        //  Create a new one
-        String title = packageName;
-        int end = revNumber.indexOf("-");
-        if (end > 0)
-            title += " - " + revNumber.substring(0, end).trim();
-
         //	Create a splash window.
         JSmoothProgressBar myBar = new JSmoothProgressBar();
         myBar.setStringPainted(true);
@@ -87,18 +91,13 @@ public class SplashUtils {
         try {
             ImageIcon icon = IconUtils.getInstance().getIcon(imageFile);
             splash = new Splash(icon, Color.black, myBar);
-            splash.setTitle(title);
+            splash.setTitle(getApplicationName());
             splash.setMessage("Starting....");
             splash.setVisible(true);
             splashProgress = 0;
         } catch (DevFailed e) {
             System.err.println(e.errors[0].desc);
         }
-    }
-    //=======================================================
-    //=======================================================
-    public static String getRevisionNumber() {
-        return revNumber;
     }
     //=======================================================
     //=======================================================

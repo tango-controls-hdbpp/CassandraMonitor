@@ -46,12 +46,9 @@ import java.net.URL;
  */
 
 public class IconUtils {
-
-    private static ImageIcon tangoLogo = null;
-
     private static final IconUtils instance = new IconUtils();
     private static final String ImagePath = "/cassandra_monitor_client/images/";
-    private static ImageIcon greenBall = null;
+    private static ImageIcon progressIcon = null;
     private static ImageIcon redBall = null;
     //===============================================================
     //===============================================================
@@ -102,14 +99,14 @@ public class IconUtils {
     }
     //===============================================================
     //===============================================================
-    public static ImageIcon getGreenBall() {
-        if (greenBall == null)
+    public static ImageIcon getProgressIcon() {
+        if (progressIcon == null)
             try {
-                greenBall = getInstance().getIcon("greenBall.gif");
+                progressIcon = getInstance().getIcon("progress.gif");
             } catch (DevFailed e) {
                 System.err.println(e.errors[0].desc);
             }
-        return greenBall;
+        return progressIcon;
     }
     //===============================================================
     //===============================================================

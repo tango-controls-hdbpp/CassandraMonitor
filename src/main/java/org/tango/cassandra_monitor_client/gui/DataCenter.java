@@ -67,7 +67,7 @@ public class DataCenter extends ArrayList<CassandraNode> {
 
     private static final String[] columnHeaders = {
             "Node",  "State", " Data  Load ", "R Requests ",
-            "W Requests ", "Comp.", "Pending", "SS Tables",
+            "W Requests ", "Compact.", "Pending", "SS Tables",
     };
 
     private static final Font labelFont = new Font("Dialog", Font.PLAIN, 12);
@@ -332,7 +332,7 @@ public class DataCenter extends ArrayList<CassandraNode> {
     private static final int OFFSET = 2;    //	Label And separator
 
     private static String[] menuLabels = {
-            "Status", "Test Device", "Compaction History"
+            "Status", "Test Device", //"Compaction History"
     };
     //=======================================================
     //=======================================================

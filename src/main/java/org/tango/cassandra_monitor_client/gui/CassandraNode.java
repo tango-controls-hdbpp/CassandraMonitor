@@ -327,7 +327,7 @@ public class CassandraNode extends DeviceProxy {
         String type = pipeBlob.getName();
         synchronized (refreshMonitor) {
             if (type.equals("Compactions")) {
-                icon = IconUtils.getGreenBall();
+                icon = IconUtils.getProgressIcon();
                 for (PipeDataElement dataElement : pipeBlob) {
                     compactionList.add(new Compaction(dataElement));
                 }

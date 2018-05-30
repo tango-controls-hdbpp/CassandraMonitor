@@ -40,9 +40,9 @@ import fr.esrf.TangoApi.DbServer;
 import fr.esrf.TangoDs.Except;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
-import org.tango.cassandra_monitor_client.tools.ReleaseNote;
 import org.tango.cassandra_monitor_client.tools.IconUtils;
 import org.tango.cassandra_monitor_client.tools.PopupHtml;
+import org.tango.cassandra_monitor_client.tools.ReleaseNotes;
 import org.tango.cassandra_monitor_client.tools.SplashUtils;
 
 import javax.swing.*;
@@ -81,7 +81,7 @@ public class CassandraMonitoring extends JFrame {
         buildDataCenterPanels();
         requestTrendDialog = new RequestTrendDialog(this, dataCenterList);
 
-        setTitle("CassandraMonitoring - " + SplashUtils.getRevisionNumber());
+        setTitle(SplashUtils.getInstance().getApplicationName());
         ImageIcon icon = IconUtils.getInstance().getIcon("cassandra.jpeg", 0.10);
         setIconImage(icon.getImage());
         pack();
@@ -330,8 +330,8 @@ public class CassandraMonitoring extends JFrame {
     //=======================================================
     @SuppressWarnings("UnusedParameters")
     private void aboutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutMenuItemActionPerformed
-        String message = "This application is able monitor Cassandra data centers\n" +
-                "Release: " + SplashUtils.getRevisionNumber() +
+        String message = SplashUtils.getInstance().getApplicationName() +
+                "This application is able monitor Cassandra data centers\n" +
                 "\n\nPascal Verdier - ESRF - Accelerator Control Unit";
         try {
             JOptionPane.showMessageDialog(this,
@@ -361,7 +361,7 @@ public class CassandraMonitoring extends JFrame {
     //=======================================================
     @SuppressWarnings("UnusedParameters")
     private void releaseMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_releaseMenuItemActionPerformed
-        new PopupHtml(this).show(ReleaseNote.str);
+        new PopupHtml(this).show(ReleaseNotes.htmlString);
     }//GEN-LAST:event_releaseMenuItemActionPerformed
     //=======================================================
     //=======================================================
